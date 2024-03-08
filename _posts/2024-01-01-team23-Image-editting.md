@@ -62,13 +62,13 @@ DDIM, short for Denoising Diffusion Implicit Models, is a variant of the diffusi
 
 ![DDIM]({{ '/assets/images/28/DDPMvsDDIM.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig # Graphical models for diffusion (left) and non-Markocivian (right) inference models.* [#].
+*Fig # Graphical models for diffusion (left) and non-Markocivian (right) inference models.* [#]
 
 The reverse diffusion process in Denoising Diffusion Implicit Models (DDIM) serves as a fundamental mechanism allowing these models to reconstruct or generate images by methodically reversing the diffusion process that gradually transforms an image into random noise. This process is central to understanding how DDIM and, by extension, technologies like DiffEdit function, enabling them to create detailed and precise image edits or generate images from textual descriptions. Here's a simplified overview of the reverse diffusion process, avoiding deep mathematical complexities (for which [this post](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#speed-up-diffusion-model-sampling) provides an excellent derivation).
 
 ![DDIM]({{ '/assets/images/28/DDIM_Denoising_Formula.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig # DDIM_Denoising_Formula.* [#].
+*Fig # DDIM_Denoising_Formula.* [#]
 
 Importantly, instead of randomly walking back through the noise levels, DDIM uses a deterministic approach to carefully control the denoising path. Thus we no longer have to use a Markov Chain since Markov Chains are used for probabilistic processes. We can use a Non-Markovian process, which allows us to skip steps.
 
@@ -78,24 +78,24 @@ Classifier-Free Guidance is a technique used to steer the generation process of 
 #### Training Phase: 
 ![CFG]({{ '/assets/images/28/With_without_class.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Fig # Noise estimation model with and without class (null).* [#].
+*Fig # Noise estimation model with and without class (null).* [#]
 
 During training, the model learns to generate outputs based on a wide range of inputs, including those without specific class labels. With a probability p_uncond, we make some of the classes null classes. This approach enables the model to understand the underlying distribution of the data more broadly, rather than being constrained to specific labeled classes.
 
 ![CFG]({{ '/assets/images/28/cfg_training.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig # Training with classifier-free guidance.* [#].
+*Fig # Training with classifier-free guidance.* [#]
 
 #### Generation Phase: 
 ![CFG]({{ '/assets/images/28/cfg_sampling_noise.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Fig # Noise model parameterization for classifier-free guidance.* [#].
+*Fig # Noise model parameterization for classifier-free guidance.* [#]
 
 The noise prediction requires two forward passes of the same image, zₜ. One forward pass calculates the predicted noise not conditioned on a desired class, and the other calculates the predicted noise conditioned on the desired class information. When generating new content, CFG employs a technique called "guidance scale" or "temperature," which adjusts the strength of the model's predictions towards certain attributes or themes. By tweaking this scale, users can control how closely the output adheres to the desired attributes without the need for an external classifier.
 
 ![CFG]({{ '/assets/images/28/cfg_sampling.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig # Sampling with classifier-free guidance.* [#].
+*Fig # Sampling with classifier-free guidance.* [#]
 
 By utilizing DDIM for efficient and precise encoding of the input image and incorporating Classifier-Free Guidance to direct the editing process without the need for additional classifiers, DiffEdit sets the stage for sophisticated image editing. These technologies allow DiffEdit to infer a mask of the region to be edited based on the text input, ensuring that changes are made only where intended. This approach not only preserves the integrity of the unedited portions of the image but also provides a high level of control and specificity in the editing process.
 
@@ -104,7 +104,7 @@ With this knowledge ready, let's take a look at the three steps of DiffEdit.
 
 ![CFG]({{ '/assets/images/28/ThreeSteps.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig # Three Steps of DiffEdit.* [#].
+*Fig # Three Steps of DiffEdit.* [#]
 
 - #### Step one: Mask Generation
 
@@ -338,6 +338,83 @@ This method is intuitive because it mirrors human reasoning by excluding the tar
 
 The groundbreaking implication of our "Text-Guided Diffusion-Based Object Segmentation" approach lies in its ability to sidestep the traditionally resource-intensive process of training specialized models for object segmentation. Instead of dedicating vast amounts of computational resources and time to train models specifically for segmentation tasks, we leverage the sophisticated text-image understanding capabilities inherent in pre-trained diffusion models. This strategy enables us to essentially get a "free ride" on the segmentation capability, exploiting the model's existing skills in a novel and efficient manner.
 
+### Demo
+You can clone the Github Repo to have a try
+```
+git clone https://github.com/JackHe313/InteractiveDiffEdit.git
+cd InteractiveDiffEdit
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### usage: 
+```
+Python diffEdit.py [--img_url IMG_URL] --target_prompt TARGET_PROMPT [--source_prompt SOURCE_PROMPT] [--save_path SAVE_PATH] [--device DEVICE] [--seg_prompt SEG_PROMPT] [--seed SEED]
+```
+
+#### For End-to-End Image Generation Editing:
+User uploaded Image Editing Example
+
+```
+python diffEdit.py -i "https://github.com/Xiang-cd/DiffEdit-stable-diffusion/raw/main/assets/origin.png" -t "a bowl of pears"
+```
+In which case the program will generate the mask and ask about your satisfaction about it. 
+
+![Mask]({{ '/assets/images/28/mask.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig # Generate the mask.*
+
+![Ask&Res]({{ '/assets/images/28/Ask&Res.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig # Whether or not to change the mask.*
+
+When user accepts the mask, it will edit the image based on the target prompt.
+
+![Ask&Res]({{ '/assets/images/28/Ask&Res2.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig # Whether or not to accept the edited image.*
+
+User Generate Image Editing Example
+
+```
+python diffEdit.py -p "a bowl of fruits"
+```
+This time instead of providing the image, we generate the image based on Stable Diffusion first. Given the prompt, it will display a generated image and if user are not satisfied, it will ask for the prompt for changes and do editing as the above process.
+
+#### For Text based Object Segmentation
+```
+python diffEdit.py -i "https://github.com/Xiang-cd/DiffEdit-stable-diffusion/raw/main/assets/origin.png" -sp -t "fruit"
+```
+It will generate the mask(segmentation) correspond with the target prompt.
+
+#### All Options:
+```
+  -h, --help            show this help message and exit
+  --img_url IMG_URL, -i IMG_URL
+                        URL of the image to edit.
+  --target_prompt TARGET_PROMPT, -t TARGET_PROMPT
+                        Prompt for the target image.
+  --source_prompt SOURCE_PROMPT, -p SOURCE_PROMPT
+                        Optional prompt for the source image.
+  --save_path SAVE_PATH, -s SAVE_PATH
+                        Optional path to save the edited image.
+  --device DEVICE, -d DEVICE
+                        Device to run the model on.
+  --seg_prompt, -sp     Boolean flag to indicate if the target_prompt is a segment prompt.
+  --seed SEED           Seed for the random number generator.
+```
+
+### Further Works
+
+- Benchmarking and Evaluation: 
+Conduct a comprehensive benchmark study to evaluate the accuracy and efficiency of the segmentation method against traditional and contemporary image segmentation and editing models, including quantitative metrics such as Intersection over Union (IoU), precision, recall.
+
+- Explore Different Diffusion Model's impact on the segmentation capability
+Conduct a systematic comparison of various diffusion models on the result of the accuracy for the segmentation results.
+
+
+
+
 ## Ethics Impact
 The ethics surrounding image editing diffusion models are multifaceted, involving considerations of privacy, consent, misinformation, and societal impact. As these models become more sophisticated and widely accessible, they pose both opportunities and challenges.
 
@@ -363,7 +440,6 @@ To address these ethical concerns, stakeholders (including developers, users, an
 In conclusion, while image editing diffusion models hold tremendous potential for creativity, communication, and innovation, their ethical implications necessitate careful consideration and proactive management. Balancing the benefits of these technologies against their risks is crucial to ensuring they contribute positively to society.
 
 ## Conclusion
-## Code
 ## Reference
 
 
