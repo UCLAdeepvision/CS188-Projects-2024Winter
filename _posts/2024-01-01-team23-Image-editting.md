@@ -31,7 +31,18 @@ Semantic image editing, a subset within the broader realm of image editing, conc
 This challenge, however, is what endows semantic image editing with its vast potential for application across a wide spectrum of image editing tasks. Its capabilities extend to other image editing tasks such as the removal of objects, colorization of images, and the transfer of styles. This versatility highlights the significance of semantic image editing in the comtempory landscape of digital image manipulation, which is why we have chosen to focus on this area in our study.
 
 ## Previous Works
+The field of semantic image editing has seen a surge in innovation, particularly with the advent of deep learning-based methods. These methods have demonstrated remarkable capabilities in generating and modifying images, particularly in response to textual prompts. Here, we provide an overview of the various approaches that have been developed to tackle semantic image editing tasks.
+
 ### Classical Approches
+Before the rise of deep learning, semantic image editing was almost impossible to achieve. The complexity of the task, combined with the lack of sophisticated models, made it a daunting challenge. One method of image editing is object-based image editing (OBIE) (Barret et al., 2002). It involved manual placement of pivot points and selecting objects by hand, making them both time-consuming and limited in scope.
+
+The emergence of deep learning has dramatically expanded the potential of semantic image editing. Groundbreaking technologies like Generative Adversarial Networks (GANs) and transformers have revolutionized this field. There are two main approaches to semantic image editing using GANs and transformers: training an end-to-end model with a proxy task then adapting it to the editing task, and training a model to optimize the image itself to match the text query.
+
+RefinedGAN (Li et al., 2020) is an example of model with a proxy task. This innovative model stands out due to its ability to generate desired images without the need for fine-grained, pixel-labelled semantic maps. This means that even when provided with simple masks, RefinedGAN can effectively interpret and act upon natural language descriptions to produce the intended images.
+
+On the other hand, VQGAN-CLIP (Crowson et al., 2022) is a representation of optimization on the image itself to match the text query. At the core of this model is the CLIP (Contrastive Language-Image Pretraining) component, which functions as a mechanism to assess how accurately a text prompt describes an image. This model works by using the multimodal encoder to use CLIP to evaluate the similarity of text and image pair and backpropagating to the latent space of the image generator. We iteratively update the candidate generation until it is sufficiently similar to the target text.
+
+These methods, while effective, work best when the models is optimized with a powerful generative network and need to comsume great computational resources (Couairon et al., 2022).
 
 ### Diffusion Approches
 
