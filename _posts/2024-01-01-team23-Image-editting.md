@@ -40,12 +40,12 @@ The emergence of deep learning has dramatically expanded the potential of semant
 
 RefinedGAN (Li et al., 2020) is an example of model with a proxy task. This innovative model stands out due to its ability to generate desired images without the need for fine-grained, pixel-labelled semantic maps. This means that even when provided with simple masks, RefinedGAN can effectively interpret and act upon natural language descriptions to produce the intended images.
 
-![RefinedGAN]({{ '/assets/images/RefinedGAN.png' | relative_url }})
+![RefinedGAN]({{ '/assets/images/28/RefinedGAN.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 
 On the other hand, VQGAN-CLIP (Crowson et al., 2022) is a representation of optimization on the image itself to match the text query. At the core of this model is the CLIP (Contrastive Language-Image Pretraining) component, which functions as a mechanism to assess how accurately a text prompt describes an image. This model works by using the multimodal encoder to use CLIP to evaluate the similarity of text and image pair and backpropagating to the latent space of the image generator. We iteratively update the candidate generation until it is sufficiently similar to the target text.
 
-![VQGAN-CLIP]({{ '/assets/images/VQGAN-CLIP.png' | relative_url }})
+![VQGAN-CLIP]({{ '/assets/images/28/VQGAN-CLIP.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 
 These methods, while effective, work best when the models is optimized with a powerful generative network and need to comsume great computational resources (Couairon et al., 2022).
