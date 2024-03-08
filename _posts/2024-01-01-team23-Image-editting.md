@@ -100,7 +100,7 @@ With this knowledge ready, let's take a look at the three steps of DiffEdit.
 {: style="width: 800px; max-width: 100%;"}
 *Fig # Three Steps of DiffEdit.* [#].
 
-#### Step one: Mask Generation
+- #### Step one: Mask Generation
 
 When the denoising an image, a text-conditioned diffusion model will yield different noise estimates given different text conditionings. We can consider where the estimates are different, which gives information about what image regions are concerned by the change in conditioning text. For instance, in Figure, the noise estimates conditioned to the query zebra and reference text horse are different on the body of the animal, where they will tend to decode different colors and textures depending on the conditioning. For the background, on the other hand, there is little change in the noise estimates. The difference between the noise estimates can thus be used to infer a mask that identifies what parts on the image need to be changed to match the query by binarized with a threshold. The masks generally somewhat overshoot the region that requires editing, this is beneficial as it allows it to be smoothly embedded in it’s context.
 
@@ -144,7 +144,7 @@ def get_mask(model, src, dst, init_latent, n: int, ddim_steps,
 
 This point underscores the innovative efficiency of the method, capitalizing on the inherent capabilities of text-conditioned diffusion models. It ingeniously bypasses the conventional need for extensive training or model adaptation. The method can generate or modify images in a context-aware manner without the necessity for additional, costly training phases.
 
-#### Step two: Encoding
+- #### Step two: Encoding
 
 We encode the input image $$x_0$$ in the implicit latent space at timestep $$r$$ with the DDIM encoding function $$E_r$$. This is done with the unconditional model, i.e. using conditioning text $$∅$$, so no text input is used for this step.
 
@@ -222,7 +222,7 @@ def sample(self, x, steps=20, t_start=None, t_end=None, order=3, skip_type='time
 ```
 *https://github.com/Xiang-cd/DiffEdit-stable-diffusion*
 
-#### Step three: Decoding with Mask Guidance
+- #### Step three: Decoding with Mask Guidance
 
 After obtaining the latent $$x_r$$, we decode it with our diffusion model conditioned on the editing text query $$Q$$, e.g. zebra in the example. We use our mask $$M$$ to guide this diffusion process. Outside the mask $$M$$, the edited image should in principle be the same as the input image. We guide the diffusion model by replacing pixel values outside the mask with the latents $$x_t$$ inferred with DDIM encoding, which will naturally map back to the original pixels through decoding. The mask-guided DDIM update can be written as $$\bar{y}_t = My_t + (1−M)x_t$$, where $$y_t$$ is computed from $$y_{t−dt}$$ with Eq. 2, and $$x_t$$ is the corresponding DDIM encoded latent. The encoding ratio $$r$$ determines the strength of the edit: larger values of $$r$$ allow for stronger edits that allow to better match the text query, at the cost of more deviation from the input image which might not be needed. 
 
@@ -303,7 +303,7 @@ def sample_edit(self, x, steps=20, t_start=None, t_end=None, order=3, skip_type=
 ```
 *https://github.com/Xiang-cd/DiffEdit-stable-diffusion*
 
-#### Why DDIM
+- #### Why DDIM
 
 With $$x_r$$ being the encoded version of $$x_0$$(input image), using DDIM decoding on $$x_r$$ unconditionally would give back the original image $$x_0$$ as for the deterministic nature. In DIFFEDIT, we use DDIM decoding conditioned on the text query $$Q$$, but there is still a strong bias to stay close to the original image. This is because the unconditional and conditional noise estimator networks $$\epsilon_θ$$ and $$\epsilon_θ(·, Q)$$ often produce similar estimates, yielding similar decoding behavior when initialized with the same starting point $$x_r$$. This means that the edited image will have a small distance w.r.t. the input image, a property critical in the context of image editing.
 
@@ -314,6 +314,29 @@ With $$x_r$$ being the encoded version of $$x_0$$(input image), using DDIM decod
 ### Text Guided Diffusion Based Object Segmentation
 
 ## Ethics Impact
+The ethics surrounding image editing diffusion models are multifaceted, involving considerations of privacy, consent, misinformation, and societal impact. As these models become more sophisticated and widely accessible, they pose both opportunities and challenges.
+
+### Consent and Privacy
+- **Misuse of Personal Images**: There's a risk of personal images being edited or manipulated without consent, leading to privacy violations. This includes generating realistic images of individuals in scenarios they were never in, which could harm reputations or lead to personal distress.
+- **Deepfakes**: The creation of convincing fake videos or images of individuals saying or doing things they never did. This poses significant risks in the context of misinformation, blackmail, or personal attacks.
+
+### Misinformation and Trust
+- **Spreading Falsehoods**: The ability to create realistic images from textual descriptions can be used to generate fake news, misleading content, or historical revisionism. This undermines trust in media and can have real-world consequences by influencing public opinion or election outcomes.
+- **Erosion of Trust**: As it becomes easier to create believable fake images, the public's trust in digital content and media could erode, leading to a "reality apathy" where people become more skeptical of all information, including legitimate content.
+
+### Societal and Cultural Impact
+- **Bias and Stereotypes**: Like any AI technology, image editing diffusion models can perpetuate or even exacerbate biases present in their training data, reinforcing stereotypes or underrepresenting marginalized groups.
+- **Impact on Art and Culture**: These models could democratize artistic expression, enabling more people to create art or visualize concepts. However, there's also a risk they could dilute the value of human creativity or homogenize cultural outputs.
+
+### Ethical Frameworks and Solutions
+To address these ethical concerns, stakeholders (including developers, users, and policymakers) need to collaborate on developing ethical frameworks, guidelines, and regulations that balance innovation with ethical considerations. 
+- **Transparency**: Clear labeling of AI-generated content to distinguish it from human-created content.
+- **Consent and Privacy Protections**: Mechanisms to ensure images of individuals are used ethically, with consent, and with respect for privacy.
+- **Regulation and Oversight**: Legal and regulatory frameworks that govern the use of these technologies, including copyright protections and measures against misinformation.
+- **Bias Mitigation**: Efforts to identify and mitigate biases in training data and model outputs, ensuring fair and equitable representation.
+
+In conclusion, while image editing diffusion models hold tremendous potential for creativity, communication, and innovation, their ethical implications necessitate careful consideration and proactive management. Balancing the benefits of these technologies against their risks is crucial to ensuring they contribute positively to society.
+
 ## Conclusion
 ## Code
 ## Reference
