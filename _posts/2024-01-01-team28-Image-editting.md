@@ -52,6 +52,8 @@ These methods, while effective, work best when the models is optimized with a po
 
 ### Diffusion Approches
 
+Building on the exploration of classical image editing methods, it is important to highlight the transformative role diffusion models play in this domain. Such models enhance images starting from random noise and are particularly effective for tasks such as inpainting when a mask is used. 
+
 ## Dive into DiffEdit
 In many cases, semantic image edits can be restricted to only a part of the image, leaving other parts unchanged. However, the input text query does not explicitly identify this region, and a naive method could allow for edits all over the image, risking to modify the input in areas where it is not needed. To circumvent this, DIFFEDIT propose a method to leverage a text-conditioned diffusion model to infer a mask of the region that needs to be edited. Starting from a DDIM encoding of the input image, DIFFEDIT uses the inferred mask to guide the denoising process, minimizing edits outside the region of interest.
 
