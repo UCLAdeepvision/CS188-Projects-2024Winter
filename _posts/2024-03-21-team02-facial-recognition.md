@@ -12,9 +12,10 @@ date: 2024-03-21
 2. [Classical Challenges](#classicalchallenges)
     1. [Challenge 1: name](#challenge1)
 3. [Deep Learning to Address Challenges](#deeplearningaddresschallenges)
+4. [Solutions](#solutions)
 	1.  [Deep Dense Face Detector (DDFD)](#ddfd)
 	2. [FaceNet](#facenet)
-4. [References](#reference)
+5. [References](#reference)
 
 # Introduction <a id="introduction"></a>
 
@@ -29,7 +30,7 @@ This is a sub paragraph, formatted in heading 3 style
 ## Deep Learning to Address Challenges <a id="deeplearningaddresschallenges"></a>
 The second paragraph text
 
-## Solutions <a id="deeplearningaddresschallenges"></a>
+## Solutions <a id="solutions"></a>
 
 ### Deep Dense Face Detector (DDFD) <a id="ddfd"></a>
 ddfd text
