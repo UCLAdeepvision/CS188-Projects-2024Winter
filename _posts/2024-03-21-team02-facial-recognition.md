@@ -39,9 +39,7 @@ ddfd text
 facenet text
 
 ## References <a id="reference"></a>
-Please make sure to cite properly in your work, for example:
-
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
+[1] Farfade, Sachin Sudhakar; Saberian, Mohammad; Li, Li-Jia. "Multi-view Face Detection Using Deep Convolutional Neural Networks." 2015.
 
 
 ---
