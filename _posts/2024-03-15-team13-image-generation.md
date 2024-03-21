@@ -330,6 +330,272 @@ We can also display some final results from the Generator:
 {: style="width: 100%; max-width: 100%;"}
 *Fig 9. Generator outputs*.
 
+### Performance
+
+The DCGAN model measures its performance through a combination of qualitative and quantitative analyses. One common technique for evaluating the quality of unsupervised representation learning algorithms is to apply them as a feature extractor on supervised datasets and evaluate the performance of linear models fitted on top of these features. The authors train on Imagenet-1k and then use the discriminator’s convolutional features from all layers, maxpooling each layers representation to produce a 4 × 4 spatial grid. A regularized linear L2-SVM classifier is then trained on top to perform image classification on CIFAR-10 and the StreetView House Numbers dataset (SVHN). The classifier is able to achieve solid performance on both datasets, showing that the quality of unsupervised representation learning of DCGAN is good:
+
+![CIFAR-10 Benchmark]({{ '/assets/images/team13/dcgan_cifar10.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 10. CIFAR-10 Benchmark*.[2]
+
+![SVHN Benchmark]({{ '/assets/images/team13/dcgan_svhn.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 11. SVHN Benchmark*.[2]
+
+The authors further visualized DCGAN output and performed qualitative analysis on the internal of the networks. Full discussion can be found in the original paper.
+
+
+## Monet Style Transfer with CycleGAN
+
+In this section, we will introduce CycleGAN and how to perform image style transfer using it. CycleGAN presents a framework for performing image-to-image translation in an unsupervised manner, i.e., without the need for paired examples in the training data. It's particularly useful for tasks where collecting paired datasets is impractical. The innovation of CycleGAN lies in its ability to learn to translate between domains without direct correspondence between individual images, relying instead on the concept of cycle consistency.
+
+![Paired vs Unpaired Data]({{ '/assets/images/team13/cyclegan_unpaired.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 10. Paired vs Unpaired Data*.[6]
+
+### How CycleGAN Works
+
+CycleGAN utilizes two pairs of Generative Adversarial Networks (GANs), with each pair consisting of a generator and a discriminator. There are two generators, $$G: X \rightarrow Y$$ and $$F: Y \rightarrow X$$, where $$X$$ and $$Y$$ are two different image domains (e.g., horses and zebras). Each generator has a corresponding discriminator, $$D_X$$ and $$D_Y$$, which aim to distinguish between real and generated images in their respective domains.
+
+### CycleGAN Loss Function
+The loss function of CycleGAN is composed of two major components: the adversarial loss and the cycle consistency loss. These components work together to ensure that the generated images not only belong to the target domain but also retain the key characteristics of the input images.
+
+**Adversarial Loss**
+
+The adversarial loss in CycleGAN functions similarly to that in traditional GANs, with the objective to make the generated images indistinguishable from real images in the target domain. The adversarial loss for generator $$G$$ and discriminator $$D_Y$$ is defined as:
+
+$$
+\mathcal{L}_{\text{adv}}(G, D_Y, X, Y) = \mathbb{E}_{y \sim p_{\text{data}}(y)}[\log D_Y(y)] + \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log(1 - D_Y(G(x)))]
+$$
+
+And similarly, the adversarial loss for $$F$$ and $$D_X$$ is:
+
+$$
+\mathcal{L}_{\text{adv}}(F, D_X, Y, X) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D_X(x)] + \mathbb{E}_{y \sim p_{\text{data}}(y)}[\log(1 - D_X(F(y)))]
+$$
+
+**Cycle Consistency Loss**
+
+The cycle consistency loss is defined as:
+
+$$
+\mathcal{L}_{\text{cycle}}(G, F) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\|F(G(x)) - x\|_1] + \mathbb{E}_{y \sim p_{\text{data}}(y)}[\|G(F(y)) - y\|_1]
+$$
+
+The cycle consistency loss plays a fundamental role in the CycleGAN framework by ensuring that the process of translating an image from its original domain $$X$$ to a new domain $$Y$$ and then back to $$X$$ results in an image that closely resembles the original. To understand how cycle consistency loss preserves original image features, consider the two parts of the cycle consistency loss formula:
+
+1. **$$ \mathbb{E}_{x \sim p_{\text{data}}(x)}[\|F(G(x)) - x\|_1] $$**: This term measures the difference between the original image $$x$$ from domain $$X$$ and the image that has been translated to domain $$Y$$ and then back to $$X$$ by the generators $$G$$ and $$F$$, respectively. The goal here is to minimize this difference, ensuring that the round-trip translation $$F(G(x))$$ results in an image that is as close as possible to the original $$x$$.
+
+2. **$$ \mathbb{E}_{y \sim p_{\text{data}}(y)}[\|G(F(y)) - y\|_1] $$**: Similarly, this term measures the difference between an original image $$y$$ from domain $$Y$$ and the image that has been translated to domain $$X$$ and then back to $$Y$$. The objective is to minimize this difference, which ensures that the cycle translation $$G(F(y))$$ preserves the content of the original image $$y$$.
+
+By enforcing that images remain consistent through these round-trip translations, the cycle consistency loss effectively constrains the model to maintain the original content and features of the images while performing the domain translation.
+
+**Total Loss**
+
+The total loss for CycleGAN is a weighted sum of the adversarial and cycle consistency losses:
+
+$$
+\mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}_{\text{adv}}(G, D_Y, X, Y) + \mathcal{L}_{\text{adv}}(F, D_X, Y, X) + \lambda \mathcal{L}_{\text{cycle}}(G, F)
+$$
+
+where $$\lambda$$ is a hyperparameter that controls the importance of the cycle consistency loss relative to the adversarial loss.
+
+
+### Architecture
+
+CycleGAN utilizes established model architectures for the generators and discriminators. Both $$G$$ and $$F$$ use a series of convolutional layers for downsampling, a set of residual blocks for transformation, and convolutional layers for upsampling. Each generator translates an image from one domain to the other. For $$D_X$$ and $$D_Y$$, CycleGAN uses PatchGAN, which classify whether 70×70 overlapping patches are real or fake.
+
+![CycleGAN Generator Architecture]({{ '/assets/images/team13/cyclegan_gen.jpeg' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 10. CycleGAN Generator Architecture*.[7]
+
+### Implementation
+Here, we present some high level implementations of CycleGAN. Code snippets are from a Kaggle notebook. Full notebook can be found [here](https://www.kaggle.com/code/dimitreoliveira/introduction-to-cyclegan-monet-paintings)
+
+Given two generators `monet_generator` and `photo_generator` and two discriminators `monet_discriminator` and `photo_discriminator` we can build a CycleGAN model as follows:
+
+```
+class CycleGan(Model):
+    def __init__(
+        self,
+        monet_generator,
+        photo_generator,
+        monet_discriminator,
+        photo_discriminator,
+        lambda_cycle=10,
+    ):
+        super(CycleGan, self).__init__()
+        self.m_gen = monet_generator
+        self.p_gen = photo_generator
+        self.m_disc = monet_discriminator
+        self.p_disc = photo_discriminator
+        self.lambda_cycle = lambda_cycle
+
+    def compile(
+        self,
+        m_gen_optimizer,
+        p_gen_optimizer,
+        m_disc_optimizer,
+        p_disc_optimizer,
+        gen_loss_fn,
+        disc_loss_fn,
+        cycle_loss_fn,
+        identity_loss_fn
+    ):
+        super(CycleGan, self).compile()
+        self.m_gen_optimizer = m_gen_optimizer
+        self.p_gen_optimizer = p_gen_optimizer
+        self.m_disc_optimizer = m_disc_optimizer
+        self.p_disc_optimizer = p_disc_optimizer
+        self.gen_loss_fn = gen_loss_fn
+        self.disc_loss_fn = disc_loss_fn
+        self.cycle_loss_fn = cycle_loss_fn
+        self.identity_loss_fn = identity_loss_fn
+
+    def train_step(self, batch_data):
+        real_monet, real_photo = batch_data
+
+        with tf.GradientTape(persistent=True) as tape:
+            # photo to monet back to photo
+            fake_monet = self.m_gen(real_photo, training=True)
+            cycled_photo = self.p_gen(fake_monet, training=True)
+
+            # monet to photo back to monet
+            fake_photo = self.p_gen(real_monet, training=True)
+            cycled_monet = self.m_gen(fake_photo, training=True)
+
+            # generating itself
+            same_monet = self.m_gen(real_monet, training=True)
+            same_photo = self.p_gen(real_photo, training=True)
+
+            # discriminator used to check, inputing real images
+            disc_real_monet = self.m_disc(real_monet, training=True)
+            disc_real_photo = self.p_disc(real_photo, training=True)
+
+            # discriminator used to check, inputing fake images
+            disc_fake_monet = self.m_disc(fake_monet, training=True)
+            disc_fake_photo = self.p_disc(fake_photo, training=True)
+
+            # evaluates generator loss
+            monet_gen_loss = self.gen_loss_fn(disc_fake_monet)
+            photo_gen_loss = self.gen_loss_fn(disc_fake_photo)
+
+            # evaluates total cycle consistency loss
+            total_cycle_loss = self.cycle_loss_fn(real_monet, cycled_monet, self.lambda_cycle) + self.cycle_loss_fn(real_photo, cycled_photo, self.lambda_cycle)
+
+            # evaluates total generator loss
+            total_monet_gen_loss = monet_gen_loss + total_cycle_loss + self.identity_loss_fn(real_monet, same_monet, self.lambda_cycle)
+            total_photo_gen_loss = photo_gen_loss + total_cycle_loss + self.identity_loss_fn(real_photo, same_photo, self.lambda_cycle)
+
+            # evaluates discriminator loss
+            monet_disc_loss = self.disc_loss_fn(disc_real_monet, disc_fake_monet)
+            photo_disc_loss = self.disc_loss_fn(disc_real_photo, disc_fake_photo)
+
+        # Calculate the gradients for generator and discriminator
+        monet_generator_gradients = tape.gradient(total_monet_gen_loss,
+                                                  self.m_gen.trainable_variables)
+        photo_generator_gradients = tape.gradient(total_photo_gen_loss,
+                                                  self.p_gen.trainable_variables)
+
+        monet_discriminator_gradients = tape.gradient(monet_disc_loss,
+                                                      self.m_disc.trainable_variables)
+        photo_discriminator_gradients = tape.gradient(photo_disc_loss,
+                                                      self.p_disc.trainable_variables)
+
+        # Apply the gradients to the optimizer
+        self.m_gen_optimizer.apply_gradients(zip(monet_generator_gradients,
+                                                 self.m_gen.trainable_variables))
+
+        self.p_gen_optimizer.apply_gradients(zip(photo_generator_gradients,
+                                                 self.p_gen.trainable_variables))
+
+        self.m_disc_optimizer.apply_gradients(zip(monet_discriminator_gradients,
+                                                  self.m_disc.trainable_variables))
+
+        self.p_disc_optimizer.apply_gradients(zip(photo_discriminator_gradients,
+                                                  self.p_disc.trainable_variables))
+
+        return {
+            'monet_gen_loss': total_monet_gen_loss,
+            'photo_gen_loss': total_photo_gen_loss,
+            'monet_disc_loss': monet_disc_loss,
+            'photo_disc_loss': photo_disc_loss
+        }
+```
+
+The loss functions can be implemented as:
+
+```
+with strategy.scope():
+    # Discriminator loss {0: fake, 1: real} (The discriminator loss outputs the average of the real and generated loss)
+    def discriminator_loss(real, generated):
+        real_loss = losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.ones_like(real), real)
+
+        generated_loss = losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.zeros_like(generated), generated)
+
+        total_disc_loss = real_loss + generated_loss
+
+        return total_disc_loss * 0.5
+
+    # Generator loss
+    def generator_loss(generated):
+        return losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.ones_like(generated), generated)
+
+
+    # Cycle consistency loss (measures if original photo and the twice transformed photo to be similar to one another)
+    with strategy.scope():
+        def calc_cycle_loss(real_image, cycled_image, LAMBDA):
+            loss1 = tf.reduce_mean(tf.abs(real_image - cycled_image))
+
+            return LAMBDA * loss1
+
+    # Identity loss (compares the image with its generator (i.e. photo with photo generator))
+    with strategy.scope():
+        def identity_loss(real_image, same_image, LAMBDA):
+            loss = tf.reduce_mean(tf.abs(real_image - same_image))
+            return LAMBDA * 0.5 * loss
+```
+
+The train loop can be implemented as following with necessary environment variables:
+
+```
+with strategy.scope():
+    # Create generators
+    monet_generator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+    photo_generator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+
+    # Create discriminators
+    monet_discriminator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+    photo_discriminator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+
+    # Create GAN
+    gan_model = CycleGan(monet_generator, photo_generator,
+                         monet_discriminator, photo_discriminator)
+
+    gan_model.compile(m_gen_optimizer=monet_generator_optimizer,
+                      p_gen_optimizer=photo_generator_optimizer,
+                      m_disc_optimizer=monet_discriminator_optimizer,
+                      p_disc_optimizer=photo_discriminator_optimizer,
+                      gen_loss_fn=generator_loss,
+                      disc_loss_fn=discriminator_loss,
+                      cycle_loss_fn=calc_cycle_loss,
+                      identity_loss_fn=identity_loss)
+
+
+history = gan_model.fit(get_gan_dataset(MONET_FILENAMES, PHOTO_FILENAMES, batch_size=BATCH_SIZE),
+                        steps_per_epoch=(n_monet_samples//BATCH_SIZE),
+                        epochs=EPOCHS,
+                        verbose=2).history
+```
+
+![CycleGAN Example Outputs]({{ '/assets/images/team13/cyclegan_example.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 11. CycleGAN Example Outputs*.[7]
+
+### Performance
+
+
+
 
 ## Basic Syntax
 ### Image
@@ -386,7 +652,8 @@ Please make sure to cite properly in your work, for example:
 
 [5] Li, D.-C.; Chen, S.-C.; Lin, Y.-S.; Huang, K.-C. A Generative Adversarial Network Structure for Learning with Small Numerical Data Sets. Appl. Sci. 2021, 11, 10823. https://doi.org/10.3390/app112210823
 
+[6] Zhu, Jun-Yan, et al. "Unpaired image-to-image translation using cycle-consistent adversarial networks." Proceedings of the IEEE international conference on computer vision. 2017.
 
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
+[7] https://towardsdatascience.com/cyclegan-learning-to-translate-images-without-paired-training-data-5b4e93862c8d
 
 ---
