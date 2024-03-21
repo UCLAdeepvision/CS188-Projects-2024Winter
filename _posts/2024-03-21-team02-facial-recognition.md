@@ -26,29 +26,22 @@ date: 2024-03-21
 
 Facial recognition is the technology of identifying human beings by analyzing their faces from pictures, video footage or in real time. Facial recognition has been an issue for computer vision until recently. The introduction of deep learning techniques which are able to grasp big data faces and analyze rich and complex images of faces has made this easier, enabling new technology to be efficient and later become even better than human vision in facial recognition.
 
+
 ### Why do we care about facial recognition?
 
 Facial recognition has gained significant attention and relevance in today's digital landscape due to its multifaceted applications and implications across various domains. From enhancing security measures to streamlining user authentication processes, facial recognition provides unparalleled convenience and efficiency. We can see facial recognition integrated in law enforcement, retail, healthcare, and even social media platforms. This highlights its versatility and potential to revolutionize how we interact with technology and each other. 
 
 
-Why is facial recognition a difficult task?
-
-Facial recognition proves to be a complex task due to the variety of factors involved in real-world scenarios. These include the variability of face angles, expressions, lighting conditions, and even aging effects. A common challenge arises from the clarity of images. When images lack clarity, facial features become less discernible, leading to increased pixelation. As a result, deep learning algorithms require higher resolution input images to accurately identify and analyze facial characteristics. 
-
-In order to address these challenges, we need to develop advanced algorithms and techinques tailored to the nuances of facial recognition tasks.
-
-### Multi-view face detection
-Current state-of-the-art approaches for this task require annotation of facial landmarks or annotation of face poses. They also require training dozens of models to fully capture faces in all orientations, angles, light levels, hairstyles, hats, glasses, facial hair, makeup, ages.
-
 ### Face recognition processing flow
 
-![YOLO]({{ 'assets/images/2/DDFD/Process-flow.png' | relative_url }})
+![Face recognition processing flow]({{ 'assets/images/2/DDFD/Process-flow.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 1. replace this* [1].
 
-![YOLO]({{ 'assets/images/2/DDFD/processflow2.png' | relative_url }})
+![Face recognition processing flow]({{ 'assets/images/2/DDFD/processflow2.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Fig 1. replace this* [1].
+*Fig 2. replace this* [1].
+
 
 ### Face recognition tasks
 
@@ -64,6 +57,17 @@ These are the most important tasks in face recognition:
 4. **Face Verification**: a one-to-one mapping of a given face against a known identity (e.g. is this the person?)
 
 5. **Face Identification**: a one-to-many mapping for a given face against a database of known faces (e.g. who is this person?)
+
+
+### Why is facial recognition a difficult task?
+
+Facial recognition proves to be a complex task due to the variety of factors involved in real-world scenarios. These include the variability of face angles, expressions, lighting conditions, and even aging effects. A common challenge arises from the clarity of images. When images lack clarity, facial features become less discernible, leading to increased pixelation. As a result, deep learning algorithms require higher resolution input images to accurately identify and analyze facial characteristics. 
+
+Current state-of-the-art approaches for this task require annotation of facial landmarks or annotation of face poses. They also require training dozens of models to fully capture faces in all orientations, angles, light levels, hairstyles, hats, glasses, facial hair, makeup, ages.
+
+In order to address these challenges, we need to develop advanced algorithms and techinques tailored to the nuances of facial recognition tasks.
+
+
 
 ## Classical Challenges <a id="classicalchallenges"></a>
 The first paragraph text
