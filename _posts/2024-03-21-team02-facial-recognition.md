@@ -7,6 +7,8 @@ author: Aidan Wittenberg, Delia Ivascu, Rafi Rajoyan
 date: 2024-03-21
 ---
 
+> Facial recognition is the technology of identifying human beings by analyzing their faces from pictures, video footage or in real time. Facial recognition has been an issue for computer vision until recently. The introduction of deep learning techniques which are able to grasp big data faces and analyze rich and complex images of faces has made this easier, enabling new technology to be efficient and later become even better than human vision in facial recognition.
+
 # Table of contents
 1. [Introduction](#introduction)
 2. [Classical Challenges](#classicalchallenges)
@@ -17,9 +19,47 @@ date: 2024-03-21
 	2. [FaceNet](#facenet)
 5. [References](#reference)
 
+
 # Introduction <a id="introduction"></a>
 
-This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+Facial recognition is the technology of identifying human beings by analyzing their faces from pictures, video footage or in real time. Facial recognition has been an issue for computer vision until recently. The introduction of deep learning techniques which are able to grasp big data faces and analyze rich and complex images of faces has made this easier, enabling new technology to be efficient and later become even better than human vision in facial recognition.
+
+## Why do we care about facial recognition?
+
+Facial recognition has gained significant attention and relevance in today's digital landscape due to its multifaceted applications and implications across various domains. From enhancing security measures to streamlining user authentication processes, facial recognition provides unparalleled convenience and efficiency. We can see facial recognition integrated in law enforcement, retail, healthcare, and even social media platforms. This highlights its versatility and potential to revolutionize how we interact with technology and each other. 
+
+Why is facial recognition a difficult task?
+
+Facial recognition proves to be a complex task due to the variety of factors involved in real-world scenarios. These include the variability of face angles, expressions, lighting conditions, and even aging effects. A common challenge arises from the clarity of images. When images lack clarity, facial features become less discernible, leading to increased pixelation. As a result, deep learning algorithms require higher resolution input images to accurately identify and analyze facial characteristics. 
+
+In order to address these challenges, we need to develop advanced algorithms and techinques tailored to the nuances of facial recognition tasks.
+
+## Multi-view face detection
+Current state-of-the-art approaches for this task require annotation of facial landmarks or annotation of face poses. They also require training dozens of models to fully capture faces in all orientations, angles, light levels, hairstyles, hats, glasses, facial hair, makeup, ages.
+
+### Face recognition processing flow
+
+![YOLO]({{ '/assets/images/2/DDFD/Process-flow.png' }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 1. replace this* [1].
+
+![YOLO]({{ '/assets/images/2/DDFD/processflow2.png' }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 1. replace this* [1].
+
+## Face recognition tasks
+
+These are the most important tasks in face recognition:
+
+1. **Face Matching**: find the best match for a given face
+
+2. **Face Similarity**: find faces that are most similar to a given face
+
+3. **Face Transformation**: generate new faces that are similar to a given face
+
+4. **Face Verification**: a one-to-one mapping of a given face against a known identity (e.g. is this the person?)
+
+5. **Face Identification**: a one-to-many mapping for a given face against a database of known faces (e.g. who is this person?)
 
 ## Classical Challenges <a id="classicalchallenges"></a>
 The first paragraph text
@@ -73,19 +113,26 @@ CNNs have a wide set of benefits over traditional methods and have transformed f
 ## Solutions <a id="solutions"></a>
 
 ### Deep Dense Face Detector (DDFD) <a id="ddfd"></a>
-ddfd text
+
+[Deep Dense Face Detector](https://arxiv.org/pdf/1502.02766.pdf), short for "DDFD", is a method for multi-view face detection that doesn't rely on pose or landmark annotations.
+
+Existing approaches require training multiple models or additional components like segmentation or bounding-box regression. DDFD, on the other hand, proposes a better, more efficient solution, using a single deep convolutional neural network (CNN). The proposed method achieves comparable or better performance to state-of-the-art methods without the need for complex annotations.
 
 ### FaceNet <a id="facenet"></a>
 facenet text
 
+## Final words
+When thinking about facial recognition, it is important to keep in mind that alongside its great promise comes a variety of ethical, privacy, and societal concerns, prompting critical discussions on the ethical deployment and regulation of this powerful technology. As facial recognition continues to evolve and be integrated into different aspects of our lives, understanding its capabilities, limitations, and ethical considerations is crucial for shaping its responsible and equitable use in society.
+
 ## References <a id="reference"></a>
+
 [1] Farfade, Sachin Sudhakar; Saberian, Mohammad; Li, Li-Jia. "Multi-view Face Detection Using Deep Convolutional Neural Networks." 2015.
 
 [2] Alzubaidi, L.; Zhang, J.; Humaidi, A.J. et al. "Review of deep learning: concepts, CNN architectures, challenges, applications, future directions." J Big Data. 8, 53 (2021).
 
 [3] Bommasani, Rishi et al. "Center for Research on Foundation Models (CRFM) at the Stanford Institute for Human-Centered Artificial Intelligence (HAI)." arXiv:2108.07258 [cs.LG]. (2022). https://doi.org/10.48550/arXiv.2108.07258.
 
----
+
 ## Basic Syntax
 ### Image
 Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
@@ -127,3 +174,5 @@ or you can write in-text formula $$y = wx + b$$.
 
 ### More Markdown Syntax
 You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/).
+
+---
