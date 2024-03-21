@@ -619,6 +619,20 @@ To counter this restriction, Imagen chooses the U-net architecture [11]. U-Net i
 
 ![U-Net Architecture]({{ '/assets/images/team13/unet.png' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 13. U-Net Architecture. [9]
 
+## Imagen Performance
+
+### Quantitative performance
+
+Using COCO, a dataset for evaluating text-to-image models, Imagen achieves a State-of-the-Art FID of 7.27 [8]. This outperforms DALL-E and even models that were trained on COCO, making Imagen one the best performing text-to-image models currently.
+
+### Qualitative performance
+
+The authors of Imagen found that there are limitations in quantitative performance measurements like FID and CLIP. Instead, they perform qualitative assessment by using human subjects to evaluate the generated images. Each subject is shown 50 generated images, along with the ground-truth caption-image pairs from the COCO validation set.
+
+To assess the quality of the generated images, the authors show each subject a generated image and its reference image and ask, "Which image is more photorealistic (looks more real)?" The resulted preference rate, where the subject chooses the generated image over the reference one, is 39.2%. [8]
+
+To assess the image-caption alignment, the authors show each subject a generated image and its reference caption and ask, "Does the caption accurately describe the above image?" The subject can respond with “yes”, “somewhat”, and “no”, which corresponds to a score of 100, 50, and 0. The resulted alignment rate is 91.4, showing a high alignment between the caption and the generated image. [8]
+
 ## Basic Syntax
 ### Image
 Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
