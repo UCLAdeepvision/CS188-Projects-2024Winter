@@ -167,7 +167,7 @@ print (torch.__version__)
 
 ## Results/Comparison
 
-We compare the results of these models upon the KITTI Cars Easy dataset below. Results are obtained from the respective journal articles.
+The models discussed above were evaluated on the KITTI server and compared against the 3D and BEV average precision benchmarks with an IoU threshold of 0.7. They were conducted on the car category of this dataset with three difficulty levels in the evaluation: easy, medium, and hard. We compare the results of these models upon the KITTI Cars Easy dataset below. Results are obtained from the respective journal articles.
 
 <style>
 table, td, th {
@@ -187,6 +187,7 @@ th, td {
 | _PointRCNN_ [1]      | 86.96         | 75.42       |   70.70    |    77.77   |
 | _SE-SSD_ [3]         | 91.49         | 82.54       |   77.15    |    83.73   |
 
+In terms of 3D AP, SE-SSD consistently outperforms PointRCNN, achieving an AP of 91.49%, 82.54%, 77.15% for easy, medium, and hard difficulty levels respectively with a mAP of 83.73%. On the other hand, PointRCNN yields slightly lower results with AP scores of 86.96%, 75.42%, and 70.70% with a mAP of 77.77%. Furthermore, SE-SSD demonstrates faster inference with an inference time of 30.56ms while PointRCNN achieved an inference time of 100ms. The differences in performance can be attributed to several factors, including architectural design, methodology, and computational complexity. PointRCNN is built upon a two-stage region-based framework, where it generates region proposals followed by region-wise feature extraction and classification. This two-stage architecture contributes to PointRCNN’s slower inference time compared to SE-SSD’s inference time as it relies on more complex processing steps and refinement. SE-SSD on the other hand is a single-stage object detector which requires fewer computational resources and eliminates the need for having to generate region proposals. Its architecture focuses primarily on predicting the bounding boxes and probabilities, allowing for more efficient processing of input data to results, which contributes to its faster inference speed than PointRCNN. Although the results from PointRCNN are slightly lower than SE-SSD’s, it still has its advantages. PointRCNN’s two-stage architecture and refinement process makes it more adept at accurately localizing objects in dense point clouds and complex environments. However, This enhanced accuracy comes at the expense of increased computational resources.
 
 ## Reference
 
