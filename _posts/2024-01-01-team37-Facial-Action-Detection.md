@@ -76,7 +76,7 @@ $$
 $$d_m$$ is the Manhattan distance to the AU center
 
 ## ResNet-50
-ResNet-50 has been utilized for the task of AU detection. Researchers from Shenzhe University had done a study presenting an approach utilizing ResNet-50 to encode AU activation status and associations into node features. The model learns multi-dimensional edge features to capture complex relationship cues between AUs, considering the facial display’s influence on AU relationships. The approach achieves state-of-the-art results, with an average F1 score of 64.7 on the BP4D dataset and 63.1 on the DISFA dataset.
+ResNet-50 has been utilized for the task of AU detection. Researchers from Shenzhen University had done a study presenting an approach utilizing ResNet-50 to encode AU activation status and associations into node features. The model learns multi-dimensional edge features to capture complex relationship cues between AUs, considering the facial display’s influence on AU relationships. The approach achieves state-of-the-art results, with an average F1 score of 64.7 on the BP4D dataset and 63.1 on the DISFA dataset.
 
 ### Structure
 The model involves a two main modules: 
@@ -95,15 +95,15 @@ The model involves a two main modules:
 ResNet-50 is used as one of the backbones for the model. It provides the initial full face representation, which is then processed by the ANFL module to generate node features. These features are further utilized by the MEFL module to learn the multi-dimensional edge features, enhancing the AU recognition performance. The model achieves state-of-the-art results on two widely used datasets for AU recognition.
 
 ### Losses
-Two types of losses are used in this model, Weighted Asymmetric Loss and Categorical Cross-Entropy Loss. The former is designed to alleviate data imbalance issues by assigning unique weights to each subtask (each AU’s recognition) based on the AU’s occurrence rate in the training set. The latter is employed to supervise the training process by leveraging the AUs co-occurrence patterns. It is used in conjunction with the multi-dimensional edge features generated from the last GatedGCN layer to predict the co-occurrence pattern of AUs.[3] The formulation of losses are show below:
+Two types of losses are used in this model, Weighted Asymmetric Loss and Categorical Cross-Entropy Loss. The former is designed to alleviate data imbalance issues by assigning unique weights to each subtask (each AU’s recognition) based on the AU’s occurrence rate in the training set. The latter is employed to supervise the training process by leveraging the AUs co-occurrence patterns. It is used in conjunction with the multi-dimensional edge features generated from the last GatedGCN layer to predict the co-occurrence pattern of AUs. The formulation of losses are show below:
 
 $$
 L_E = -\frac{1}{|E|} \sum_{i=1}^{|E|} \sum_{j=1}^{N_E} y_{i,j}^e \log\left(\frac{e^{p_{i,j}^e}}{\sum_k e^{p_{i,k}^e}}\right) 
 $$
 
 where:
-- $$|E|$$ denotes the number of edges in the facial graph.
-- $$N_E is the number of co-occurrence patterns.
+- $$E$$ denotes the number of edges in the facial graph.
+- $$N_E$$ is the number of co-occurrence patterns.
 - $$p_{i,j}$$ is the co-occurrence prediction output from the shared fully connected layer.
 
 $$
@@ -115,19 +115,20 @@ where:
 - $$y_i$$ is the ground truth for the $$i^{th}$$ AU.
 - $$w_i$$ is the weight of the $$i^{th}$$ AU.
 
+The total loss is calculated as the sum of $$L_{WA}$$ and $$L_E$$.
 
 ### Performance 
 The reported results are shown below:
 The model outperforms both JAA-Net and ResNet-50, which is not surprising since ResNet is only utilized as a backbone structure and the model is new with more sophisticated structure.
 
 ## Experiments
-We attempted to train a model using JAA-Net that is public on BP4D dataset. With limited resources, we had to scale down the dataset, but we were successful to train JAA-Net and obtained its performance metrics.
+We attempted to train a model using JAA-Net that is public on BP4D dataset. With limited resources, we had to scale down the dataset, but we were successful to train JAA-Net and obtained its performance metrics. The code, trained models (12 in total, with each being a snapshot after a epoch), and attention heatmaps can be found in this repository: https://github.com/HiccupHan/CS188-PyTorch-JAANet
 
 ### Dataset
-We were able to obtain a subset of BP4D dataset.BP4D-Spontaneous dataset is a database of videos of facial expressions in a group of young adults. The participants in the video clips are around 18-29 years of age from various ethnicity backgrounds. The expressions they displayed in these videos are induced from natural stimulus. Facial features are tracked in both 2D and 3D domains. The entire dataset is about 2.6TB in size. We utilized the metadata associated with AU activation and facial landmark information included with the dataset. [2] The sub-dataset we use contains 125884 images sampled from frames of videos, and groud truth labels of the presence of 12 AU labels and facial landmarks. The dataset we obntained was missing AU activation labels and facial landmark information for some pictures, causing a mismatch between images and labels.  This issue was discovered during training when the model displayed low loss but low accuracy during testing with new images. Because of lack of knowledge to properly label these images, we determined to exclude them from the dataset. The final dataset used contained 83924 images for training and 45809 images for testing. Training was done locally on a laptop with a RTX 3070Ti as it requires a large amount of memory and time, and it was not realistic to do on a Google Cloud VM with the few credits that were available. Because of limited resources, training set was kept small compared to the test set. 
+We were able to obtain a subset of BP4D dataset.BP4D-Spontaneous dataset is a database of videos of facial expressions in a group of young adults. The participants in the video clips are around 18-29 years of age from various ethnicity backgrounds. The expressions they displayed in these videos are induced from natural stimulus. Facial features are tracked in both 2D and 3D domains. The entire dataset is about 2.6TB in size. We utilized the metadata associated with AU activation and facial landmark information included with the dataset. [2] The sub-dataset we use contains 125884 images sampled from frames of videos, and ground truth labels of the presence of 12 AU labels and facial landmarks. The dataset we obtained was missing AU activation labels and facial landmark information for some pictures, causing a mismatch between images and labels.  This issue was discovered during training when the model displayed low loss but low accuracy during testing with new images. Because of lack of knowledge to properly label these images, we determined to exclude them from the dataset. The final dataset used contained 83924 images for training and 45809 images for testing. Training was done locally on a laptop with a RTX 3070Ti as it requires a large amount of memory and time, and it was not realistic to do on a Google Cloud VM with the few credits that were available. Because of limited resources, training set was kept small compared to the test set. 
 
 ### Methods And Results
-Some minor modifications to the code base was required to work with our specific dataset, but nothing with JAA-Net's structure were changed. The model was trained on the training set for 12 epochs with learning rate originally set at 0.00007 for first  that  0.000096 and decays down to 0.000024. Training took more than 50 hours, which underscores a significant drawback of this model: it requires a lot of resources and time to train. This is an older model using CNN and attention mechanisms, and they can be difficult to train. 
+Some minor modifications to the code base was required to work with our specific dataset, but nothing with JAA-Net's structure were changed. During the preprocessing step, similarity transformation is conducted on each image, cropping every image around the face. Then interocular distances of each sample and weight loss of each AU for the training set is calculated. The model was trained on the training set (processed image) for 12 epochs with learning rate originally set at 0.00007 for first  that  0.000096 and decays down to 0.000024. Training took more than 50 hours, which underscores a significant drawback of this model: it requires a lot of resources and time to train. This is an older model using CNN and attention mechanisms, and they can be difficult to train. 
 
 The model was then tested on the test set, which yielded the following results:
 
@@ -150,10 +151,10 @@ The model was then tested on the test set, which yielded the following results:
 
 As can be seen from the table, JAA-Net is relatively reliable, with low failure rate. Overall, we see that F1 score shows a gradual increase, but the increase is not significant, signaling that learning rate can be tuned further to improve performance. Mean error also decreased, hovering around 0.04 range, indicating the consistency in model's prediction errors. There are two interesting patterns that can be observed from these results:
 - Accuracy fluctuation:
-The accuracy very quickly increases and reaches its peak at the 4th epoch and suddenly drops, then fluctuates around 76%. We theorizes that this fluctuation is caused by model maybe overfitting to the training data, which may be fixed through further optimization to the learning rate. Because we had to divide the dataset to reduce training time, it may have decreased diversity among images, with some images of some individuals from different ethinical backgrounds and with very different facial features excluded from the trainig set. This may cause the model to overfit on certain features.
+The accuracy very quickly increases and reaches its peak at the 4th epoch and suddenly drops, then fluctuates around 76%. We theorizes that this fluctuation is caused by model maybe overfitting to the training data, which may be fixed through further optimization to the learning rate. Because we had to divide the dataset to reduce training time, it may have decreased diversity among images, with some images of some individuals from different ethnical backgrounds and with very different facial features excluded from the training set. This may cause the model to overfit on certain features.
 - Difference between F1 score and accuracy:
-There is a large gap between F1 score and accuracy, indicating that the model performs well on majority class but struggles with minority class. This model is clearly biased towards predicting certain AUs mroe than others, which can be a result from the dataset being imbalanced and not necessarily a problem with the model itself.
-The results closely match the results reported by the researchers that created JAA-Net. Interestly, our F1 score is higher than the reported 44%, which can indicate that maybe certain individuals in the dataset have tendencies to activate certain AUs which caused class imbalance in the dataset. Our accuracy is understandably lower than the reported 87%, which is understandable as our dataset is reduced and is not as diverse as the dataset they used to train the model.
+There is a large gap between F1 score and accuracy, indicating that the model performs well on majority class but struggles with minority class. This model is clearly biased towards predicting certain AUs more than others, which can be a result from the dataset being imbalanced and not necessarily a problem with the model itself.
+The results closely match the results reported by the researchers that created JAA-Net. Interestingly, our F1 score is higher than the reported 44%, which can indicate that maybe certain individuals in the dataset have tendencies to activate certain AUs which caused class imbalance in the dataset. Our accuracy is understandably lower than the reported 87%, which is understandable as our dataset is reduced and is not as diverse as the dataset they used to train the model.
 
 ### Attention Heatmaps
 Using the attention mechanism in the model, we generated heatmaps from some of the samples in the test dataset. Unfortunately, because JAA-Net requires facial landmark information to function properly, and we lack the technical knowledge to provide a labeled sample, we could only test the model on existing data in the BP4D dataset. The results show the model is clearly focusing on the correct regions of facial activation units.
@@ -166,9 +167,9 @@ Using the attention mechanism in the model, we generated heatmaps from some of t
 
 ### Future Improvements And General Discussion
 
-As discussed before, the dataset was significantly reduced, and the partition of data can ideally be mixed better through shuffling of the images to include more varying faces at the cost of fewer examples for certain expressions for some individuals. Of course, ideally the training set should be much bigger than what we used for this experiment, and learning rate definitely requires some tuning, and the number of epochs can be cut down before overfitting occurs. We also would like to have taken our own pictures and tested model's performance in a more realistic enviroment, with background noise in the pictures instead of a clean and controlled background that is in BP4D dataset.
+As discussed before, the dataset was significantly reduced, and the partition of data can ideally be mixed better through shuffling of the images to include more varying faces at the cost of fewer examples for certain expressions for some individuals. Of course, ideally the training set should be much bigger than what we used for this experiment, and learning rate definitely requires some tuning, and the number of epochs can be cut down before overfitting occurs. We also would like to have taken our own pictures and tested model's performance in a more realistic environment, with background noise in the pictures instead of a clean and controlled background that is in BP4D dataset.
 
-Nonetheless, the results from JAA-Net is impressive, especially for an older model. The model was performing better than many other models at the time, proving that features learned during facial alignment can in fact provide non-negligble benefits for the task of detecting facial action units. 
+Nonetheless, the results from JAA-Net is impressive, especially for an older model. The model was performing better than many other models at the time, proving that features learned during facial alignment can in fact provide non-negligible benefits for the task of detecting facial action units. 
 
 ## Reference
 [1] Li, W., Abtahi, F., Zhu, Z., & Yin, L. (2017, May). Eac-net: A region-based deep enhancing and cropping approach for facial action unit detection. In 2017 12th IEEE International Conference on Automatic Face & Gesture Recognition (FG 2017) (pp. 103-110). IEEE.
