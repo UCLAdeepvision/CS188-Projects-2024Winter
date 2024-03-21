@@ -7,7 +7,7 @@ date: 2024-03-07
 ---
 
 
-> In this study, we explore the advancements in image generation, particularly focusing on DIFFEDIT, an innovative approach leveraging text-conditioned diffusion models for semantic image editing. Semantic image editing aims to modify images in response to textual prompts, enabling precise and context-aware alterations. We conduct a thorough comparison between DIFFEDIT and various traditional and deep learning-based methodologies, highlighting its consistency and effectiveness in semantic editing tasks. Additionally, we introduce an interactive framework that integrates DIFFEDIT with BLIP and other text-to-image models to create a comprehensive end-to-end generation and editing pipeline. Moreover, we delve into a novel technique for text-guided mask generation within DIFFEDIT, proposing a method for object segmentation based solely on textual queries. We emphasize the importance of integrating AI safety and ethical considerations, ensuring our advancements are both technologically groundbreaking and responsibly implemented. 
+> In this study, we explore the advancements in image generation, particularly focusing on DIFFEDIT, an innovative approach leveraging text-conditioned diffusion models for semantic image editing (Couairon et al., 2022 [1]). Semantic image editing aims to modify images in response to textual prompts, enabling precise and context-aware alterations. A thorough comparison between DIFFEDIT and various traditional and deep learning-based methodologies have been conducted, highlighting its consistency and effectiveness in semantic editing tasks. Additionally, we introduce an interactive framework that integrates DIFFEDIT with BLIP and other text-to-image models to create a comprehensive end-to-end generation and editing pipeline. Moreover, we delve into a novel technique for text-guided mask generation within DIFFEDIT, proposing a method for object segmentation based solely on textual queries. We emphasize the importance of integrating AI safety and ethical considerations, ensuring our advancements are both technologically groundbreaking and responsibly implemented. 
 
 
 <!--more-->
@@ -19,7 +19,7 @@ date: 2024-03-07
 ### What is Image Editing
 Image editing refers to the process of altering or manipulating digital images. It encompasses a wide range of tasks, including color correction, cropping, resizing, and retouching. It has a variety of applications, such as photography, graphic design, and digital art.
 
-The recent surge in image editing technology, driven by advancements in deep learning, has revolutionized the field. Deep learning-based methods have showcased impressive abilities in generating and modifying images, paving the way for a diverse array of applications. These include image inpainting as evidenced by (Yu et al., 2018), style transfer as explored by (Jing et al., 2019), and semantic image editing, a concept furthered by (Couairon et al., 2022). These developments have birthed a novel paradigm in image editing, particularly notable in text-guided image editing.
+The recent surge in image editing technology, driven by advancements in deep learning, has revolutionized the field. Deep learning-based methods have showcased impressive abilities in generating and modifying images, paving the way for a diverse array of applications. These include image inpainting as evidenced by (Yu et al., 2018 [2]), style transfer as explored by (Jing et al., 2019 [3]), and many others. These developments have birthed a novel paradigm in image editing, particularly notable in text-guided image editing.
 
 This innovative approach is able to find significant applications in the fashion industry. Designers now have the capability to input descriptions of desired styles, colors, and patterns, and watch as AI systems adapt existing designs to these specifications. This method offers a more efficient pathway for testing and developing new design concepts.
 
@@ -34,104 +34,104 @@ This challenge, however, is what endows semantic image editing with its vast pot
 The field of semantic image editing has seen a surge in innovation, particularly with the advent of deep learning-based methods. These methods have demonstrated remarkable capabilities in generating and modifying images, particularly in response to textual prompts. Here, we provide an overview of the various approaches that have been developed to tackle semantic image editing tasks.
 
 ### Classical Approaches
-Before the rise of deep learning, semantic image editing was almost impossible to achieve. The complexity of the task, combined with the lack of sophisticated models, made it a daunting challenge. One method of image editing is object-based image editing (OBIE) (Barret et al., 2002). It involved manual placement of pivot points and selecting objects by hand, making them both time-consuming and limited in scope.
+Before the rise of deep learning, semantic image editing was almost impossible to achieve. The complexity of the task, combined with the lack of sophisticated models, made it a daunting challenge. One method of image editing is object-based image editing (OBIE) (Barret & Cheney, 2002 [4]), which involved manual placement of pivot points and selecting objects by hand, making them both time-consuming and limited in scope.
 
 The emergence of deep learning has dramatically expanded the potential of semantic image editing. Groundbreaking technologies like Generative Adversarial Networks (GANs) and transformers have revolutionized this field. There are two main approaches to semantic image editing using GANs and transformers: training an end-to-end model with a proxy task then adapting it to the editing task, and training a model to optimize the image itself to match the text query.
 
-RefinedGAN (Li et al., 2020) is an example of model with a proxy task. This innovative model stands out due to its ability to generate desired images without the need for fine-grained, pixel-labelled semantic maps. This means that even when provided with simple masks, RefinedGAN can effectively interpret and act upon natural language descriptions to produce the intended images. The basic architecture of the model is shown in Fig. 1.
+RefinedGAN (Li et al., 2020 [5]) is an example of model with a proxy task. This innovative model stands out due to its ability to generate desired images without the need for fine-grained, pixel-labelled semantic maps. This means that even when provided with simple masks, RefinedGAN can effectively interpret and act upon natural language descriptions to produce the intended images. The basic architecture of the model is shown in Fig. 1.
 
 ![RefinedGAN]({{ '/assets/images/28/RefinedGAN.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 1. Architecture of RefinedGAN.* [1]
+*Figure 1. Architecture of RefinedGAN.* [5]
 
-On the other hand, VQGAN-CLIP (Crowson et al., 2022) is a representation of optimization on the image itself to match the text query. At the core of this model is the CLIP (Contrastive Language-Image Pretraining) component, which functions as a mechanism to assess how accurately a text prompt describes an image. This model works by using the multimodal encoder to use CLIP to evaluate the similarity of text and image pair and backpropagating to the latent space of the image generator. We iteratively update the candidate generation until it is sufficiently similar to the target text. The basic architecture of the model is shown in Fig. 2.
+On the other hand, VQGAN-CLIP (Crowson et al., 2022 [6]) is a representation of optimization on the image itself to match the text query. At the core of this model is the CLIP (Contrastive Language-Image Pretraining) component, which functions as a mechanism to assess how accurately a text prompt describes an image. This model works by using the multimodal encoder to use CLIP to evaluate the similarity of text and image pair and backpropagating to the latent space of the image generator. We iteratively update the candidate generation until it is sufficiently similar to the target text. The basic architecture of the model is shown in Fig. 2.
 
 ![VQGAN-CLIP]({{ '/assets/images/28/VQGAN-CLIP.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 2. Architecture of VQGAN-CLIP.* [2]
+*Figure 2. Architecture of VQGAN-CLIP.* [6]
 
-These methods, while effective, work best when the models is optimized with a powerful generative network and need to comsume great computational resources (Couairon et al., 2022).
+These methods, while effective, work best when the models is optimized with a powerful generative network and need to comsume great computational resources (Couairon et al., 2022 [1]).
 
 ### Diffusion Approaches
 
 Building on the exploration of classical image editing methods, it is important to highlight the transformative role diffusion models play in this domain. Such models enhance images starting from random noise and are ideal for inpainting by filling in masked areas naturally.
 
-One of such approaches is DiffusionCLIP, in which case the CLIP loss and target text are leveraged during gradient descent to update the model parameters (Kim & Ye, 2021). Fig. 3 demonstrates how the CLIP loss is incorporated into the gradient flow of fine-tuning DiffusionCLIP. But it is worth noting that this approach has a high computational cost since one model is fine-tuned for each input image.
+One of such approaches is DiffusionCLIP, in which case the CLIP loss and target text are leveraged during gradient descent to update the model parameters (Kim & Ye, 2021 [7]). Fig. 3 demonstrates how the CLIP loss is incorporated into the gradient flow of fine-tuning DiffusionCLIP. But it is worth noting that this approach has a high computational cost since one model is fine-tuned for each input image.
 
 ![DiffusionCLIPGradientFLow]({{ '/assets/images/28/DiffusionCLIP.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 3. Gradient flow of fine-tuning DiffusionCLIP with CLIP Loss.* [3]
+*Figure 3. Gradient flow of fine-tuning DiffusionCLIP with CLIP Loss.* [7]
 
-Another approach is ILVR, i.e. Intermediate Latent Variable Refinement, which introduces a decoding constraint to ensure that the downscaled versions of both the input and the decoded images remain closely aligned (Choi et al., 2021). Using this method, image sampling is controlled by an reference image.  Fig. 4 shows how different downsampling factors N affects the output image: When N is small (like 8), the outputs are similar to the reference images, but when N gets bigger, facial features begin to change, up to a point where only the color scheme remains from the reference.
+Another approach is ILVR, i.e. Intermediate Latent Variable Refinement, which introduces a decoding constraint to ensure that the downscaled versions of both the input and the decoded images remain closely aligned (Choi et al., 2021 [8]). Using this method, image sampling is controlled by an reference image.  Fig. 4 shows how different downsampling factors N affect the output image: when N is small (like 8), the outputs are similar to the reference images, but when N gets bigger, facial features begin to change, up to a point where only the color scheme remains from the reference.
 
 ![ILVR]({{ '/assets/images/28/ILVR.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 4. Effect of downsampling factor on ILVR.* [4]
+*Figure 4. Effect of downsampling factor on ILVR.* [8]
 
-SDEdit is also a significant diffusion approach that features iterative refinement to produce high quality outputs (Meng et al., 2021). It uses SDE (Stochastic Differential Equations) to model the diffusion process with modifications in the noise space to reflect meaningful changes in the image space. In other words, it was developed with the purpose of converting basic sketches into fully-realized, realistic images, as shown in Fig. 5. Nonetheless, it is also useful in conditionally denoising images with respect to a text query, which allows for easy comparison to the main subject of the study, i.e. DIFFEDIT.
+SDEdit is also a significant diffusion approach that features iterative refinement to produce high quality outputs (Meng et al., 2021 [9]). It uses SDE (Stochastic Differential Equations) to model the diffusion process with modifications in the noise space to reflect meaningful changes in the image space. It was developed with the purpose of converting basic sketches into fully-realized, realistic images, as shown in Fig. 5. Nonetheless, it is also useful in conditionally denoising images with respect to a text query, which allows for easy comparison to the main subject of the study, i.e. DIFFEDIT.
 
 ![SDEdit]({{ '/assets/images/28/SDEdit.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 5. Example of SDEdit application.* [5]
+*Figure 5. Example of SDEdit application.* [9]
 
 
-## Dive into DiffEdit
+## Dive into DIFFEDIT
 In many cases, semantic image edits can be restricted to only a part of the image, leaving other parts unchanged. However, the input text query does not explicitly identify this region, and a naive method could allow for edits all over the image, risking to modify the input in areas where it is not needed. To circumvent this, DIFFEDIT propose a method to leverage a text-conditioned diffusion model to infer a mask of the region that needs to be edited. Starting from a DDIM encoding of the input image, DIFFEDIT uses the inferred mask to guide the denoising process, minimizing edits outside the region of interest.
 
-Before delving into the intricate workings of DiffEdit, it's essential to lay the groundwork by understanding some foundational concepts that it builds upon: DDIM and Classifier-Free Guidance. These elements are vital for grasping how DiffEdit achieves its targeted editing prowess.
+Before delving into the intricate workings of DIFFEDIT, it's essential to lay the groundwork by understanding some foundational concepts that it builds upon: DDIM (Song et al., 2021 [10]) and Classifier-Free Guidance (Ho & Salimans, 2022 [11]). These elements are vital for grasping how DIFFEDIT achieves its targeted editing prowess.
 
 ### Denoising Diffusion Implicit Models (DDIM)
-DDIM, short for Denoising Diffusion Implicit Models, is a variant of the diffusion models used for generating or editing images. One problem with the DDPM process is the speed of generating an image after training. DDIMs accelerate this process by optimizing the number of steps needed to denoise an image, making it more efficient while maintaining the quality of the generated images (with a little quality tradeoff). It does so by redefining the diffusion process as a non-Markovian process. The best part about DDIMs is they can be applied after training a model, so DDPM models can easily be converted into a DDIM without retraining a new model. 
+DDIM, short for Denoising Diffusion Implicit Models, is a variant of the diffusion models used for generating or editing images (Song et al., 2021 [10]). One problem with the DDPM process is the speed of generating an image after training. DDIMs accelerate this process by optimizing the number of steps needed to denoise an image, making it more efficient while maintaining the quality of the generated images (with a little quality tradeoff). It does so by redefining the diffusion process as a non-Markovian process. The best part about DDIMs is they can be applied after training a model, so DDPM models can easily be converted into a DDIM without retraining a new model. Fig. 6 shows the difference between the twi paradigms.
 
 ![DDIM]({{ '/assets/images/28/DDPMvsDDIM.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 6. Graphical models for diffusion (left) and non-Markocivian (right) inference models.* [6]
+*Figure 6. Graphical models for diffusion (left) and non-Markovian (right) inference models.* [10]
 
-The reverse diffusion process in Denoising Diffusion Implicit Models (DDIM) serves as a fundamental mechanism allowing these models to reconstruct or generate images by methodically reversing the diffusion process that gradually transforms an image into random noise. This process is central to understanding how DDIM and, by extension, technologies like DiffEdit function, enabling them to create detailed and precise image edits or generate images from textual descriptions. Here's a simplified overview of the reverse diffusion process, avoiding deep mathematical complexities (for which [this post](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#speed-up-diffusion-model-sampling) provides an excellent derivation).
+The reverse diffusion process in Denoising Diffusion Implicit Models (DDIM) serves as a fundamental mechanism allowing these models to reconstruct or generate images by methodically reversing the diffusion process that gradually transforms an image into random noise (Song et al., 2021 [10]). This process is central to understanding how DDIM and, by extension, technologies like DIFFEDIT function, enabling them to create detailed and precise image edits or generate images from textual descriptions. A simplified overview of the reverse diffusion process has been provided, avoiding deep mathematical complexities (Weng, 2021 [12]). The denoising formula for DDIM models is illustrated below in Fig. 7.
 
 ![DDIM]({{ '/assets/images/28/DDIM_Denoising_Formula.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 7. DDIM_Denoising_Formula.* [7]
+*Figure 7. DDIM Denoising Formula.* [1]
 
-Importantly, instead of randomly walking back through the noise levels, DDIM uses a deterministic approach to carefully control the denoising path. Thus we no longer have to use a Markov Chain since Markov Chains are used for probabilistic processes. We can use a Non-Markovian process, which allows us to skip steps.
+Importantly, instead of randomly walking back through the noise levels, DDIM uses a deterministic approach to carefully control the denoising path (Song et al., 2021 [10]). Thus we no longer have to use a Markov Chain since Markov Chains are used for probabilistic processes. We can use a Non-Markovian process, which allows us to skip steps.
 
 ### Classifier-Free Guidance
-Classifier-Free Guidance is a technique used to steer the generation process of a model towards a specific outcome without relying on a separate classifier model. In traditional guided diffusion models, a classifier is often used in tandem with the diffusion model to ensure the generated images adhere to certain criteria. However, Classifier-Free Guidance simplifies this by eliminating the need for a separate classifier. Instead, it modifies the diffusion process itself to guide the generation towards the desired output. This is achieved in two key steps:
+Classifier-Free Guidance (CFG) is a technique used to steer the generation process of a model towards a specific outcome without relying on a separate classifier model (Ho & Salimans, 2022 [11]). In traditional guided diffusion models, a classifier is often used in tandem with the diffusion model to ensure the generated images adhere to certain criteria. However, Classifier-Free Guidance simplifies this by eliminating the need for a separate classifier. Instead, it modifies the diffusion process itself to guide the generation towards the desired output. This is achieved in two key steps (Ho & Salimans, 2022 [11]):
 
 #### Training Phase: 
 ![CFG]({{ '/assets/images/28/With_without_class.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Figure 8. Noise estimation model with and without class (null).* [8]
+*Figure 8. Noise estimation model with and without class (null).* [11]
 
-During training, the model learns to generate outputs based on a wide range of inputs, including those without specific class labels. With a probability p_uncond, we make some of the classes null classes. This approach enables the model to understand the underlying distribution of the data more broadly, rather than being constrained to specific labeled classes.
+During training, the model learns to generate outputs based on a wide range of inputs, including those without specific class labels. With a probability p_uncond, we make some of the classes null classes. This approach enables the model to understand the underlying distribution of the data more broadly, rather than being constrained to specific labeled classes. The training algorithm is shown in Fig. 8 and Fig. 9.
 
 ![CFG]({{ '/assets/images/28/cfg_training.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 9. Training with classifier-free guidance.* [9]
+*Figure 9. Training with Classifier-Free Guidance.* [11]
 
 #### Generation Phase: 
 ![CFG]({{ '/assets/images/28/cfg_sampling_noise.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Figure 10. Noise model parameterization for classifier-free guidance.* [10]
+*Figure 10. Noise model parameterization for Classifier-Free Guidance.* [11]
 
-The noise prediction requires two forward passes of the same image, zₜ. One forward pass calculates the predicted noise not conditioned on a desired class, and the other calculates the predicted noise conditioned on the desired class information. When generating new content, CFG employs a technique called "guidance scale" or "temperature," which adjusts the strength of the model's predictions towards certain attributes or themes. By tweaking this scale, users can control how closely the output adheres to the desired attributes without the need for an external classifier.
+The noise prediction requires two forward passes of the same image, zₜ. One forward pass calculates the predicted noise not conditioned on a desired class, and the other calculates the predicted noise conditioned on the desired class information. When generating new content, CFG employs a technique called "guidance scale" or "temperature," which adjusts the strength of the model's predictions towards certain attributes or themes. By tweaking this scale, users can control how closely the output adheres to the desired attributes without the need for an external classifier. The sampling algorithms are shown in Fig. 10 (for noise) and Fig. 11.
 
 ![CFG]({{ '/assets/images/28/cfg_sampling.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 11. Sampling with classifier-free guidance.* [11]
+*Figure 11. Sampling with Classifier-Free Guidance.* [11]
 
-By utilizing DDIM for efficient and precise encoding of the input image and incorporating Classifier-Free Guidance to direct the editing process without the need for additional classifiers, DiffEdit sets the stage for sophisticated image editing. These technologies allow DiffEdit to infer a mask of the region to be edited based on the text input, ensuring that changes are made only where intended. This approach not only preserves the integrity of the unedited portions of the image but also provides a high level of control and specificity in the editing process.
+By utilizing DDIM for efficient and precise encoding of the input image and incorporating Classifier-Free Guidance to direct the editing process without the need for additional classifiers, DIFFEDIT sets the stage for sophisticated image editing. These technologies allow DIFFEDIT to infer a mask of the region to be edited based on the text input, ensuring that changes are made only where intended. This approach not only preserves the integrity of the unedited portions of the image but also provides a high level of control and specificity in the editing process (Couairon et al., 2022 [1]).
 
-### Three Steps of DiffEdit
-With this knowledge ready, let's take a look at the three steps of DiffEdit.
+### Three Steps of DIFFEDIT
+With this knowledge ready, let's take a look at the three steps of DIFFEDIT (Couairon et al., 2022 [1]).
 
 ![CFG]({{ '/assets/images/28/ThreeSteps.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 12. Three Steps of DiffEdit.* [12]
+*Figure 12. Three Steps of DIFFEDIT.* [1]
 
 - #### Step one: Mask Generation
 
-When the denoising an image, a text-conditioned diffusion model will yield different noise estimates given different text conditionings. We can consider where the estimates are different, which gives information about what image regions are concerned by the change in conditioning text. For instance, in Figure, the noise estimates conditioned to the query zebra and reference text horse are different on the body of the animal, where they will tend to decode different colors and textures depending on the conditioning. For the background, on the other hand, there is little change in the noise estimates. The difference between the noise estimates can thus be used to infer a mask that identifies what parts on the image need to be changed to match the query by binarized with a threshold. The masks generally somewhat overshoot the region that requires editing, this is beneficial as it allows it to be smoothly embedded in it’s context.
+When the denoising an image, a text-conditioned diffusion model will yield different noise estimates given different text conditionings. We can consider where the estimates are different, which gives information about what image regions are concerned by the change in conditioning text. For instance, in Fig. 12, the noise estimates conditioned to the query zebra and reference text horse are different on the body of the animal, where they will tend to decode different colors and textures depending on the conditioning. For the background, on the other hand, there is little change in the noise estimates. The difference between the noise estimates can thus be used to infer a mask that identifies what parts on the image need to be changed to match the query by binarized with a threshold. The masks generally somewhat overshoot the region that requires editing, this is beneficial as it allows it to be smoothly embedded in it’s context.
 
 ```
 def get_mask(model, src, dst, init_latent, n: int, ddim_steps,
@@ -338,62 +338,62 @@ With $$x_r$$ being the encoded version of $$x_0$$(input image), using DDIM decod
 
 ## Experiment and Benchmarks
 
-The main goal we want to achieve is to modify only specific areas in an image according to a given prompt, without altering the rest of the image. This can be quite challenging because many existing methods result in undesired changes to the background while editing the main object. However, by using DIFFEDIT, we could easily achieve the goal through leveraging a combination of masking and DDIM encoding. Masking allows us to isolate the desired areas for modification, ensuring that the edits would remain confined to those regions. Meanwhile, DDIM encoding enables us to apply these changes within a latent space that encapsulates the full information of the original image. These two techniques, thus, ensures that the background remains largely unchanged compared to the input image.
+The main goal is to modify only specific areas in an image according to a given prompt, without altering the rest of the image. This can be quite challenging because many existing methods result in undesired changes to the background while editing the main object. However, by using DIFFEDIT, we could easily achieve the goal through leveraging a combination of masking and DDIM encoding. Masking allows us to isolate the desired areas for modification, ensuring that the edits would remain confined to those regions. Meanwhile, DDIM encoding enables us to apply these changes within a latent space that encapsulates the full information of the original image. These two techniques, thus, ensures that the background remains largely unchanged compared to the input image.
 
-The following experiments have been conducted on three major datasets: ImageNet, Imagen, and COCO to compare the performance of DIFFEDIT with other models such as SDEdit. Latent diffusion models are used to perform these experiments. More specifically, they are the class-conditional model trained on ImageNet at resolution 256x256, and the Stable Diffusion model (890M parameter text-conditional model trained on LAION-5B). The resolutions of the masks for DIFFEDIT are 32x32 for ImageNet and 64x64 for both Imagen and COCO. The DDIM sampling is set to have 50 steps in addition to the encoding ratio parameter. Classifier-free guidance is also incorporated into the experiments with their recommended values for each of the two models.
+The following experiments have been conducted by Couairon et al., 2022 [1] on three major datasets: ImageNet, Imagen, and COCO to compare the performance of DIFFEDIT with other models such as SDEdit. Latent diffusion models are used to perform these experiments. More specifically, they are the class-conditional model trained on ImageNet at resolution 256x256, and the Stable Diffusion model (890M parameter text-conditional model trained on LAION-5B). The resolutions of the masks for DIFFEDIT are 32x32 for ImageNet and 64x64 for both Imagen and COCO. The DDIM sampling is set to have 50 steps in addition to the encoding ratio parameter. Classifier-Free Guidance is also incorporated into the experiments with their recommended values for each of the two models.
 
 ### ImageNet
 First, on ImageNet, the evaluation metrics are LPIPS (Learned Perceptual Image Patch Similarity) and CSFID (Class-conditional FID). LPIPS measures the distance/similarity with the input image, while CSFID measures both image realism and consistency with respect to the query. For both metrics, lower values indicate better edits. It is worth noting that there is a tradeoff between the two metrics since better edits would generally improve the CSFID score as the edited images better represent the query while it also tends to deviate from the input, leading to worse LPIPS score. 
 
-Figure x demonstrates the performances of several models. The two baseline cases are: 1) Copy (best LPIPS score of 0 by just copying the input image), and 2) Retrieve (best CSFID score by just replacing the input with an image of the targeted class from the ImageNet dataset). It can be observed that while both SDEdit and ILVR have CSFID values similar to that of the Retrieval baseline, among the diffusion-based methods, DIFFEDIT has achieved a similar CSFID score and a significantly lower LPIPS score across different encoding ratios indicated by the red numbers. On the other hand, FlexIT, which is a mask-free, optimization-based model using VQGAN and CLIP, obtains both higher LPIPS and higher CSFID scores, indicating its incapability in producing relatively realistic images. 
+Fig. 13 demonstrates the performances of several models. The two baseline cases are: 1) Copy (best LPIPS score of 0 by just copying the input image), and 2) Retrieve (best CSFID score by just replacing the input with an image of the targeted class from the ImageNet dataset). It can be observed that while both SDEdit and ILVR have CSFID values similar to that of the Retrieval baseline, among the diffusion-based methods, DIFFEDIT has achieved a similar CSFID score and a significantly lower LPIPS score across different encoding ratios indicated by the red numbers. On the other hand, FlexIT, which is a mask-free, optimization-based model using VQGAN and CLIP, obtains both higher LPIPS and higher CSFID scores, indicating its incapability in producing relatively realistic images. 
 
 ![ImageNet]({{ '/assets/images/28/ImageNetCompare.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 13. Comparison of DIFFEDIT with other models on ImageNet.* [13]
+*Figure 13. Comparison of DIFFEDIT with other models on ImageNet.* [1]
 
-Figure x further shows how masking and DDIM encoding enhance DIFFEDIT's performance on the specific task. Four models are being compared here: 1) DIFFEDIT, 2) Encode-Decode with DDIM encoding added but has no masking, 3) DIFFEDIT without DDIM encode but has masking, and 4) SDEdit, which has neither DDIM encoding nor masking. It can be observed from the graph that either adding the DDIM encoding (indicated by the grey line) or adding the masking (indicated by the pink line) helps improve the LPIPS-CSFID tradeoff since they are closer to the origin. In addition, combining both methods (indicated by the red line, i.e. the actual DIFFEDIT model) gives an even better tradeoff as the background is better preserved by masking while the visual information inside the mask is better preserved by DDIM encoding.
+Fig. 14 further shows how masking and DDIM encoding enhance DIFFEDIT's performance on the specific task. Four models are being compared here: 1) DIFFEDIT, 2) Encode-Decode with DDIM encoding added but has no masking, 3) DIFFEDIT without DDIM encode but has masking, and 4) SDEdit, which has neither DDIM encoding nor masking. It can be observed from the graph that either adding the DDIM encoding (indicated by the grey line) or adding the masking (indicated by the pink line) helps improve the LPIPS-CSFID tradeoff since they are closer to the origin. In addition, combining both methods (indicated by the red line, i.e. the actual DIFFEDIT model) gives an even better tradeoff as the background is better preserved by masking while the visual information inside the mask is better preserved by DDIM encoding.
 
 ![MaskEncode]({{ '/assets/images/28/Masking+Encoding.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 14. Comparing the contribution of masking and DDIM Encoding.* [14]
+*Figure 14. Comparing the contribution of masking and DDIM Encoding.* [1]
 
-Figure x shows a more straightforward comparison between DIFFEDIT and other models. By inspecting the output generated by those models, one could make the following observations: when masking is absent (i.e. SDEdit and Encode-Decode), the backgrounds have been modified significantly compared to the input, which is an undesired bahavior of our task; when DDIM encoding is absent (i.e. SDEdit and DIFFEDIT without Encode), visual information from the input has not been preserved and demonstrated correctly on the output. But when both techniques are used, DIFFEDIT has nicely replaced the desired area in the input image with the new object indicated by the text query while the background remains almost identical to that of each input.  
+Fig. 15 shows a more straightforward comparison between DIFFEDIT and other models. By inspecting the output generated by those models, one could make the following observations: when masking is absent (i.e. SDEdit and Encode-Decode), the backgrounds have been modified significantly compared to the input, which is an undesired bahavior of our task; when DDIM encoding is absent (i.e. SDEdit and DIFFEDIT without Encode), visual information from the input has not been preserved and demonstrated correctly on the output. But when both techniques are used, DIFFEDIT has nicely replaced the desired area in the input image with the new object indicated by the text query while the background remains almost identical to that of each input.  
 
 ![ImageNetResult]({{ '/assets/images/28/ImageNetResult.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 15. Comparison of images generated by different models with input from the ImageNet dataset.* [15]
+*Figure 15. Comparison of images generated by different models with input from the ImageNet dataset.* [1]
 
-Another ablation experiment that has been conducted is related to the testing of different mask binarization threholds. The threhold is used to determine how a continuous mask is converted to a binary mask. Figure x shows that compared to the default value of 0.5, a lower threshold of 0.25 results in a larger mask, more image modifications, and therefore worse tradeoffs. A higher threshold of 0.75, on the other hand, results in smaller masks that are too restrictive, preventing the CSFID score from decreasing further.
+Another ablation experiment that has been conducted is related to the testing of different mask binarization threholds. The threhold is used to determine how a continuous mask is converted to a binary mask. Fig. 16 shows that compared to the default value of 0.5, a lower threshold of 0.25 results in a larger mask, more image modifications, and therefore worse tradeoffs. A higher threshold of 0.75, on the other hand, results in smaller masks that are too restrictive, preventing the CSFID score from decreasing further.
 
 ![MaskThreshold]({{ '/assets/images/28/MaskThreshold.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 16. Comparison of mask binarization threshold on ImageNet.* [16]
+*Figure 16. Comparison of mask binarization threshold on ImageNet.* [1]
 
 ### Imagen
 The next set of testings involves background alterations, substitution of secondary objects, and adjustments to object attributes. Since Imagen is known for its compositional abilities by using templated prompts to generate images, it is used as the testing subject in this case. More specifically, 300 prompts were generated and later modified in a way where one of the elements of each prompt is changed.
 
-Instead of CSFID, FID is used as a metric to evaluate model performance in addition to the CLIPScore in this case to assess realism and prompt-output alignment, respectively. Figure x reveals that DIFFEDIT outperformed other methods such as SDEdit, FlexIT, and Cross Attention Control in the precision of edits by integrating masking with DDIM encoding. Moreover, two types of DIFFEDIT were evaluated based on different mask computation methods: one using the original caption (DIFFEDIT w/ ref.text) and the other using blank text (DIFFEDIT w/o ref.text). To view the difference more directly, one could refer to Figure x. Notice that when reference text is used, the common parts between the reference text and the query are not included in the mask anymore (such as the fruits in the first exmaple and the panda in the second example). But when reference text is absent, the mask becomes less precise, potentially worsening the performance of the model. According to Figure x, DIFFEDIT w/ ref.text achieves the best tradeoff between FID and CLIPScore among all the tested models. 
+Instead of CSFID, FID is used as a metric to evaluate model performance in addition to the CLIPScore in this case to assess realism and prompt-output alignment, respectively. Fig. 17 reveals that DIFFEDIT outperformed other methods such as SDEdit, FlexIT, and Cross Attention Control in the precision of edits by integrating masking with DDIM encoding. Moreover, two types of DIFFEDIT were evaluated based on different mask computation methods: one using the original caption (DIFFEDIT w/ ref.text) and the other using blank text (DIFFEDIT w/o ref.text). To view the difference more directly, one could refer to Fig. 18. Notice that when reference text is used, the common parts between the reference text and the query are not included in the mask anymore (such as the fruits in the first exmaple and the panda in the second example). But when reference text is absent, the mask becomes less precise, potentially worsening the performance of the model. According to Fig. 17, DIFFEDIT w/ ref.text achieves the best tradeoff between FID and CLIPScore among all the tested models. 
 
 ![ImagenCompare]({{ '/assets/images/28/ImagenCompare.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 17. Comparison of DIFFEDIT with other models on Imagen.* [17]
+*Figure 17. Comparison of DIFFEDIT with other models on Imagen.* [1]
 
 ![ReferenceText]({{ '/assets/images/28/ReferenceText.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 18. Effect of reference text on DIFFEDIT masks and edits.* [18]
+*Figure 18. Effect of reference text on DIFFEDIT masks and edits.* [1]
 
 ### COCO
-In order to test with more complex prompts, the study has used images and captions from the COCO dataset, particularly focusing on annotations that associate images with captions similar to the original but contradict the depicted scene. Similarly, the models are evaluated with CLIPScore, FID, and LPIPS as the metrics in this case. Figure x shows that DIFFEDIT outperforms other models in the CLIP-LPIPS tradeoff, though it achieves a lower maximum CLIP score compared to SDEdit. FID scores for DIFFEDIT also show significant improvement over most of the other models. Nonetheless, it is worth noting that in contrast to the results obtained on the Imagen dataset, DIFFEDIT w/ ref.text and DIFFEDIT w/o ref.text achieve comparable results in this case. The reason behind this is that the captions often describe the original image in a different way than the query text, which makes it harder to precisely select the areas that needed to be edited in an image. 
+In order to test with more complex prompts, the study has used images and captions from the COCO dataset, particularly focusing on annotations that associate images with captions similar to the original but contradict the depicted scene. Similarly, the models are evaluated with CLIPScore, FID, and LPIPS as the metrics in this case. Fig. 19 shows that DIFFEDIT outperforms other models in the CLIP-LPIPS tradeoff, though it achieves a lower maximum CLIP score compared to SDEdit. FID scores for DIFFEDIT also show significant improvement over most of the other models. Nonetheless, it is worth noting that in contrast to the results obtained on the Imagen dataset, DIFFEDIT w/ ref.text and DIFFEDIT w/o ref.text achieve comparable results in this case. The reason behind this is that the captions often describe the original image in a different way than the query text, which makes it harder to precisely select the areas that needed to be edited in an image. 
 
 ![COCOCompare]({{ '/assets/images/28/COCOCompare.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 19. Comparison of DIFFEDIT with other models on COCO.* [19]
+*Figure 19. Comparison of DIFFEDIT with other models on COCO.* [1]
 
-Figure x shows how DIFFEDIT performs on the COCO dataset in a qualitative way. One can also notice how different queries would result in different objects to be modified given the same input image from the COCO dataset. 
+Fig. 20 shows how DIFFEDIT performs on the COCO dataset in a qualitative way. One can also notice how different queries would result in different objects to be modified given the same input image from the COCO dataset. 
 
 ![COCOResult]({{ '/assets/images/28/COCOResult.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 20. Results obtained using DIFFEDIT on COCO.* [20]
+*Figure 20. Results obtained using DIFFEDIT on COCO.* [1]
 
 ## Our Ideas
 ### End-to-End Generation and Editing
@@ -408,15 +408,15 @@ Upon user approval of the mask, our framework employs DIFFEDIT to execute the sp
 
 ### Text Guided Diffusion Based Object Segmentation
 
-Our innovative concept, "Text-Guided Diffusion-Based Object Segmentation," harnesses the sophisticated capabilities of DiffEdit for generating precise masks, and repurposes this functionality towards achieving advanced text-guided object segmentation. 
+Our innovative concept, "Text-Guided Diffusion-Based Object Segmentation," harnesses the sophisticated capabilities of DIFFEDIT for generating precise masks, and repurposes this functionality towards achieving advanced text-guided object segmentation. 
 
-At the heart of this process is a novel utilization of DiffEdit's mask generation feature, which we adapt for the purpose of segmenting objects from images based purely on textual descriptions. The workflow begins by taking a descriptive prompt for the object intended to be segmented (the object prompt). This prompt is then intelligently compared with a source prompt generated by BLIP (Bidirectional Language-Image Pre-training) model, which effectively describes the entire image. Our system strategically removes (replaced with token [None]) the object's text from this source prompt, creating what we term the "target prompt."
+At the heart of this process is a novel utilization of DIFFEDIT's mask generation feature, which we adapt for the purpose of segmenting objects from images based purely on textual descriptions. The workflow begins by taking a descriptive prompt for the object intended to be segmented (the object prompt). This prompt is then intelligently compared with a source prompt generated by BLIP (Bidirectional Language-Image Pre-training) model, which effectively describes the entire image. Our system strategically removes the object's text from this source prompt (by replacing it with the token [None]), creating what we term the "target prompt."
 
 Subsequently, we initiate the mask generation process. Leveraging the initial image, the comprehensive source prompt, and the meticulously crafted target prompt (from which the object text has been excluded), our system embarks on generating a mask. The underlying theory is that the absence of the target object's text in the target prompt compels the predictive model to focus the differential noise, essentially the areas of discrepancy, on the target object. This concentrated discrepancy illuminates the target object, enabling the extraction of a highly accurate segmentation mask.
 
-This method is intuitive because it mirrors human reasoning by excluding the target object from the textual description of the scene, prompting the model to isolate and highlight the object of interest. It is innovative because it repurposes the inherent capabilities of DiffEdit for a novel application, extending its utility beyond mere image editing to sophisticated segmentation tasks.
+This method is intuitive because it mirrors human reasoning by excluding the target object from the textual description of the scene, prompting the model to isolate and highlight the object of interest. It is innovative because it repurposes the inherent capabilities of DIFFEDIT for a novel application, extending its utility beyond mere image editing to sophisticated segmentation tasks.
 
-The groundbreaking implication of our "Text-Guided Diffusion-Based Object Segmentation" approach lies in its ability to sidestep the traditionally resource-intensive process of training specialized models for object segmentation. Instead of dedicating vast amounts of computational resources and time to train models specifically for segmentation tasks, we leverage the sophisticated text-image understanding capabilities inherent in pre-trained diffusion models. This strategy enables us to essentially get a "free ride" on the segmentation capability, exploiting the model's existing skills in a novel and efficient manner.
+The significant implication of our "Text-Guided Diffusion-Based Object Segmentation" approach lies in its ability to sidestep the traditionally resource-intensive process of training specialized models for object segmentation. Instead of dedicating vast amounts of computational resources and time to train models specifically for segmentation tasks, we leverage the sophisticated text-image understanding capabilities inherent in pre-trained diffusion models. This strategy enables us to essentially get a "free ride" on the segmentation capability, exploiting the model's existing skills in a novel and efficient manner.
 
 ### Demo
 You can clone the Github Repo to have a try
@@ -438,11 +438,11 @@ User uploaded Image Editing Example
 ```
 python diffEdit.py -i "https://github.com/Xiang-cd/DiffEdit-stable-diffusion/raw/main/assets/origin.png" -t "a bowl of pears"
 ```
-In which case the program will generate the mask and ask about your satisfaction about it. When user accepts the mask, it will edit the image based on the target prompt.
+In which case the program will generate the mask and ask about your satisfaction about it. When user accepts the mask, it will edit the image based on the target prompt. The demo is shown in Fig. 21.
 
 ![Mask]({{ '/assets/images/28/demo.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 21. End-to-End Image Generation Editing Demo.* [21]
+*Figure 21. End-to-End Image Generation Editing Demo.* 
 
 User Generate Image Editing Example
 
@@ -455,11 +455,11 @@ This time instead of providing the image, we generate the image based on Stable 
 ```
 python diffEdit.py -i "https://github.com/Xiang-cd/DiffEdit-stable-diffusion/raw/main/assets/origin.png" -sp -t "fruit"
 ```
-It will generate the mask(segmentation) correspond with the target prompt.
+It will generate the mask(segmentation, shown in Fig. 22) correspond with the target prompt.
 
 ![Mask]({{ '/assets/images/28/mask.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Figure 22. Text-base-Object-Segmentation.* [22]
+*Figure 22. Text-base-Object-Segmentation.* 
 #### All Options:
 ```
   -h, --help            show this help message and exit
@@ -519,7 +519,31 @@ Given a textual query, using the diffusion model, DIFFEDIT infers the relevant r
 rather than requiring a user generated mask. Furthermore, in contrast to other diffusion-based methods, DIFFEDIT initialize the generation process with a DDIM encoding of the input. We introduce the theoretical analysis that motivates this choice, and demonstrate the experiments that this approach conserves more appearance information from the input image, leading to lighter edits. Quantitative and qualitative evaluations on ImageNet, COCO, and images generated by Imagen, show that this approach leads excellent edits, improving over previous approaches. 
 
 ## Reference
+[1] Guillaume Couairon, Jakob Verbeek, Holger Schwenk, and Matthieu Cord. DiffEdit: Diffusion-based semantic image editing with mask guidance. arXiv preprint, arXiv:2210.11427, 2022.
 
+[2] Jiahui Yu, Zhe Lin, Jimei Yang, Xiaohui Shen, Xin Lu, and Thomas S Huang. Generative image inpainting with contextual attention. In CVPR, 2018.
+
+[3] Yongcheng Jing, Yezhou Yang, Zunlei Feng, Jingwen Ye, Yizhou Yu, and Mingli Song. Neural style transfer: A review. Transactions on visualization and computer graphics, 26(11):3365-3385, 2019.
+
+[4] William A. Barrett and Alan S. Cheney. Object-Based Image Editing. https://courses.cs.washington.edu/courses/cse590b/02au/barrett_high_res.pdf, 2022. 
+
+[5] Bowen Li, Xiaojuan Qi, Philip HS Torr, and Thomas Lukasiewicz. Image-to-image translation with text guidance. arXiv preprint, arXiv:2002.05235, 2020b.
+
+[6] Katherine Crowson, Stella Biderman, Daniel Kornis, Dashiell Stander, Eric Hallahan, Louis Castricato, and Edward Raff. VQGAN-CLIP: Open domain image generation and editing with natural language guidance. In ECCV, 2022.
+
+[7] Gwanghyun Kim and Jong Chul Ye. DiffusionCLIP: Text-guided image manipulation using diffusion models. In CVPR, 2021.
+
+[8] Jooyoung Choi, Sungwon Kim, Yonghyun Jeong, Youngjune Gwon, and Sungroh Yoon. ILVR: Conditioning method for denoising diffusion probabilistic models. In ICCV, 2021.
+
+[9] Chenlin Meng, Yutong He, Yang Song, Jiaming Song, Jiajun Wu, Jun-Yan Zhu, and Stefano Ermon. SDEdit: Guided image synthesis and editing with stochastic differential equations. In ICLR, 2021.
+ 
+[10] Jiaming Song, Chenlin Meng, and Stefano Ermon. Denoising diffusion implicit models. In ICLR, 2021.
+
+[11] Jonathan Ho and Tim Salimans. Classifier-Free Diffusion Guidance. arXiv preprint, arXiv:2207.12598, 2022.
+
+[12] Lilian Weng. What are diffusion models?. Lil’Log. https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#speed-up-diffusion-model-sampling, 2021.
+
+ 
 
 <!-- ### Image
 Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
