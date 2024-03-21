@@ -603,19 +603,19 @@ First metric is **AMT perceptual studies**. This method involves "real vs fake" 
 
 ![CycleGAN AMT Metrics]({{ '/assets/images/team13/cycleGAN_AMT.png' | relative_url }})
 {: style="width: 100%; max-width: 100%;"}
-*Fig 12. AMT “real vs fake” test on maps↔aerial photos at 256 × 256 resolution.*.[6]
+*Fig 12. AMT “real vs fake” test on maps↔aerial photos at 256 × 256 resolution.*[6]
 
 Second metric is **FCN Score**. This automatic quantitative measure assesses how interpretable the generated photos are according to an off-the-shelf semantic segmentation algorithm (the fully-convolutional network, FCN). The FCN predicts a label map for a generated photo, which can then be compared against the input ground truth labels using standard semantic segmentation metrics. The intuition is that if a photo generated from a label map of a specific scene (e.g., "car on the road") is successful, the FCN applied to the generated photo should detect the same scene elements. FCN scores table is shown in Figure 13.
 
 ![CycleGAN FCN Score]({{ '/assets/images/team13/cyclegan_fcn.png' | relative_url }})
 {: style="width: 100%; max-width: 100%;"}
-*Fig 13. FCN Score*.[6]
+*Fig 13. CycleGAN FCN Score*[6]
 
 The last metric is **Semantic segmentation metrics**, which uses per-pixel accuracy, per-class accuracy, and mean-IoU to evaluate performance on Cityscapes photo to labels tasks. The performance table is shown in Figure 14.
 
 ![CycleGAN Semantic segmentation metrics]({{ '/assets/images/team13/cyclegan_semantic.png' | relative_url }})
 {: style="width: 100%; max-width: 100%;"}
-*Fig 13. *.[6]
+*Fig 14. CycleGAN Semantic Segmentation Metrics*[6]
 
 From the above table we can see that CycleGAN outperforms all other baseline models on both subjective human judgment and objective machine-based metrics. These results shows that CycleGAN indeed has better performance and ability to generate indistinguishable images from the target images. 
 
@@ -633,7 +633,7 @@ Imagen first takes a textual prompt as the input and encodes it using a pre-trai
 
 The T-5 text encoder (Text-to-Text Transfer Transformer) [10] is a general framework for NLP tasks released by Google in 2019. Unlike other text-to-image generation models like DALL-E 2, Imagen doesn’t use a text encoder explicitly trained on image-caption pairs. It is questionable that whether T-5 text encoder performs better than encoders specialized for text-to-image generation, but the overall performance of Imagen proves that T-5 works well.
 
-![T5 examples]({{ '/assets/images/team13/T5.gif' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 13. T5 examples. [10]
+![T5 examples]({{ '/assets/images/team13/T5.gif' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 15. T5 examples. [10]
 
 One reason that contributes to the effectiveness of T-5 text encoder is its size [9]. Even though not trained on image-caption pairing tasks, the sheer size of extremely large language model still learns useful representation in text-to-text encoding task. One can argue that the size and quality of a model is more important than the specifics of the model itself.
 
@@ -643,7 +643,7 @@ The image generator in Imagen is a diffusion model, similar to other popular tex
 
 To counter this restriction, Imagen chooses the U-net architecture [11]. U-Net is made up of two parts: an encoder and a decoder. The encoder is a series of convolutional and pooling layers that gradually downsample the input image to extract features at multiple scales. The decoder mirrors the encoder but in reverse, focusing on upscaling the feature maps and restoring the spatial dimensions to reconstruct the original image size.
 
-![U-Net Architecture]({{ '/assets/images/team13/unet.png' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 13. U-Net Architecture. [9]
+![U-Net Architecture]({{ '/assets/images/team13/unet.png' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 16. U-Net Architecture. [9]
 
 ## Imagen Performance
 
