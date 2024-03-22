@@ -99,7 +99,7 @@ The second way they combined the two is in the model architecture itself, which 
 *Fig 5. CoAtNet Model Architecture* [4].
 
 ## Experiments and Results
-We compared the performance of our implementation of the CoAtNet with a ResNet and Vision Transformer. Due to limited compute resources and time, we train on only 3 epochs for all models, and we train the models from scratch rather than using pre-trained weights. The models were trained and evaluated on the Imagenette dataset, which has only 10 classes and is a much smaller subset of the ImageNet dataset. For ResNet and ViT, we use Hugging Face to load and train the models. Specifically, we use ResNet-50 and ViT-base. Below is the code for the initialization of those models.
+We compared the performance between a ResNet and Vision Transformer. Due to limited compute resources and time, we train on only 3 epochs for all models, and we train the models from scratch rather than using pre-trained weights. The models were trained and evaluated on the Imagenet dataset, which has only 10 classes and is a much smaller subset of the ImageNet dataset. We use Hugging Face to load and train the models. Specifically, we use ResNet-50 and ViT-base. Below is the code for the initialization of those models.
 
 ```
 configuration = ResNetConfig(
@@ -115,8 +115,10 @@ configuration = ViTConfig(
     id2label=id2label,
     ignore_mismatched_sizes = True)
 model = ViTForImageClassification(configuration).to(device)
-
 ```
+
+Below you can see the results for both. For this dataset, ViT-base performed much better than ResNet-50. Although empirically it has been shown that CNNs often perform better than ViTs on smaller datasets, it’s likely that relatively simple ResNet-50 is too lacking compared to newer state-of-the-art CNNs that apply more advanced mechanisms and have deeper layers. The ResNet achieved an accuracy of 45% on our validation dataset while the ViT achieved an accuracy of 62% after 3 epochs.
+
 ### ResNet results
 ![YOLO]({{ 'assets/images/30/results1new.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
