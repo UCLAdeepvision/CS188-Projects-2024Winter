@@ -14,28 +14,22 @@ date: 2024-03-22
 * TOC
 {:toc}
 
-## Main Content
-
-Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
-
 ## Introduction
 
 Our team is investigating style transfer in the context of image-to-image translation, specifically focusing on translating realistic image to Monet-style painting.
 
-## Background
-
-### Image-to-image translation
+## Image-to-image translation
 
 The goal of image-to-image translation is learning a mapping between input image and the output image. The dataset used for this problem is typically two sets of images we want to learn the mapping between. These datasets come in the form of
 
 1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
 2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
 
-![paired-unpaired-datasets]({{ '/assets/images/team26/paired_unpaired_ds.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 1. Illustration of unpaired vs paired dataset* [1].
+![paired-unpaired-datasets]({{ '/assets/images/team26/paired_unpaired_ds.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 1. Illustration of unpaired vs paired dataset* [4].
 
 Paired datasets are easier to train on, but they maybe hard to collect, especially in style transfer (e.g. there is not a Monet painting for every real image). Thus, we need methods to effectively train on unpaired datasets.
 
-### Cycle-GAN
+## CycleGAN
 
 Generative adversarial network (GAN) are deep learning frameworks that relies on a generator $$G$$ and a discriminator $$D$$. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
@@ -43,12 +37,12 @@ The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
 
-![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [1].
-![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [1].
+![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [4].
+![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [4].
 
 Now, in the actual style transfer process, we can use $$G$$ to translate from style $$X$$ to style $$Y$$, and $$F$$ to translate from style $$Y$$ to style $$X$$.
 
-#### Architecture
+### Architecture
 
 The generators $$G$$ and $$F$$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $$D_X$$ and $$D_Y$$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
 
@@ -102,9 +96,9 @@ model += [nn.Tanh()]
 self.model = nn.Sequential(*model)
 ```
 
-#### Training
+### Training CycleGAN
 
-![training-cycle-GAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [1].
+![training-CycleGAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [4].
 
 To train Gan 1 $$(G, D_Y)$$, where $$G$$ is a mapping from $$X$$ to $$Y$$ and $$D_Y$$ is a discriminator for $$Y$$, we use the following loss function:
 
@@ -134,7 +128,7 @@ $$
 G^*, F^* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)
 $$
 
-### Stable Diffusion
+## Stable Diffusion
 
 Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space.
 
@@ -183,21 +177,21 @@ While the conventional diffusion model achieves satisfying results by generating
 
 Instead of sampling from the pixel space, the Latent Diffusion Model samples from the latent space of a powerful pretrained autoencoder [2]. The autoencoder is universal, and is trained only once in order to apply multiple LDM trainings. The autoencoder is trained by combination of a perceptual loss and a patch-based adversarial objective [2] such that the reconstruction are confined to the image manifold and avoids blurriness if solely relying on pixel space losses. More formally, the 
 
-### Training
+### Training Latent Diffusion Model
 
 [TODO]
 
-### Image Captioning with Transformers
+## Image Captioning with Transformers
 
 To caption an image, we can use a encoder-decoder architecture. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
 
 ## Experimentation: Approaching Realistic Image to Monet-style Painting
 
-We are using two methods to translate realistic images to Monet-style paintings: Cycle-GAN and our own proposed method using Image Captioning and Stable Diffusion.
+We are using two methods to translate realistic images to Monet-style paintings: CycleGAN and our own proposed method using Image Captioning and Stable Diffusion.
 
-### Cycle-GAN
+### Running CycleGAN
 
-We followed the instruction from th github repository of [Cycle-GAN paper](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix?tab=readme-ov-file) and focused on the Monet dataset in particular. We found that the training process was very slow and the results after 100 epochs were not good. We expected this to be due to the difficulty of training GAN models and the complexity of the Monet dataset. Then we downloaded the pretained model fro the authors and tested on test dataset. 
+We followed the instruction from th github repository of [CycleGAN paper](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix?tab=readme-ov-file) and focused on the Monet dataset in particular. We found that the training process was very slow and the results after 100 epochs were not good. We expected this to be due to the difficulty of training GAN models and the complexity of the Monet dataset. Then we downloaded the pretained model fro the authors and tested on test dataset. 
 
 ```bash
 # clone the repository
@@ -215,7 +209,7 @@ bash ./scripts/download_cyclegan_model.sh style_monet
 python test.py --dataroot datasets/monet2photo/testB --name style_monet_pretrained --model test --no_dropout
 ```
 
-### Stable Diffusion
+### Running Stable Diffusion
 
 We used the [CompVis sdv1.4](https://huggingface.co/CompVis/stable-diffusion-v1-4) available on Hugging Face for generation. We used the [nlpconnect/vit-gpt2-image-captioning](https://huggingface.co/nlpconnect/vit-gpt2-image-captioning) available on Hugging Face for image captioning. We first tested on the pretrained model and then fine-tuned on monet dataset.
 
@@ -333,6 +327,7 @@ accelerate launch train_text_to_image.py \
 We fine-tuned for 1000 epochs and 3000 epochs. We indeed saw improvement after fine-tuning, and 1000-step and 3000-step tuning did not show significant difference.
 
 ### FID Score
+
 We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. 
 
 ```bash
@@ -708,6 +703,10 @@ if __name__ == '__main__':
 
 [1] Ho, J., Jain, A. N., & Abbeel, P. (2020). Denoising diffusion probabilistic models. _arXiv (Cornell University)_.
 
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
+[2] Kumar, Ankur. "The Illustrated Image Captioning using transformers." _ankur3107.github.io_. 2022.
+
+[3] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
+
+[4] Yuan, Yuan, et al. "Unsupervised image super-resolution using cycle-in-cycle generative adversarial networks." Proceedings of the IEEE conference on computer vision and pattern recognition workshops. 2018.
 
 ---
