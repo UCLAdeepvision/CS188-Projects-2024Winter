@@ -126,8 +126,16 @@ CNNs have a wide set of benefits over traditional methods and have transformed f
 
 Existing approaches require training multiple models or additional components like segmentation or bounding-box regression. DDFD, on the other hand, proposes a better, more efficient solution, using a single deep convolutional neural network (CNN). The proposed method achieves comparable or better performance to state-of-the-art methods without the need for complex annotations.
 
+#### Architecture
+#### Loss Mechanism
+#### Evaluation Results
+#### Pros and Cons
+
 ### FaceNet <a id="facenet"></a>
-facenet text
+#### Architecture
+#### Loss Mechanism
+#### Evaluation Results
+#### Pros and Cons
 
 ## Final words
 When thinking about facial recognition, it is important to keep in mind that alongside its great promise comes a variety of ethical, privacy, and societal concerns, prompting critical discussions on the ethical deployment and regulation of this powerful technology. As facial recognition continues to evolve and be integrated into different aspects of our lives, understanding its capabilities, limitations, and ethical considerations is crucial for shaping its responsible and equitable use in society.
