@@ -185,7 +185,7 @@ A good latent space of lower dimension preserves the most important data of the 
 
 ## Image Captioning with Transformers
 
-To caption an image, we can use a encoder-decoder architecture. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
+To caption an image, we can use a encoder-decoder architecture [2]. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
 
 ## Experimentation: Approaching Realistic Image to Monet-style Painting
 
