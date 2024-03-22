@@ -1,7 +1,7 @@
 ---
 layout: post
 comments: true
-title: Point Cloud 3D Object Detection for MRI Brain Tumor Segmentation
+title: A Comparison of Point Cloud 3D Object Detection Methods
 author: Elizabeth Moh, Megan Jacob, Selina Huynh, Stephanie Wei
 date: 2024-03-11
 ---
