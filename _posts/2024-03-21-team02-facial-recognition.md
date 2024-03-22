@@ -11,8 +11,11 @@ date: 2024-03-21
 # Table of contents
 
 1. [Introduction](#introduction)
-2. [Classical Challenges](#classicalchallenges)
-   1. [Challenge 1: name](#challenge1)
+2. [Classical Approaches](#classicalapproaches)
+   1. [Approach 1: Cascade Based Methods](#approach1)
+   2. [Approach 2: DPM Methods](#approach2)
+   3. [Approach 3: Neural Network Methods](#approach3)
+   4. [Approach Summary](#approachsummary)
 3. [Deep Learning to Address Challenges](#deeplearningaddresschallenges)
 4. [Solutions](#solutions)
    1. [Deep Dense Face Detector (DDFD)](#ddfd)
@@ -66,6 +69,22 @@ Before we dive into the deep learning solution for facial detection and facial r
 ### Classical Approach 1: Cascade Based Methods<a id="approach1"></a>
 
 The first classical approach uses cascade-based methods which usually either use multiple detectors or combine detectors with other techniques such as integral channel features and soft-cascading to implement facial detection. Soft cascading is a technique that introduces a level of flexibility to regular cascading by allowing a region of interest which is made up of classifiers to be accepted or rejected at each stage based on a weighted combination of the weak classifiers outputs, rather than a strict threshold. In most cases soft-cascading is the preferred method within cascade-based methods due to the computational efficiency gain. The problem with this approach is that it often requires the data to include face orientation annotations. This inherently forces our data to become much larger which ultimately leads to increased complexity in training and testing. Training and testing with this method can become even further complicated when it is required to extend the cascade for multi-view face detection. This increase in complexity cannot be avoided because we must train the model and separate detector cascades for each facial orientation. In conclusion, due to the fact that facial orientation annotations are often a fundamental piece to this approach it drastically limits its practical use in real world applications. These orientation annotations are usually not available when using test data.
+
+### Classical Approach 2: DPM Methods<a id="approach2"></a>
+
+In the area of facial detection, classical approaches such as DPM (deformable part models) have been foundational in detecting facial structures. DPM, an established method, characterizes faces as an assembly of constituent parts, and works to train classifiers capable of discerning the fine relationships among these deformable components. However, while DPM holds promise, its efficiency is often under question by the limitations of individual deformable part models. To fully utilize the capabilities of DPM, practitioners frequently resort to concatenating multiple layers of this approach. As a result, this strategy inherently produces a significant surge in the computational complexity of the overarching model, rendering it unreasonably inefficient. Ultimately, while classical methods like DPM have contributed to our understanding of facial detection, their reliance on intricate part-based modeling and the associated computational overhead underscores the necessity for more streamlined and efficient techniques in contemporary facial detection systems.
+
+### Classical Approach 3: Neural Network Methods<a id="approach3"></a>
+
+The third and final classical approach to facial detection, the neural network approach, leverages convolutional neural networks (CNNs), which represents a significant stride forward in achieving more concrete results. CNNs have demonstrated significant increases in accuracy, particularly regarding scenarios involving varied facial orientations and partial obstructions of facial features. However, despite its advancements, this methodology is not without its limitations. One of the primary shortcomings lies in the generality of the model; while it excels in many cases, it often falls short in delivering highly precise facial detection outcomes. This is mainly due to the fact that these neural networks are not specifically trained or fine-tuned to handle specific facial detection details. Additionally, a notable concern pertains to the tendency of these models to overfit the training data, thereby compromising their ability to generalize well to unseen instances. To address these deficiencies, there is a definite need for the development of more tailored methods that can provide a better analyses of detection scores. By enhancing model training, it may be possible to mitigate the limitations of current neural network-based facial detection systems and create a solution that is both practical and provides accurate results.
+
+### Approach Summary <a id="approachsummary"></a>
+
+Based on these classical approaches, it is evident that the common problem amongst the three are computational complexity and the failure to bypass facial obstruction or positioning. There needs to be a solution that addresses these concerns, and that solution is to use Deep Learning.
+
+![Obstruction_Position]({{ 'assets/images/2/DDFD/FacialPositions.png' | relative_url }})
+Example of different facial positions and obstructions.
+{: style="width: 400px; max-width: 100%; margin: auto;"}
 
 ## Deep Learning to Address Challenges <a id="deeplearningaddresschallenges"></a>
 
