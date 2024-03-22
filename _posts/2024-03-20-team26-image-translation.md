@@ -21,7 +21,7 @@ Your survey starts here. You can refer to the [source code](https://github.com/l
 
 ## Introduction
 
-Our team is investigating style transfer in the context of image-to-image translation.
+Our team is investigating style transfer in the context of image-to-image translation, specifically focusing on translating realistic image to Monet-style painting.
 
 ## Background
 
@@ -32,9 +32,9 @@ The goal of image-to-image translation is learning a mapping between input image
 1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
 2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
 
-Paired datasets are easier to train on, but they maybe hard to collect (e.g. there is not a Monet painitng for every real image). Thus, we need methods to effectively train on unpaired datasets.
+Paired datasets are easier to train on, but they maybe hard to collect, especially in style transfer (e.g. there is not a Monet painting for every real image). Thus, we need methods to effectively train on unpaired datasets.
 
-## Cycle-GAN
+### Cycle-GAN
 
 Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
@@ -44,10 +44,9 @@ To preserve cycle consistency, we want to make sure when our network translates 
 
 Now, in the actual style transfer process, we can use $G$ to translate from style $X$ to style $Y$, and $F$ to translate from style $Y$ to style $X$.
 
-### Architecture
+#### Architecture
 
-The generators $G$ and $F$ can be any architecture that can map an image from one domain to another. The implmentation provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $D_X$ and $D_Y$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
-
+The generators $G$ and $F$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $D_X$ and $D_Y$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
 
 Detailed implementation of Resnet-based generator:
 
@@ -101,7 +100,7 @@ model += [nn.Tanh()]
 self.model = nn.Sequential(*model)
 ```
 
-### Training
+#### Training
 
 To train Gan 1 $(G, D_Y)$, where $G$ is a mapping from $X$ to $Y$ and $D_Y$ is a discriminator for $Y$, we use the following loss function:
 
@@ -131,7 +130,7 @@ $$
 G^*, F^* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)
 $$
 
-## Stable Diffusion
+### Stable Diffusion
 
 Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space. 
 
@@ -142,13 +141,16 @@ We can reduce the dimensionality with minimal loss of information! This makes tr
 
 [TODO]
 
-## Image Captioning with Transformers
+### Image Captioning with Transformers
 
 To caption an image, we can use a encoder-decoder architecture. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
 
-## Demo
+## Experimentation: Approaching Realistic Image to Monet-style Painting
+
+We are using two methods to translate realistic images to Monet-style paintings: Cycle-GAN and our own proposed method using Image Captioning and Stable Diffusion.
 
 ### Cycle-GAN
+
 We followed the instruction from th github repository of [Cycle-GAN paper](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix?tab=readme-ov-file) and focused on the Monet dataset in particular. We found that the training process was very slow and the results after 100 epochs were not good. We expected this to be due to the difficulty of training GAN models and the complexity of the Monet dataset. Then we downloaded the pretained model fro the authors and tested on test dataset. 
 
 ```bash
@@ -167,8 +169,8 @@ bash ./scripts/download_cyclegan_model.sh style_monet
 python test.py --dataroot datasets/monet2photo/testB --name style_monet_pretrained --model test --no_dropout
 ```
 
-
 ### Stable Diffusion
+
 We used the [CompVis sdv1.4](https://huggingface.co/CompVis/stable-diffusion-v1-4) available on Hugging Face for generation. We used the [nlpconnect/vit-gpt2-image-captioning](https://huggingface.co/nlpconnect/vit-gpt2-image-captioning) available on Hugging Face for image captioning. We first tested on the pretrained model and then fine-tuned on monet dataset.
 
 To translate the image, we first generated the captions of the input using image (photo) captioning model, then we modified the captions to conditioned on Monet style. We then used the stable diffusion model to generate the image (painting) from the modified captions.
