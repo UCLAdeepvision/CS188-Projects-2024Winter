@@ -31,15 +31,20 @@ The goal of image-to-image translation is learning a mapping between input image
 1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
 2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
 
+![paired-unpaired-datasets]({{ '/assets/images/team26/paired_unpaired_ds.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 1. Illustration of unpaired vs paired dataset* [1].
+
 Paired datasets are easier to train on, but they maybe hard to collect, especially in style transfer (e.g. there is not a Monet painting for every real image). Thus, we need methods to effectively train on unpaired datasets.
 
 ### Cycle-GAN
 
 Generative adversarial network (GAN) are deep learning frameworks that relies on a generator $$G$$ and a discriminator $$D$$. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
-The goal of our Cycle GAN is to learn a mapping between two image styles $$X$$ and $$Y$$. So if we have preserve cycle consistency, the idea is that our tralated image will preserve most of its semanics besides the style change.
+The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the ideaaaa is that our tralated image will preserve most of its semanics besides the style change.
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
+
+![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [1].
+![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [1].
 
 Now, in the actual style transfer process, we can use $$G$$ to translate from style $$X$$ to style $$Y$$, and $$F$$ to translate from style $$Y$$ to style $$X$$.
 
@@ -60,8 +65,6 @@ Parameters:
     n_blocks (int)      -- the number of ResNet blocks
     padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
 """
-assert(n_blocks >= 0)
-super(ResnetGenerator, self).__init__()
 if type(norm_layer) == functools.partial:
     use_bias = norm_layer.func == nn.InstanceNorm2d
 else:
@@ -100,6 +103,8 @@ self.model = nn.Sequential(*model)
 ```
 
 #### Training
+
+![training-cycle-GAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [1].
 
 To train Gan 1 $$(G, D_Y)$$, where $$G$$ is a mapping from $$X$$ to $$Y$$ and $$D_Y$$ is a discriminator for $$Y$$, we use the following loss function:
 
@@ -717,6 +722,6 @@ In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only t
 
 [1] Ho, J., Jain, A. N., & Abbeel, P. (2020). Denoising diffusion probabilistic models. _arXiv (Cornell University)_.
 
-[2] Rombach, R., Blattmann, A., Lorenz, D., Esser, P., & Ommer, B. (2022). High-Resolution Image Synthesis with Latent Diffusion Models. _2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)_.
+[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
 
 ---
