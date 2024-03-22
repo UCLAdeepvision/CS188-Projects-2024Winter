@@ -412,7 +412,7 @@ CycleGAN utilizes established model architectures for the generators and discrim
 *Fig 10. CycleGAN Generator Architecture*.[7]
 
 ### Implementation
-Here, we present some high level implementations of CycleGAN. Code snippets are from a Kaggle notebook. Full notebook can be found [here](https://www.kaggle.com/code/dimitreoliveira/introduction-to-cyclegan-monet-paintings)
+Here, we present some high level implementations of CycleGAN. Code snippets are from a Kaggle notebook. Full notebook can be found [here](https://www.kaggle.com/code/dimitreoliveira/introduction-to-cyclegan-monet-paintings).
 
 Given two generators `monet_generator` and `photo_generator` and two discriminators `monet_discriminator` and `photo_discriminator` we can build a CycleGAN model as follows:
 
@@ -618,28 +618,34 @@ From the above table we can see that CycleGAN outperforms all other baseline mod
 ## Text-to-image Generation with Imagen
 
 In this section, we will discuss text-to-image generation with Imagen [8], one of the latest and best performing text-to-image models released by Google in December 2023. To enhance our understanding of such sophisticated models, we also explore simplified versions like MinImagen, which isolates Imagen's salient features for educational purposes. This approach demystifies the complex technology, making it more accessible and providing a hands-on learning experience.
-
 ### Imagen Architecture
 
 Imagen first takes a textual prompt as the input and encodes it using a pre-trained T5 text encoder, which encapsulates the semantic information within the text. Imagen then feeds the encoding to the image generator, a diffusion model that starts with Gaussian noise and gradually denoise the image to generate a 64x64 small image as described by the textual prompt. Finally, the small image is upscaled by two super-resolution models (a type of diffusion model), generating a high-resolution 1024x1024 image as the output.
 
-![Imagen Architecture]({{ '/assets/images/team13/imagen_architecture.png' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 12. Imagen Architecture. [9]
+![Imagen Architecture]({{ '/assets/images/team13/imagen_architecture.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 15. Imagen Architecture*.[6]
 
-### T-5 text encoder
+**T-5 text encoder**
 
 The T-5 text encoder (Text-to-Text Transfer Transformer) [10] is a general framework for NLP tasks released by Google in 2019. Unlike other text-to-image generation models like DALL-E 2, Imagen doesn’t use a text encoder explicitly trained on image-caption pairs. It is questionable that whether T-5 text encoder performs better than encoders specialized for text-to-image generation, but the overall performance of Imagen proves that T-5 works well.
 
-![T5 examples]({{ '/assets/images/team13/T5.gif' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 15. T5 examples. [10]
+![T5 examples]({{ '/assets/images/team13/T5.gif' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 16. T5 examples*.[6]
 
 One reason that contributes to the effectiveness of T-5 text encoder is its size [9]. Even though not trained on image-caption pairing tasks, the sheer size of extremely large language model still learns useful representation in text-to-text encoding task. One can argue that the size and quality of a model is more important than the specifics of the model itself.
 
-### U-Net architecture
+**U-Net architecture**
 
 The image generator in Imagen is a diffusion model, similar to other popular text-to-image models. One distinct feature of Imagen is to generate a low-resolution image in the middle of the entire workflow. However, diffusion model poses a restriction that its input and output must share the same dimensionalities and the image size must remain the same during the diffusion process.
 
 To counter this restriction, Imagen chooses the U-net architecture [11]. U-Net is made up of two parts: an encoder and a decoder. The encoder is a series of convolutional and pooling layers that gradually downsample the input image to extract features at multiple scales. The decoder mirrors the encoder but in reverse, focusing on upscaling the feature maps and restoring the spatial dimensions to reconstruct the original image size.
 
-![U-Net Architecture]({{ '/assets/images/team13/unet.png' | relative_url }}) {: style="width: 100%; max-width: 100%;"} Fig 16. U-Net Architecture. [9]
+![U-Net Architecture]({{ '/assets/images/team13/unet.png' | relative_url }})
+{: style="width: 100%; max-width: 100%;"}
+*Fig 16. U-Net Architecture*.[9]
+
 
 ## Implementation of MinImagen in PyTorch
 
