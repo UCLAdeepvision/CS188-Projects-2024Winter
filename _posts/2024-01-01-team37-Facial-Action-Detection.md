@@ -102,7 +102,11 @@ $$
 
 where:
 - $$y_{2j-1}$$ and $$y_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
-- $$\hat{y}_{2j-1}$$ and $$\hat{y}_{2j}$$ are the corresponding predicted results.
+- $$
+\hat{y}_{2j-1}
+$$ and $$
+\hat{y}_{2j}
+$$ are the corresponding predicted results.
 - $$d_0$$ is the ground-truth inter-ocular distance for normalization.
 
 #### Global Feature Learning
@@ -117,7 +121,7 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
 
 $$
-E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
+E_r = -\sum_{i=1}^{n_{\mathrm{au}}} \sum_{k=1}^{n_{\mathrm{am}}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
 $$
 
 where:
