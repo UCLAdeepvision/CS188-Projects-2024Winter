@@ -417,177 +417,172 @@ Here, we present some high level implementations of CycleGAN. Code snippets are 
 Given two generators `monet_generator` and `photo_generator` and two discriminators `monet_discriminator` and `photo_discriminator` we can build a CycleGAN model as follows:
 
 ```
-class CycleGan(Model):
-    def __init__(
-        self,
-        monet_generator,
-        photo_generator,
-        monet_discriminator,
-        photo_discriminator,
-        lambda_cycle=10,
-    ):
-        super(CycleGan, self).__init__()
-        self.m_gen = monet_generator
-        self.p_gen = photo_generator
-        self.m_disc = monet_discriminator
-        self.p_disc = photo_discriminator
-        self.lambda_cycle = lambda_cycle
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+import torch.nn.functional as F
 
-    def compile(
-        self,
-        m_gen_optimizer,
-        p_gen_optimizer,
-        m_disc_optimizer,
-        p_disc_optimizer,
-        gen_loss_fn,
-        disc_loss_fn,
-        cycle_loss_fn,
-        identity_loss_fn
-    ):
-        super(CycleGan, self).compile()
-        self.m_gen_optimizer = m_gen_optimizer
-        self.p_gen_optimizer = p_gen_optimizer
-        self.m_disc_optimizer = m_disc_optimizer
-        self.p_disc_optimizer = p_disc_optimizer
-        self.gen_loss_fn = gen_loss_fn
-        self.disc_loss_fn = disc_loss_fn
-        self.cycle_loss_fn = cycle_loss_fn
-        self.identity_loss_fn = identity_loss_fn
+class ResidualBlock(nn.Module):
+    def __init__(self, in_features):
+        super(ResidualBlock, self).__init__()
+        self.block = nn.Sequential(
+            nn.Conv2d(in_features, in_features, kernel_size=3, stride=1, padding=1),
+            nn.InstanceNorm2d(in_features),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_features, in_features, kernel_size=3, stride=1, padding=1),
+            nn.InstanceNorm2d(in_features)
+        )
 
-    def train_step(self, batch_data):
-        real_monet, real_photo = batch_data
+    def forward(self, x):
+        return x + self.block(x)
 
-        with tf.GradientTape(persistent=True) as tape:
-            # photo to monet back to photo
-            fake_monet = self.m_gen(real_photo, training=True)
-            cycled_photo = self.p_gen(fake_monet, training=True)
+class Generator(nn.Module):
+    def __init__(self, input_channels, num_residual_blocks=9):
+        super(Generator, self).__init__()
+        # Initial convolution block
+        model = [nn.Conv2d(input_channels, 64, kernel_size=7, stride=1, padding=3),
+                 nn.InstanceNorm2d(64),
+                 nn.ReLU(inplace=True)]
+        # Downsampling
+        in_features = 64
+        out_features = in_features*2
+        for _ in range(2):
+            model += [nn.Conv2d(in_features, out_features, kernel_size=3, stride=2, padding=1),
+                      nn.InstanceNorm2d(out_features),
+                      nn.ReLU(inplace=True)]
+            in_features = out_features
+            out_features = in_features*2
+        # Residual blocks
+        for _ in range(num_residual_blocks):
+            model += [ResidualBlock(in_features)]
+        # Upsampling
+        out_features = in_features//2
+        for _ in range(2):
+            model += [nn.ConvTranspose2d(in_features, out_features, kernel_size=3, stride=2, padding=1, output_padding=1),
+                      nn.InstanceNorm2d(out_features),
+                      nn.ReLU(inplace=True)]
+            in_features = out_features
+            out_features = in_features//2
+        # Output layer
+        model += [nn.Conv2d(64, input_channels, kernel_size=7, stride=1, padding=3),
+                  nn.Tanh()]
+        self.model = nn.Sequential(*model)
 
-            # monet to photo back to monet
-            fake_photo = self.p_gen(real_monet, training=True)
-            cycled_monet = self.m_gen(fake_photo, training=True)
+    def forward(self, x):
+        return self.model(x)
 
-            # generating itself
-            same_monet = self.m_gen(real_monet, training=True)
-            same_photo = self.p_gen(real_photo, training=True)
+class Discriminator(nn.Module):
+    def __init__(self, input_channels):
+        super(Discriminator, self).__init__()
+        self.model = nn.Sequential(
+            nn.Conv2d(input_channels, 64, kernel_size=4, stride=2, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(256, 512, kernel_size=4, padding=1),
+            nn.InstanceNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(512, 1, kernel_size=4, padding=1)
+        )
 
-            # discriminator used to check, inputing real images
-            disc_real_monet = self.m_disc(real_monet, training=True)
-            disc_real_photo = self.p_disc(real_photo, training=True)
-
-            # discriminator used to check, inputing fake images
-            disc_fake_monet = self.m_disc(fake_monet, training=True)
-            disc_fake_photo = self.p_disc(fake_photo, training=True)
-
-            # evaluates generator loss
-            monet_gen_loss = self.gen_loss_fn(disc_fake_monet)
-            photo_gen_loss = self.gen_loss_fn(disc_fake_photo)
-
-            # evaluates total cycle consistency loss
-            total_cycle_loss = self.cycle_loss_fn(real_monet, cycled_monet, self.lambda_cycle) + self.cycle_loss_fn(real_photo, cycled_photo, self.lambda_cycle)
-
-            # evaluates total generator loss
-            total_monet_gen_loss = monet_gen_loss + total_cycle_loss + self.identity_loss_fn(real_monet, same_monet, self.lambda_cycle)
-            total_photo_gen_loss = photo_gen_loss + total_cycle_loss + self.identity_loss_fn(real_photo, same_photo, self.lambda_cycle)
-
-            # evaluates discriminator loss
-            monet_disc_loss = self.disc_loss_fn(disc_real_monet, disc_fake_monet)
-            photo_disc_loss = self.disc_loss_fn(disc_real_photo, disc_fake_photo)
-
-        # Calculate the gradients for generator and discriminator
-        monet_generator_gradients = tape.gradient(total_monet_gen_loss,
-                                                  self.m_gen.trainable_variables)
-        photo_generator_gradients = tape.gradient(total_photo_gen_loss,
-                                                  self.p_gen.trainable_variables)
-
-        monet_discriminator_gradients = tape.gradient(monet_disc_loss,
-                                                      self.m_disc.trainable_variables)
-        photo_discriminator_gradients = tape.gradient(photo_disc_loss,
-                                                      self.p_disc.trainable_variables)
-
-        # Apply the gradients to the optimizer
-        self.m_gen_optimizer.apply_gradients(zip(monet_generator_gradients,
-                                                 self.m_gen.trainable_variables))
-
-        self.p_gen_optimizer.apply_gradients(zip(photo_generator_gradients,
-                                                 self.p_gen.trainable_variables))
-
-        self.m_disc_optimizer.apply_gradients(zip(monet_discriminator_gradients,
-                                                  self.m_disc.trainable_variables))
-
-        self.p_disc_optimizer.apply_gradients(zip(photo_discriminator_gradients,
-                                                  self.p_disc.trainable_variables))
-
-        return {
-            'monet_gen_loss': total_monet_gen_loss,
-            'photo_gen_loss': total_photo_gen_loss,
-            'monet_disc_loss': monet_disc_loss,
-            'photo_disc_loss': photo_disc_loss
-        }
-```
-
-The loss functions can be implemented as:
+    def forward(self, x):
+        return self.model(x)
 
 ```
-with strategy.scope():
-    # Discriminator loss {0: fake, 1: real} (The discriminator loss outputs the average of the real and generated loss)
-    def discriminator_loss(real, generated):
-        real_loss = losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.ones_like(real), real)
 
-        generated_loss = losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.zeros_like(generated), generated)
+The loss functions and CycleGAN Model can be implemented as:
 
-        total_disc_loss = real_loss + generated_loss
+```
+class IdentityLoss(nn.Module):
+    def __init__(self, lambda_identity=0.5):
+        super(IdentityLoss, self).__init__()
+        self.lambda_identity = lambda_identity
+        self.loss = nn.L1Loss()
 
-        return total_disc_loss * 0.5
+    def forward(self, real, same):
+        return self.lambda_identity * self.loss(real, same)
 
-    # Generator loss
-    def generator_loss(generated):
-        return losses.BinaryCrossentropy(from_logits=True, reduction=losses.Reduction.NONE)(tf.ones_like(generated), generated)
+class CycleGAN(nn.Module):
+    def __init__(self, generator_X_to_Y, generator_Y_to_X, discriminator_X, discriminator_Y, device):
+        super(CycleGAN, self).__init__()
+        self.generator_X_to_Y = generator_X_to_Y
+        self.generator_Y_to_X = generator_Y_to_X
+        self.discriminator_X = discriminator_X
+        self.discriminator_Y = discriminator_Y
+        self.device = device
 
+        self.adversarial_loss = AdversarialLoss().to(device)
+        self.cycle_consistency_loss = CycleConsistencyLoss(lambda_cycle=10).to(device)
+        self.identity_loss = IdentityLoss(lambda_identity=5).to(device)
 
-    # Cycle consistency loss (measures if original photo and the twice transformed photo to be similar to one another)
-    with strategy.scope():
-        def calc_cycle_loss(real_image, cycled_image, LAMBDA):
-            loss1 = tf.reduce_mean(tf.abs(real_image - cycled_image))
-
-            return LAMBDA * loss1
-
-    # Identity loss (compares the image with its generator (i.e. photo with photo generator))
-    with strategy.scope():
-        def identity_loss(real_image, same_image, LAMBDA):
-            loss = tf.reduce_mean(tf.abs(real_image - same_image))
-            return LAMBDA * 0.5 * loss
 ```
 
 The train loop can be implemented as following with necessary environment variables:
 
 ```
-with strategy.scope():
-    # Create generators
-    monet_generator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
-    photo_generator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+def train_cycle_gan(dataloader_X, dataloader_Y, cycleGAN, num_epochs=200):
+    optim_G = torch.optim.Adam(
+        list(cycleGAN.generator_X_to_Y.parameters()) + list(cycleGAN.generator_Y_to_X.parameters()), 
+        lr=0.0002, betas=(0.5, 0.999))
+    optim_D_X = torch.optim.Adam(cycleGAN.discriminator_X.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    optim_D_Y = torch.optim.Adam(cycleGAN.discriminator_Y.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
-    # Create discriminators
-    monet_discriminator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
-    photo_discriminator_optimizer = optimizers.Adam(2e-4, beta_1=0.5)
+    for epoch in range(num_epochs):
+        for batch_X, batch_Y in zip(dataloader_X, dataloader_Y):
+            real_X = batch_X.to(cycleGAN.device)
+            real_Y = batch_Y.to(cycleGAN.device)
 
-    # Create GAN
-    gan_model = CycleGan(monet_generator, photo_generator,
-                         monet_discriminator, photo_discriminator)
+            # Generators X->Y and Y->X
+            fake_Y = cycleGAN.generator_X_to_Y(real_X)
+            fake_X = cycleGAN.generator_Y_to_X(real_Y)
 
-    gan_model.compile(m_gen_optimizer=monet_generator_optimizer,
-                      p_gen_optimizer=photo_generator_optimizer,
-                      m_disc_optimizer=monet_discriminator_optimizer,
-                      p_disc_optimizer=photo_discriminator_optimizer,
-                      gen_loss_fn=generator_loss,
-                      disc_loss_fn=discriminator_loss,
-                      cycle_loss_fn=calc_cycle_loss,
-                      identity_loss_fn=identity_loss)
+            # Generators' losses
+            loss_G_X_to_Y = cycleGAN.adversarial_loss(cycleGAN.discriminator_Y(fake_Y), True)
+            loss_G_Y_to_X = cycleGAN.adversarial_loss(cycleGAN.discriminator_X(fake_X), True)
 
+            # Cycle consistency losses
+            cycle_X = cycleGAN.generator_Y_to_X(fake_Y)
+            cycle_Y = cycleGAN.generator_X_to_Y(fake_X)
+            loss_cycle_X = cycleGAN.cycle_consistency_loss(real_X, cycle_X)
+            loss_cycle_Y = cycleGAN.cycle_consistency_loss(real_Y, cycle_Y)
 
-history = gan_model.fit(get_gan_dataset(MONET_FILENAMES, PHOTO_FILENAMES, batch_size=BATCH_SIZE),
-                        steps_per_epoch=(n_monet_samples//BATCH_SIZE),
-                        epochs=EPOCHS,
-                        verbose=2).history
+            # Identity losses
+            identity_X = cycleGAN.generator_Y_to_X(real_X)
+            identity_Y = cycleGAN.generator_X_to_Y(real_Y)
+            loss_identity_X = cycleGAN.identity_loss(real_X, identity_X)
+            loss_identity_Y = cycleGAN.identity_loss(real_Y, identity_Y)
+
+            # Total generators' losses
+            loss_G = loss_G_X_to_Y + loss_G_Y_to_X + loss_cycle_X + loss_cycle_Y + loss_identity_X + loss_identity_Y
+            optim_G.zero_grad()
+            loss_G.backward()
+            optim_G.step()
+
+            # Discriminators' losses
+            real_X_loss = cycleGAN.adversarial_loss(cycleGAN.discriminator_X(real_X), True)
+            fake_X_loss = cycleGAN.adversarial_loss(cycleGAN.discriminator_X(fake_X.detach()), False)
+            loss_D_X = (real_X_loss + fake_X_loss) / 2
+
+            real_Y_loss = cycleGAN.adversarial_loss(cycleGAN.discriminator_Y(real_Y), True)
+            fake_Y_loss = cycleGAN.adversarial_loss(cycleGAN.discriminator_Y(fake_Y.detach()), False)
+            loss_D_Y = (real_Y_loss + fake_Y_loss) / 2
+
+            # Update discriminators
+            optim_D_X.zero_grad()
+            loss_D_X.backward()
+            optim_D_X.step()
+
+            optim_D_Y.zero_grad()
+            loss_D_Y.backward()
+            optim_D_Y.step()
+
+            if batch_X == dataloader_X.dataset[-1]:
+                print(f"Epoch {epoch+1}/{num_epochs}, Loss G: {loss_G.item()}, Loss D_X: {loss_D_X.item()}, Loss D_Y: {loss_D_Y.item()}")
 ```
 
 ![CycleGAN Example Outputs]({{ '/assets/images/team13/cyclegan_example.png' | relative_url }})
@@ -621,11 +616,11 @@ From the above table we can see that CycleGAN outperforms all other baseline mod
 
 
 ## Text-to-image Generation with Imagen
-In this section, we will discuss text-to-image generation with Imagen [8], one of the latest and best performing text-to-image models released by Google in December 2023.
 
+In this section, we will discuss text-to-image generation with Imagen [8], one of the latest and best performing text-to-image models released by Google in December 2023. To enhance our understanding of such sophisticated models, we also explore simplified versions like MinImagen, which isolates Imagen's salient features for educational purposes. This approach demystifies the complex technology, making it more accessible and providing a hands-on learning experience.
 ### Imagen Architecture
 
-Imagen first takes a textual prompt as the input and encodes it using a pre-trained T5 text encoder, which encapsulates the semantic information within the text. Imagen then feeds the encoding to the image generator, a diffusion model that starts with Gaussian noise and gradually denoise the image to generate a 64x64 small image as described by the textual prompt. Finally, the small image is upscaled by two super resolution models (a type of diffusion model), generating a high-resolution 1024x1024 image as the output.
+Imagen first takes a textual prompt as the input and encodes it using a pre-trained T5 text encoder, which encapsulates the semantic information within the text. Imagen then feeds the encoding to the image generator, a diffusion model that starts with Gaussian noise and gradually denoise the image to generate a 64x64 small image as described by the textual prompt. Finally, the small image is upscaled by two super-resolution models (a type of diffusion model), generating a high-resolution 1024x1024 image as the output.
 
 ![Imagen Architecture]({{ '/assets/images/team13/imagen_architecture.png' | relative_url }})
 {: style="width: 100%; max-width: 100%;"}
@@ -651,19 +646,365 @@ To counter this restriction, Imagen chooses the U-net architecture [11]. U-Net i
 {: style="width: 100%; max-width: 100%;"}
 *Fig 16. U-Net Architecture*.[9]
 
-### Imagen Performance
 
-**Quantitative performance**
+## Implementation of MinImagen in PyTorch
+
+In this section, we detail the practical implementation of MinImagen, a simplified version of the Imagen model, using PyTorch. This implementation aims to provide a hands-on approach to understanding and working with text-to-image models by isolating Imagen's core features.This approach demystifies the complex technology behind Imagen, making it more accessible and offering a practical, hands-on learning experience. The idea of simplifying such models for educational purposes aligns with efforts to make advanced AI techniques more approachable to a wider audience, as discussed in the MinImagen guide by O’Connor [12].
+
+### Step 1: GaussianDiffusion Class
+The GaussianDiffusion class orchestrates the diffusion process, crucial for transitioning from noise to images in the generation process. This class handles the gradual addition and removal of noise over a predefined number of steps, utilizing a set variance schedule.
+```bash
+import torch
+import torch.nn as nn
+
+
+class GaussianDiffusion(nn.Module):
+    def __init__(self, beta_start=0.0001, beta_end=0.02, timesteps=1000):
+        super(GaussianDiffusion, self).__init__()
+        self.beta_start = beta_start
+        self.beta_end = beta_end
+        self.timesteps = timesteps
+
+        betas = torch.linspace(beta_start, beta_end, timesteps)
+        alphas = 1.0 - betas
+        alphas_cumprod = torch.cumprod(alphas, dim=0)
+
+        self.register_buffer('betas', betas)
+        self.register_buffer('alphas', alphas)
+        self.register_buffer('alphas_cumprod', alphas_cumprod)
+        self.register_buffer('sqrt_alphas_cumprod', torch.sqrt(alphas_cumprod))
+        self.register_buffer('sqrt_one_minus_alphas_cumprod', torch.sqrt(1.0 - alphas_cumprod))
+
+    def q_sample(self, x_start, t, noise=None):
+        """
+        Sample x_t from x_0 using the variance schedule.
+        """
+        if noise is None:
+            noise = torch.randn_like(x_start)
+
+        # Compute the noisy sample x_t at time t
+        factor = self.sqrt_alphas_cumprod[t]
+        x_t = x_start * factor + noise * torch.sqrt(1.0 - factor * factor)
+        return x_t
+
+    def q_posterior_mean_variance(self, x_start, x_t, t):
+        """
+        Compute the mean and variance of the reverse process posterior q(x_{t-1} | x_t, x_0).
+        """
+        posterior_mean = (
+            self.sqrt_alphas_cumprod[t] * x_start +
+            (1 - self.sqrt_alphas_cumprod[t]) * x_t
+        )
+        posterior_variance = 1 - self.sqrt_alphas_cumprod[t]
+        return posterior_mean, posterior_variance
+
+```
+### Step 2: Denoising U-Net
+The Denoising U-Net plays a crucial role in predicting the noise at each diffusion step, facilitating the transition from noisy images back to clean images. This expanded example includes the encoder, bottleneck, and decoder sections with skip connections.
+```bash
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class ConvBlock(nn.Module):
+    """A Convolutional Block consisting of Conv2D, Activation, and optional BatchNorm."""
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, use_bn=True):
+        super(ConvBlock, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        self.activation = nn.ReLU(inplace=True)
+        self.use_bn = use_bn
+        if use_bn:
+            self.bn = nn.BatchNorm2d(out_channels)
+    
+    def forward(self, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        x = self.activation(x)
+        return x
+
+class EncoderBlock(nn.Module):
+    """Encoder block that reduces spatial dimensions by half and increases feature maps."""
+    def __init__(self, in_channels, out_channels):
+        super(EncoderBlock, self).__init__()
+        self.conv_block = ConvBlock(in_channels, out_channels)
+        self.downsample = nn.MaxPool2d(2)
+
+    def forward(self, x):
+        x = self.conv_block(x)
+        x_downsampled = self.downsample(x)
+        return x, x_downsampled
+
+class DecoderBlock(nn.Module):
+    """Decoder block that doubles spatial dimensions and reduces feature maps."""
+    def __init__(self, in_channels, out_channels):
+        super(DecoderBlock, self).__init__()
+        self.upsample = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
+        self.conv_block = ConvBlock(in_channels, out_channels)
+
+    def forward(self, x, skip_connection):
+        x = self.upsample(x)
+        x = torch.cat((x, skip_connection), dim=1)
+        x = self.conv_block(x)
+        return x
+
+class Unet(nn.Module):
+    """Denoising U-Net model for predicting noise at each diffusion step."""
+    def __init__(self, in_channels=3, features=[64, 128, 256, 512]):
+        super(Unet, self).__init__()
+        self.encoders = nn.ModuleList()
+        self.decoders = nn.ModuleList()
+
+        # Encoder pathway
+        for feature in features:
+            self.encoders.append(EncoderBlock(in_channels, feature))
+            in_channels = feature
+
+        # Decoder pathway
+        for feature in reversed(features):
+            self.decoders.append(DecoderBlock(feature*2, feature))
+        
+        # Bottleneck
+        self.bottleneck = ConvBlock(features[-1], features[-1]*2)
+        
+        # Final layer to map to 3 output channels
+        self.final_layer = nn.Conv2d(features[0], 3, kernel_size=1)
+
+    def forward(self, x):
+        skip_connections = []
+
+        for encoder in self.encoders:
+            x, x_down = encoder(x)
+            skip_connections.append(x)
+            x = x_down
+        
+        x = self.bottleneck(x)
+
+        skip_connections = skip_connections[::-1]
+
+        for idx, decoder in enumerate(self.decoders):
+            x = decoder(x, skip_connections[idx])
+
+        x = self.final_layer(x)
+        return x
+
+```
+### Step 3: Integrating T5 Text Encoder
+The T5 text encoder converts textual prompts into embeddings, guiding the image generation process. We utilize the transformers library to load a pre-trained T5 model.
+
+```bash
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import torch.nn as nn
+
+class TextEncoder(nn.Module):
+    """
+    This class utilizes the pre-trained T5 model from the Hugging Face transformers library
+    to encode textual prompts into embeddings.
+    """
+    def __init__(self, model_name='t5-small'):
+        """
+        Initializes the TextEncoder with a specified T5 model.
+        
+        Parameters:
+            model_name (str): Identifier for the Hugging Face model to be used.
+        """
+        super(TextEncoder, self).__init__()
+        self.tokenizer = T5Tokenizer.from_pretrained(model_name)
+        self.model = T5ForConditionalGeneration.from_pretrained(model_name)
+
+    def encode(self, text):
+        inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}  # Move inputs to the same device as model
+        with torch.no_grad():
+            outputs = self.model.encoder(**inputs)
+        return outputs.last_hidden_state  
+
+```
+### Step 4: Training MinImagen
+Training involves optimizing the model parameters to reduce the difference between the generated images and the target images. This process requires a dataset of text-image pairs.
+```bash
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, Dataset
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize
+from torchvision.io import read_image
+from pathlib import Path        
+import pandas as pd
+import os
+import torch.optim as optim
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from PIL import Image
+import numpy as np
+
+class MyDataset(Dataset):
+    def __init__(self, root_dir, captions_file, transform=None):
+        """
+        root_dir (string): Directory with all the images.
+        captions_file (string): Path to the text file with captions.
+        transform (callable, optional): Optional transform to be applied on a sample.
+        """
+        self.root_dir = root_dir
+        self.transform = Compose([
+            Resize((256, 256)),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        self.captions_data = pd.read_csv(captions_file)
+        self.images = self.captions_data['image']
+        self.captions = self.captions_data['caption']
+
+    def __len__(self):
+        return len(self.captions_data)
+    def __getitem__(self, idx):
+        img_name = os.path.join(self.root_dir, 'Images', self.images.iloc[idx])
+        if not os.path.exists(img_name):
+            raise FileNotFoundError(f"Image file not found: {img_name}")
+        
+        image = read_image(img_name).float() / 255.0
+
+        if self.transform:
+            image = self.transform(image)
+
+        caption = self.captions.iloc[idx]
+        return caption, image
+
+root_dir = '/content/drive/My Drive/archive'
+captions_file = '/content/drive/My Drive/archive/captions.txt'
+
+# Initialize the dataset and dataloader
+transform = Compose([
+    Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+dataset = MyDataset(root_dir=root_dir, captions_file=captions_file, transform=transform)
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+
+
+class MinImagenModel(nn.Module):
+    def __init__(self, timesteps=1000):
+        super(MinImagenModel, self).__init__()
+        self.diffusion = GaussianDiffusion()
+        self.unet = Unet()
+        self.text_encoder = TextEncoder(model_name='t5-small')
+        self.timesteps = timesteps
+        
+    def forward(self, text):
+        
+        # 1. Encode text to get text embeddings
+        text_embeddings = self.text_encoder.encode(text)
+        
+        # 2. Generate initial noise
+        noise = torch.randn(text_embeddings.size(0), 3, 256, 256, device=text_embeddings.device)
+        
+        # 3. Use the diffusion model and U-Net to transform the noise based on text embeddings
+        for t in range(self.diffusion.timesteps):
+            # Use the U-Net to predict noise and update the image tensor
+            noise = self.unet(noise, text_embeddings)
+        
+        return noise
+    def denoise_step(self, text_embedding, noise, t):
+        # Predict the noise at timestep t
+        noise_pred = self.unet(noise, t, text_embedding)
+        
+        # Retrieve necessary coefficients for denoising
+        alpha_t, sigma_t = self.diffusion.coefficients(t)
+
+        # Denoise the image using the predicted noise and coefficients
+        denoised_image = (noise - sigma_t * noise_pred) / alpha_t
+
+        return noise - 0.1 * noise 
+
+
+# Define 'device' to use GPU if available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# Initialize the model and move it to the appropriate device
+model = MinImagenModel().to(device)
+
+# Define the optimizer using the optim module
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Define the loss function
+loss_fn = torch.nn.MSELoss()
+
+model = model.to(device)
+num_epochs = 10
+for epoch in range(num_epochs):
+    for batch_idx, (text, images) in enumerate(dataloader):
+        images = images.to(device)  # Move images to the correct device
+
+        # Convert text to embeddings and move to the GPU
+        text_embeddings = model.text_encoder.encode(text).to(device)
+
+        optimizer.zero_grad()
+        predicted_images = model(text_embeddings)  
+
+        loss = loss_fn(predicted_images, images)  
+        loss.backward()
+        optimizer.step()
+
+        if batch_idx % 100 == 0:
+            print(f'Epoch: {epoch+1}, Batch: {batch_idx}, Loss: {loss.item()}')
+
+```
+### Step 5: Generating Images with MinImagen
+After training, use the model to generate images from new text prompts.
+
+```bash
+import torch
+from PIL import Image
+import numpy as np
+
+# Define the device
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# Define the function to generate the image
+def generate_image(text_prompt, model, text_encoder, device='cuda'):
+    model.eval()
+    text_encoder.eval()
+
+    # Encode text prompt to create text embeddings
+    text_embedding = text_encoder.encode([text_prompt]).to(device)
+
+    # Generate initial noise
+    noise = torch.randn(1, 3, 256, 256, device=device)
+    for t in reversed(range(model.timesteps)):
+        noise = model.denoise_step(text_embedding, noise, t)
+
+    # Convert the tensor to a PIL image
+    generated_image = noise.squeeze().cpu().detach().numpy()
+    generated_image = np.transpose(generated_image, (1, 2, 0))
+    generated_image = (np.clip(generated_image, 0, 1) * 255).astype(np.uint8)
+    pil_image = Image.fromarray(generated_image)
+
+    return pil_image
+
+# Initialize model and text_encoder instances
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = MinImagenModel().to(device)
+text_encoder = TextEncoder(model_name='t5-small').to(device)
+
+text_prompt = "A scenic view of mountains at sunset"
+generated_image = generate_image(text_prompt, model, text_encoder, device)
+generated_image.show()
+
+```
+## Practical Implementation of MinImagen: A PyTorch Exploration
+
+
+## Imagen Performance
+
+### Quantitative performance
 
 Using COCO, a dataset for evaluating text-to-image models, Imagen achieves a State-of-the-Art FID of 7.27 [8]. This outperforms DALL-E and even models that were trained on COCO, making Imagen one the best performing text-to-image models currently.
 
-**Qualitative performance**
+### Qualitative performance
 
 The authors of Imagen found that there are limitations in quantitative performance measurements like FID and CLIP. Instead, they perform qualitative assessment by using human subjects to evaluate the generated images. Each subject is shown 50 generated images, along with the ground-truth caption-image pairs from the COCO validation set.
 
 To assess the quality of the generated images, the authors show each subject a generated image and its reference image and ask, "Which image is more photorealistic (looks more real)?" The resulted preference rate, where the subject chooses the generated image over the reference one, is 39.2%. [8]
 
-To assess the image-caption alignment, the authors show each subject a generated image and its reference caption and ask, "Does the caption accurately describe the above image?" The subject can respond with “yes”, “somewhat”, and “no”, which corresponds to a score of 100, 50, and 0. The resulted alignment rate is 91.4, showing a high alignment between the caption and the generated image. [8]
+To assess the image-caption alignment, the authors show each subject a generated image and its reference caption and ask, "Does the caption accurately describe the above image?" The subject can respond with “yes”, “somewhat”, and “no”, which corresponds to a score of 100, 50, and 0. The resulted alignment rate is 91.4, demonstrating a high level of congruence between the captions and the generated images. This qualitative assessment underscores Imagen's ability to not only produce visually compelling images but also to ensure these creations are meaningfully aligned with their textual descriptions, highlighting the model's nuanced understanding of language and visual representation. [8]
+
 
 ## Reference
 Please make sure to cite properly in your work, for example:
@@ -690,4 +1031,5 @@ Please make sure to cite properly in your work, for example:
 
 [11] Nichol, A., & Dhariwal, P. (2021, February 18). Improved denoising diffusion probabilistic models. arXiv.org. https://arxiv.org/abs/2102.09672
 
+[12] O’Connor, R. (2022, October 18). MinImagen: Build Your Own Imagen Text-to-Image Model. Assembly AI. https://www.assemblyai.com/blog/minimagen-build-your-own-imagen-text-to-image-model/
 ---
