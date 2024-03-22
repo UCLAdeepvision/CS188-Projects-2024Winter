@@ -227,6 +227,70 @@ The model was also able to demonstrate the "Attention" where it focuses on featu
 
 # Methods
 
+This model was highly successful in mono 3D pose estimation by use of
+clever geometric insights. We were interested to see if these
+geometric insights scaled, and experimented with augmenting it with
+both temporal information(the last 3 frames) and stereo
+information(right camera). To study this, we created an extensible
+framework which increased the information given to the model without
+compromizing the models fundamental architecture.
+
+## Preprocessing
+
+Deep3dbox requires that each the image be cropped to its bounding
+box. As a result, extending this model to more information requires
+nontrivial preprocessing decisions. These are presented in diagram
+from below.
+
+![PREPOCESSING]({{ '/assets/images/32/preprocessor.svg' | relative_url}})
+
+In words, each of the images are extracted from their file, then
+compared against the ground truth labels to find the location of the
+bounding boxes. These images are then cropped to their bounding box,
+normalized, and concatenated. We chose the convention that stereo
+images would be concatenated horizontally, while temporal images would
+be concatenated vertically. It should also be noted that each image
+was cropped to the points given in the baseline "mono" image. This was
+done for several reasons:
+
+1. Keeping the points the same can increase temporal information. As
+an example, picture a car driving perpindicular to the
+camera. Changing the crop location would make the previous frames
+almost identical to the current frame, giving no extra
+information. Cropping from the same location allows the car to move in
+the cropped image, communicating movement to the neural net.
+
+![Moving Vs Static Window]({{ '/assets/images/32/moving_window.svg' | relative_url}})
+
+2. Deep3dbox is heavily based on estimating the local orientation
+angle, so there were concerns about introducing multiple global angles
+to the problem.
+
+3. KITTI only seems to provide these labels for the
+left camera at the frame of annotation.
+
+## Neural Net Architecture
+
+Deep3dBox is relatively size agnostic, but did require some tweaking
+to work with larger input sizes. Like the paper, our initial feature
+space is created by VGGNet's convolution layers, so nothing needs to
+be done there. However, all three neural nets(dimensions, orientation,
+and confidence) begin with a fully connected layer from this feature
+space into the embedding. To keep the architecture similar to the
+paper, we chose to increase the input size of this linear layer, and
+keep the architecture of the other layers exactly the same from run to
+run.
+
+The above decision results in the total parameters increasing for
+models with more data, which requires increased training time and
+increases the flops per forward pass. To make sure the project was
+still completable under limited compute resources, max pooling with a
+kernel of size (4,2) and stride (4,2) was implemented between VGGNet
+and the linear networks on the stereo-temporal architecture.
+
+## Training
+
+
 # Results
 
 
