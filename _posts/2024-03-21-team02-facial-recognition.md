@@ -118,6 +118,14 @@ CNNs have a wide set of benefits over traditional methods and have transformed f
 
 Existing approaches require training multiple models or additional components like segmentation or bounding-box regression. DDFD, on the other hand, proposes a better, more efficient solution, using a single deep convolutional neural network (CNN). The proposed method achieves comparable or better performance to state-of-the-art methods without the need for complex annotations.
 
+#### Architecture
+
+#### Loss Mechanism
+
+#### Evaluation Results
+
+#### Pros and Cons
+
 ### FaceNet <a id="facenet"></a>
 
 facenet text
