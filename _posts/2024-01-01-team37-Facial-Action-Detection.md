@@ -78,7 +78,7 @@ $$
 w = 1 - 0.095 \cdot d_m
 $$
 
-$$d_m$$ is the Manhattan distance to the AU center
+$$d_m$$ is the Manhattan distance to the AU center[1]
 
 ## JAA-Net
 JAA-Net, Joint learning and Adaptive Attention Network, presents an approach to facial analysis by integrating the tasks of facial action unit (AU) detection and face alignment. Through hierarchical and multi-scale region learning, adaptive attention mechanisms, and a novel local AU detection loss function, JAA-Net achieves state-of-the-art performance on benchmark datasets. By jointly optimizing these tasks, JAA-Net sets a new standard for accurate and robust facial expression analysis, offering a unified solution for real-world computer vision applications.
@@ -96,13 +96,13 @@ This component estimates facial landmarks, which are utilized to predefine the i
 The loss supervises the face alignment module, ensuring accurate estimation of facial landmarks essential for subsequent stages of AU detection and alignment. The formula of the loss for this part is shown below:
 
 $$
-E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n\_{\text{align}}} \left( (y\_{2j-1} - \hat{y}\_{2j-1})^2 + (y\_{2j} - \hat{y}\_{2j})^2 \right)
+E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n\_{\text{align}}} \left( (y_{2j-1} - \hat{y}_{2j-1})^2 + (y_{2j} - \hat{y}_{2j})^2 \right)
 $$
 
 
 where:
-- $$y\_{2j-1}$$ and $$y\_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
-- $$\hat{y}\_{2j-1}$$ and $$\hat{y}\_{2j}$$ are the corresponding predicted results.
+- $$y_{2j-1}$$ and $$y_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
+- $$\hat{y}_{2j-1}$$ and $$\hat{y}_{2j}$$ are the corresponding predicted results.
 - $$d_0$$ is the ground-truth inter-ocular distance for normalization.
 
 #### Global Feature Learning
@@ -117,7 +117,7 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
 
 $$
-E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v\_{ik} \log \hat{v}\_{ik} + (1 - v\_{ik}) \log (1 - \hat{v}\_{ik}) \right]
+E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
 $$
 
 where:
@@ -157,7 +157,7 @@ JAA-Net offers several advantages:
 - Significantly outperforms state-of-the-art AU detection methods on challenging benchmarks, including BP4D, DISFA, GFT, and BP4D+.
 - Adaptsively captures irregular regions of each AU, enhancing the accuracy of AU detection.
 - Achieves competitive performance for face alignment, ensuring accurate localization of facial landmarks.
-- Works well under partial occlusions and non-frontal poses, demonstrating robustness in real-world scenarios.
+- Works well under partial occlusions and non-frontal poses, demonstrating robustness in real-world scenarios.[3]
 
 
 ## ResNet-50
@@ -209,16 +209,100 @@ The reported results are shown below:
 {: style="width: 800px; max-width: 100%;"}
 *Table 1. ResNet-50 results* [2].
 
-The model outperforms both JAA-Net and ResNet-50, which is not surprising since ResNet is only utilized as a backbone structure and the model is new with more sophisticated structure.
+The model outperforms both JAA-Net and ResNet-50, which is not surprising since ResNet is only utilized as a backbone structure and the model is new with more sophisticated structure.[2]
 
 ## Experiments
-We attempted to train a model using JAA-Net that is public on BP4D dataset. With limited resources, we had to scale down the dataset, but we were successful to train JAA-Net and obtained its performance metrics. The code, trained models (12 in total, with each being a snapshot after a epoch), and attention heatmaps can be found in this repository: https://github.com/HiccupHan/CS188-PyTorch-JAANet
+We attempted to train a model using JAA-Net that is public on BP4D dataset. With limited resources, we had to scale down the dataset, but we were successful to train JAA-Net and obtained its performance metrics. The code, trained models (12 in total, with each being a snapshot after a epoch), and attention heatmaps can be found in this repository: [GitHub Repository](https://github.com/HiccupHan/CS188-PyTorch-JAANet)
 
 ### Dataset
 We were able to obtain a subset of BP4D dataset.BP4D-Spontaneous dataset is a database of videos of facial expressions in a group of young adults. The participants in the video clips are around 18-29 years of age from various ethnicity backgrounds. The expressions they displayed in these videos are induced from natural stimulus. Facial features are tracked in both 2D and 3D domains. The entire dataset is about 2.6TB in size. We utilized the metadata associated with AU activation and facial landmark information included with the dataset. [4] The sub-dataset we use contains 125884 images sampled from frames of videos, and ground truth labels of the presence of 12 AU labels and facial landmarks. The dataset we obtained was missing AU activation labels and facial landmark information for some pictures, causing a mismatch between images and labels.  This issue was discovered during training when the model displayed low loss but low accuracy during testing with new images. Because of lack of knowledge to properly label these images, we determined to exclude them from the dataset. The final dataset used contained 83924 images for training and 45809 images for testing. Training was done locally on a laptop with a RTX 3070Ti as it requires a large amount of memory and time, and it was not realistic to do on a Google Cloud VM with the few credits that were available. Because of limited resources, training set was kept small compared to the test set. 
 
 ### Methods And Results
-Some minor modifications to the code base was required to work with our specific dataset, but nothing with JAA-Net's structure were changed. During the preprocessing step, similarity transformation is conducted on each image, cropping every image around the face. Then interocular distances of each sample and weight loss of each AU for the training set is calculated. The model was trained on the training set (processed image) for 12 epochs with learning rate originally set at 0.00007 for first  that  0.000096 and decays down to 0.000024. Training took more than 50 hours, which underscores a significant drawback of this model: it requires a lot of resources and time to train. This is an older model using CNN and attention mechanisms, and they can be difficult to train. 
+Some minor modifications to the code base was required to work with our specific dataset, but nothing with JAA-Net's structure were changed. During the preprocessing step, similarity transformation is conducted on each image, cropping every image around the face. 
+
+```
+def align_face_49pts(img, img_land, box_enlarge, img_size):
+    leftEye0 = (img_land[2 * 19] + img_land[2 * 20] + img_land[2 * 21] + img_land[2 * 22] + img_land[2 * 23] +
+                img_land[2 * 24]) / 6.0
+    leftEye1 = (img_land[2 * 19 + 1] + img_land[2 * 20 + 1] + img_land[2 * 21 + 1] + img_land[2 * 22 + 1] +
+                img_land[2 * 23 + 1] + img_land[2 * 24 + 1]) / 6.0
+    rightEye0 = (img_land[2 * 25] + img_land[2 * 26] + img_land[2 * 27] + img_land[2 * 28] + img_land[2 * 29] +
+                 img_land[2 * 30]) / 6.0
+    rightEye1 = (img_land[2 * 25 + 1] + img_land[2 * 26 + 1] + img_land[2 * 27 + 1] + img_land[2 * 28 + 1] +
+                 img_land[2 * 29 + 1] + img_land[2 * 30 + 1]) / 6.0
+    deltaX = (rightEye0 - leftEye0)
+    deltaY = (rightEye1 - leftEye1)
+    l = math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    sinVal = deltaY / l
+    cosVal = deltaX / l
+    mat1 = np.mat([[cosVal, sinVal, 0], [-sinVal, cosVal, 0], [0, 0, 1]])
+
+    mat2 = np.mat([[leftEye0, leftEye1, 1], [rightEye0, rightEye1, 1], [img_land[2 * 13], img_land[2 * 13 + 1], 1],
+                   [img_land[2 * 31], img_land[2 * 31 + 1], 1], [img_land[2 * 37], img_land[2 * 37 + 1], 1]])
+
+    mat2 = (mat1 * mat2.T).T
+
+    cx = float((max(mat2[:, 0]) + min(mat2[:, 0]))) * 0.5
+    cy = float((max(mat2[:, 1]) + min(mat2[:, 1]))) * 0.5
+
+    if (float(max(mat2[:, 0]) - min(mat2[:, 0])) > float(max(mat2[:, 1]) - min(mat2[:, 1]))):
+        halfSize = 0.5 * box_enlarge * float((max(mat2[:, 0]) - min(mat2[:, 0])))
+    else:
+        halfSize = 0.5 * box_enlarge * float((max(mat2[:, 1]) - min(mat2[:, 1])))
+
+    scale = (img_size - 1) / 2.0 / halfSize
+    mat3 = np.mat([[scale, 0, scale * (halfSize - cx)], [0, scale, scale * (halfSize - cy)], [0, 0, 1]])
+    mat = mat3 * mat1
+
+    aligned_img = cv2.warpAffine(img, mat[0:2, :], (img_size, img_size), cv2.INTER_LINEAR, borderValue=(128, 128, 128))
+
+    land_3d = np.ones((int(len(img_land)/2), 3))
+    land_3d[:, 0:2] = np.reshape(np.array(img_land), (int(len(img_land)/2), 2))
+    mat_land_3d = np.mat(land_3d)
+    new_land = np.array((mat * mat_land_3d.T).T)
+    new_land = np.reshape(new_land[:, 0:2], len(img_land))
+
+    return aligned_img, new_land
+
+```
+
+Then interocular distances of each sample and weight loss of each AU for the training set is calculated. 
+
+```
+# interocular distances
+import numpy as np
+
+list_path_prefix = '../data/list/'
+input_land = np.loadtxt(list_path_prefix+'BP4D_att2_land.txt')
+
+biocular = np.zeros(input_land.shape[0])
+
+l_ocular_x = np.mean(input_land[:,np.arange(2*20-2,2*25,2)],1)
+l_ocular_y = np.mean(input_land[:,np.arange(2*20-1,2*25,2)],1)
+r_ocular_x = np.mean(input_land[:,np.arange(2*26-2,2*31,2)],1)
+r_ocular_y = np.mean(input_land[:,np.arange(2*26-1,2*31,2)],1)
+biocular = (l_ocular_x - r_ocular_x) ** 2 + (l_ocular_y - r_ocular_y) ** 2
+
+np.savetxt(list_path_prefix+'BP4D_att2_biocular.txt', biocular, fmt='%f', delimiter='\t')
+```
+
+```
+# weight loss for each AU
+import numpy as np
+
+list_path_prefix = '../data/list/'
+
+imgs_AUoccur = np.loadtxt(list_path_prefix + 'BP4D_att2_AUoccur.txt')
+AUoccur_rate = np.zeros((1, imgs_AUoccur.shape[1]))
+
+for i in range(imgs_AUoccur.shape[1]):
+    AUoccur_rate[0, i] = sum(imgs_AUoccur[:,i]>0) / float(imgs_AUoccur.shape[0])
+
+AU_weight = 1.0 / (AUoccur_rate+1)
+AU_weight = AU_weight / AU_weight.sum() * AU_weight.shape[1]
+np.savetxt(list_path_prefix+'BP4D_att2_weight.txt', AU_weight, fmt='%f', delimiter='\t')
+```
+The model was trained on the training set (processed image) for 12 epochs with learning rate originally set at 0.00007 for first  that  0.000096 and decays down to 0.000024. Training took more than 50 hours, which underscores a significant drawback of this model: it requires a lot of resources and time to train. This is an older model using CNN and attention mechanisms, and they can be difficult to train. 
 
 The model was then tested on the test set, which yielded the following results:
 
@@ -261,7 +345,7 @@ As discussed before, the dataset was significantly reduced, and the partition of
 
 Nonetheless, the results from JAA-Net is impressive, especially for an older model. The model was performing better than many other models at the time, proving that features learned during facial alignment can in fact provide non-negligible benefits for the task of detecting facial action units. 
 
-## Reference
+## References
 [1] Li, W., Abtahi, F., Zhu, Z., & Yin, L. (2017, May). Eac-net: A region-based deep enhancing and cropping approach for facial action unit detection. In 2017 12th IEEE International Conference on Automatic Face & Gesture Recognition (FG 2017) (pp. 103-110). IEEE.
 
 [2] Luo, C., Song, S., Xie, W., Shen, L., & Gunes, H. (2022, July). Learning Multi-dimensional Edge Feature-based AU Relation Graph for Facial Action Unit Recognition. In Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence. International Joint Conferences on Artificial Intelligence Organization.
