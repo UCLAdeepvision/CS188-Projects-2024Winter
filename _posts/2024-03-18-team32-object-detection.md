@@ -129,16 +129,6 @@ The use of the cross ratio loss function allows for self-supervised learning usi
 {: style="width: 400px; max-width: 100%;"}
 
 
-### Comparison to Deep3DBox
-
-Overall, this model out performs most other models (including Deep3DBox) by a solid 3-5% across many different categories. 
-
-![EGO10]({{ '/assets/images/32/ego10.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-
-Overall, this paper provides a good example of work based off of Deep3DBox, where new ideas and improvements are added atop the original model's idea of geometric estimation. 
-
-
 ## 3D Bounding Box Estimation based Method
 
 "3D Bounding Box Estimation Using Deep Learning and Geometry, Mousavian et al. 2017" starts with a 2D bounding box, and estimates 3D dimensions/orientation using that.
@@ -239,7 +229,22 @@ The model was also able to demonstrate the "Attention" where it focuses on featu
 
 # Results
 
+
 # Discussion
+
+## Comparison between Ego-net and 3D Bounding Box Estimation based method
+
+Ego-net (the IGR based method), being based on the work of the earlier 3D Bound box estimation based method, performed better.
+
+![EGO10]({{ '/assets/images/32/ego10.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+
+Ego-net was able to out perform the 3D bounding box estimation based method because it took advantage of IGR which was a development found from other pose-estimation fields in CV. Inspired by developments from human pose estimation, the model was re-architecture to encourage the learning of IGR via custom loss functions. This reduced the difficulty of mapping directly from 2d pixels to 3d orientation. 
+
+Furthermore, the use of cross ratio loss function enabled the model to have some levels of self-supervised learning. In fact, results from the paper show that the model is able to learn pose from unlabelled data through cross-ratio loss alone, which is something Deep3dBox does not have. 
+
+All in all, it make sense that Ego-net was able to out perform Deep3dBox, thanks IGR and the cross-ratio loss function. 
+
 
 # Reference
 Please make sure to cite properly in your work, for example:
