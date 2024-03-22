@@ -1,8 +1,8 @@
 ---
 layout: post
 comments: true
-title: Post Template
-author: UCLAdeepvision
+title: Image Style Translation
+author: Lawrence Liao, John Li, Guanhua Ji, William Wu
 date: 2024-03-22
 ---
 
@@ -88,6 +88,144 @@ We can reduce the dimensionality with minimal loss of information! This makes tr
 ## Image Captioning with Transformers
 
 To caption an image, we can use a encoder-decoder architecture. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
+
+## Demo
+
+### Cycle-GAN
+We followed the instruction from th github repository of [Cycle-GAN paper](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix?tab=readme-ov-file) and focused on the Monet dataset in particular. We found that the training process was very slow and the results after 100 epochs were not good. We expected this to be due to the difficulty of training GAN models and the complexity of the Monet dataset. Then we downloaded the pretained model fro the authors and tested on test dataset. 
+
+```bash
+# clone the repository
+git clone git@github.com:junyanz/pytorch-CycleGAN-and-pix2pix.git
+cd pytorch-CycleGAN-and-pix2pix
+# download the dataset
+bash ./datasets/download_cyclegan_dataset.sh monet2photo
+# train the model
+python train.py --dataroot ./datasets/monet2photo --name monet_cyclegan --model cycle_gan
+# test the model
+python test.py --dataroot ./datasets/monet2photo --name maps_cyclegan --model cycle_gan
+# download the pretrained model (style to monet)
+bash ./scripts/download_cyclegan_model.sh style_monet
+# test the pretrained model
+python test.py --dataroot datasets/monet2photo/testB --name style_monet_pretrained --model test --no_dropout
+```
+
+
+### Stable Diffusion
+We used the [CompVis sdv1.4](https://huggingface.co/CompVis/stable-diffusion-v1-4) available on Hugging Face for generation. We used the [nlpconnect/vit-gpt2-image-captioning](https://huggingface.co/nlpconnect/vit-gpt2-image-captioning) available on Hugging Face for image captioning. We first tested on the pretrained model and then fine-tuned on monet dataset.
+
+To translate the image, we first generated the captions of the input using image (photo) captioning model, then we modified the captions to conditioned on Monet style. We then used the stable diffusion model to generate the image (painting) from the modified captions.
+
+```python
+# generate
+import os
+from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
+from diffusers import StableDiffusionPipeline
+from PIL import Image
+import torch
+import pandas as pd
+from tqdm import tqdm
+
+def generate_caption(image, feature_extractor, tokenizer, model):
+    pixel_values = feature_extractor(images=image, return_tensors="pt").pixel_values
+    pixel_values = pixel_values.to(device)
+    output_ids = model.generate(pixel_values)
+    caption = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return caption
+
+def generate_images(folder_path, generate_path):
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to(device)
+    img_caption = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning", torch_dtype=torch.float16).to(device)
+    feature_extractor = ViTImageProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+
+    for file_name in tqdm(os.listdir(folder_path)):
+        if file_name.endswith(('.png', '.jpg', '.jpeg')):
+            image_path = os.path.join(folder_path, file_name)
+            image = Image.open(image_path).convert('RGB')
+            caption = generate_caption(image, feature_extractor, tokenizer, img_caption)
+            caption = f'a painting of {caption}by Claude Monet.'
+            output = pipe(caption, guidance_scale=5).images
+            output[0].save(os.path.join(generate_path, file_name))
+
+# Example usage
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+folder_path = './monet2photo/testB/'
+# model_id = "CompVis/stable-diffusion-v1-4"
+generate_path = './monet2photo/generated_monet_1000/'
+model_id = './models/monet-1000/'
+
+generate_images(folder_path, generate_path)
+```
+
+We fine-tuned the t2i stable diffusion model on Monet dataset. We first generated the captions of the Monet paintings then passed the painting, captions pairs to the pretained model for fine-tuning.
+
+```python
+# captioning
+import os
+from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
+from PIL import Image
+import torch
+import pandas as pd
+from tqdm import tqdm
+
+def generate_caption(image, feature_extractor, tokenizer, model):
+    pixel_values = feature_extractor(images=image, return_tensors="pt").pixel_values
+    pixel_values = pixel_values.to(device)
+    output_ids = model.generate(pixel_values)
+    caption = tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return caption
+
+def process_images(folder_path, csv_file_path):
+    img_caption = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning").to(device)
+    feature_extractor = ViTImageProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    
+    data = []
+
+    for file_name in tqdm(os.listdir(folder_path)):
+        if file_name.endswith(('.png', '.jpg', '.jpeg')):
+            image_path = os.path.join(folder_path, file_name)
+            image = Image.open(image_path).convert('RGB')
+            caption = generate_caption(image, feature_extractor, tokenizer, img_caption)
+            caption = f'a painting of {caption}by Claude Monet.'
+            data.append([file_name, caption])
+    
+    # Create a DataFrame and save to CSV
+    df = pd.DataFrame(data, columns=['file_name', 'text'])
+    df.to_csv(csv_file_path, index=False)
+
+# Example usage
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+folder_path = './monet2photo/trainA/'
+csv_file_path = './monet2photo/trainA/metadata.csv'
+process_images(folder_path, csv_file_path)
+```
+
+To fine-tune t2i diffusion, we used the python code from Hugging Face [train_text_to_image.py](https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image.py). Here is the script:
+  
+```bash
+export MODEL_NAME="CompVis/stable-diffusion-v1-4"
+export TRAIN_DIR="./monet2photo/trainA"
+export OUTPUT_DIR="./models/monet-3000"
+
+accelerate launch train_text_to_image.py \
+  --pretrained_model_name_or_path=$MODEL_NAME \
+  --train_data_dir=$TRAIN_DIR \
+  --use_ema \
+  --resolution=512 --center_crop --random_flip \
+  --train_batch_size=1 \
+  --gradient_accumulation_steps=4 \
+  --gradient_checkpointing \
+  --mixed_precision="fp16" \
+  --max_train_steps=3000 \
+  --learning_rate=1e-05 \
+  --max_grad_norm=1 \
+  --lr_scheduler="constant" --lr_warmup_steps=0 \
+  --output_dir=${OUTPUT_DIR}
+```
+
+We fine-tuned for 1000 epochs and 3000 epochs.
 
 ## Reference
 
