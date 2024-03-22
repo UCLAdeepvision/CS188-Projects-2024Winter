@@ -82,6 +82,7 @@ $$d_m$$ is the Manhattan distance to the AU center
 
 ## JAA-Net
 JAA-Net, Joint learning and Adaptive Attention Network, presents an approach to facial analysis by integrating the tasks of facial action unit (AU) detection and face alignment. Through hierarchical and multi-scale region learning, adaptive attention mechanisms, and a novel local AU detection loss function, JAA-Net achieves state-of-the-art performance on benchmark datasets. By jointly optimizing these tasks, JAA-Net sets a new standard for accurate and robust facial expression analysis, offering a unified solution for real-world computer vision applications.
+
 ![JAA-Net Architecture Framework]({{'assets/images/team37/JAA-Net-Architecture.png'| relative_url}})
 {: style="width: 800px; max-width: 100%;"}
 *Fig 3. Architecture of JAA-Net* [4].
@@ -97,6 +98,7 @@ The loss supervises the face alignment module, ensuring accurate estimation of f
 $$
 E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n_{\text{align}}} \left( (y_{2j-1} - \hat{y}_{2j-1})^2 + (y_{2j} - \hat{y}_{2j})^2 \right)
 $$
+
 where:
 - $$\(y_{2j-1}\)$$ and $$\(y_{2j}\)$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
 - $$\(\hat{y}_{2j-1}\)$$ and $$\(\hat{y}_{2j}\)$$ are the corresponding predicted results.
@@ -112,32 +114,40 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 *Fig 3. Architecture of JAA-Net Adaptive Attention Learning Module* [4].
 
 The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
+
 $$
 E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
 $$
+
 where 
 - $$\(\hat{v}_{ik}\)$$ is the refined attention weight of the k-th point for the i-th AU
 - $$\(n_{am} = l/4 \times l/4\)$$ is the number of points in each attention map. 
 #### Facial AU Detection
 In the final stage of JAA-Net, assembled local AU features are combined with the face alignment feature and the global feature. This amalgamation is then fed into a network comprising two fully-connected layers with dimensions of \( d \) and \( 2n_{\text{au}} \), respectively. Subsequently, a softmax layer is employed to predict the probability of occurrence for each AU. This approach effectively addresses data imbalance issues commonly encountered in AU detection tasks, ensuring robust and accurate predictions across all AU classes. The formula of softmax loss is shown below:
+
 $$
 E_{\text{softmax}} = -\frac{1}{n_{au}} \sum_{i=1}^{n_{au}} w_i \left[ p_i \log \hat{p}_i + (1 - p_i) \log (1 - \hat{p}_i) \right]
 $$
+
 where:
 - $$\(p_i\)$$ denotes the ground-truth probability of occurrence for the i-th AU, which is 1 if occurrence and 0 otherwise.
 - $$ \(\hat{p}_i\) denotes the corresponding predicted probability of occurrence.
 
 In some cases, some AUs appear rarely in training samples, for which the softmax loss often makes the network prediction strongly biased towards absence. To overcome this limitation, a weighted multi-label Dice coefficient loss is introduced:
+
 $$
 E_{\text{dice}} = \frac{1}{n_{au}} \sum_{i=1}^{n_{au}} w_i \left( 1 - \frac{2p_i\hat{p}_i + \varepsilon}{p_i^2 + \hat{p}_i^2 + \varepsilon} \right)
 $$
+
 where $$\(\varepsilon\)$$ is the smooth term.
 
 ### Loss Function
 JAA-Net introduces a novel local AU detection loss, enhancing the refinement of attention maps to extract more precise local features. This loss function is more effective than traditional methods, as it directly supervises attention map refinement and removes constraints on attention map differences, facilitating adaptive learning of attention.
+
 $$
 E = E_{au} + \lambda_1 E_{align} + \lambda_2 E_r
 $$
+
 where $$\(E_{au}\)$$ and $$\(E_{align}\)$$ denote the losses of AU detection and face alignment, respectively, $$\(E_r\)$$ measures the difference before and after the attention refinement, which is a constraint to maintain the consistency, and $$\(\lambda_1\)$$ and $$\(\lambda_2\)$$ are trade-off parameters.
 
 ### Advantage
