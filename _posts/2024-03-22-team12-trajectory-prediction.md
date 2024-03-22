@@ -1,13 +1,13 @@
 ---
 layout: post
 comments: true
-title: Trajectory Prediction
+title: Road Agent Behavior and Trajectory Prediction
 author: Daniel Kim, Luciano Kholos, Steph Mach
 date: 2024-03-22
 ---
 
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+> In this paper, we review various deep learning models that are capable of predicting the future actions of various road actors. 
 
 
 <!--more-->
@@ -155,6 +155,5 @@ Each of the discussed deep learning models presents a set of advantages tailored
 ### Conclusion
 
 The study of road agent behavior and trajectory prediction through three distinct deep learning models demonstrates the diversity of solutions to this problem. Each model: the FastMobileNet (FMNet) for predicting the motion of Vulnerable Road Users (VRUs) using high-definition maps and ConvNets, the TraPHic model for trajectory prediction in dense and heterogeneous traffic, and the two-stream graph-LSTM model for forecasting the trajectory and behavior of road-agents, demonstrates unique strengths and architectural innovations tailored to address specific challenges in trajectory and behavior prediction.
-
 
 ---
