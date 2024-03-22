@@ -96,12 +96,12 @@ This component estimates facial landmarks, which are utilized to predefine the i
 The loss supervises the face alignment module, ensuring accurate estimation of facial landmarks essential for subsequent stages of AU detection and alignment. The formula of the loss for this part is shown below:
 
 $$
-E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n_{\text{align}}} \left( (y_{2j-1} - \hat{y}_{2j-1})^2 + (y_{2j} - \hat{y}_{2j})^2 \right)
+E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n\_{\text{align}}} \left( (y\_{2j-1} - \hat{y}\_{2j-1})^2 + (y\_{2j} - \hat{y}\_{2j})^2 \right)
 $$
 
 
 where:
-- $$y_{2j-1}$$ and $$y_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
+- $$y\_{2j-1}$$ and $$y\_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
 - $$\hat{y}\_{2j-1}$$ and $$\hat{y}\_{2j}$$ are the corresponding predicted results.
 - $$d_0$$ is the ground-truth inter-ocular distance for normalization.
 
@@ -117,7 +117,7 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
 
 $$
-E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
+E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v\_{ik} \log \hat{v}\_{ik} + (1 - v\_{ik}) \log (1 - \hat{v}\_{ik}) \right]
 $$
 
 where:
