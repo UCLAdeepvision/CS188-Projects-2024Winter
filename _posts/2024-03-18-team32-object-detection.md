@@ -15,19 +15,16 @@ date: 2024-03-18
 * TOC
 {:toc}
 
-## Introduction
+# Introduction
 3D object detection is a challenging task in computer vision where the goal is to identify and locate objects in 3D environments based on their shape, location and orientation. 
 
 Application fields include autonomous vehicles, robotics, and augmented reality.
 
 In our project, we explore methods to recover 3D bounding box and orientation from monocular, 2D RGB images. We specifically focus on a classic paper in the field, "3D Bounding Box Estimation Using Deep Learning and Geometry". 
 
-<!-- ACHTUNG! -->
-
-In addition to comparing between different methods, we also add a improvement to original paper via blah blah blah. 
 
 
-## Data Set
+# Data Set
 
 Most datasets consists of 2D images/videos that contain additional information such as Distance, Elevation, and Azimuth of the camera which is relevant for evaluating 3D Bounding box generated from 2D images/videos. 
 
@@ -38,7 +35,7 @@ Alternatively, there are tools which can be used to map CAD models of objects on
 ![DATA1]({{ '/assets/images/32/data1.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
-### KITTI
+## KITTI
 
 One of the most popular benchmark dataset in 3D Object Detection is the KITTI dataset from 2012. 
 
@@ -52,8 +49,7 @@ The label processing is quite difficult, as labelling needs to be added on a pix
 
 ![DATA2]({{ '/assets/images/32/data2.png' | relative_url }})
 {: style="width: 600px; max-width: 100%;"}
-
-### Metric for Evaluation: Bounding Box
+<!-- ### Metric for Evaluation: Bounding Box
 
 The official 3D Metric various across different dataset varies
 AP used, where a 2D bounding box is compared against the 3D Bounding box
@@ -65,28 +61,28 @@ We want Precision and recall both to be high or hug the top right corner. The ar
 AUC is often used to calculate Average Precision, a very common metric used to measure other segmentation tasks. mAP is the mean AP across different object classes
 
 <!-- IMAGE -->
-
+<!-- 
 ### Metric for Evaluation: Orientation
 
 KITTI uses “Average Orientation Similarity”, which is calculated using the cosine similarity between predicted orientation and GT orientation.
 
 There is also metrics that measures model performance at detecting center of a 3D box bounded object
 
-<!-- IMAGE -->
+IMAGE --> -->
 
 
 
 
-## Other Approachs
+# Models
 
-### Approach 1
+## XYZ Based Model
 
-### Intermediate Geometric Representation based Method
+## Intermediate Geometric Representation Based Method
 
 Another popular method of regressing 3d pose from 2d images is through the extraction of intermediate geometric representation. The best performing model of this class is the Ego-Net from 2021 [2]. This class of model is also similar to Deep3DBox, as they both try to regress 3d pose from 2d images.
 
 
-#### Past works
+### Past works
 Many previous models attempt to directly map 2d pixels to angular representation of 3d poses. The drawbacks of these previous models is that local appearance alone in a 2d image is not sufficient to determine vehicle pose. 
 
 ![EGO1]({{ '/assets/images/32/ego1.png' | relative_url }})
@@ -99,21 +95,21 @@ Furthermore, extracting 3d pose directly from 2d pixels is a highly non-linear a
 ![EGO4]({{ '/assets/images/32/ego3.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
-#### IGR
+### IGR
 
 Inspired by the representational framework of vision introduced by Marr [3], Ego-Net explicitly defines and coerces the model to first learn some intermediate geometric representations. 
 
 ![EGO6]({{ '/assets/images/32/ego5.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
-##### IGR Regression target
+#### IGR Regression target
 
 The model attempts to regress the orientation relative to the center of a cuboid. The regressed, correctly oriented cuboid is then projected back to the image plane. The 2D coordinate of the projection is the desired IGR.
 
 ![EGO6]({{ '/assets/images/32/ego6.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
-#### Custom Loss Function
+### Custom Loss Function
 
 The lost function used for this model consists of heatmap loss, 2d and 3d. 
 
@@ -133,7 +129,7 @@ The use of the cross ratio loss function allows for self-supervised learning usi
 {: style="width: 400px; max-width: 100%;"}
 
 
-#### Comparison to Deep3DBox
+### Comparison to Deep3DBox
 
 Overall, this model out performs most other models (including Deep3DBox) by a solid 3-5% across many different categories. 
 
@@ -143,7 +139,7 @@ Overall, this model out performs most other models (including Deep3DBox) by a so
 Overall, this paper provides a good example of work based off of Deep3DBox, where new ideas and improvements are added atop the original model's idea of geometric estimation. 
 
 
-## Deep3DBox
+## 3D Bounding Box Estimation based Method
 
 "3D Bounding Box Estimation Using Deep Learning and Geometry, Mousavian et al. 2017" starts with a 2D bounding box, and estimates 3D dimensions/orientation using that.
 
@@ -239,13 +235,13 @@ The model was also able to demonstrate the "Attention" where it focuses on featu
 ![EGO10]({{ '/assets/images/32/3d12.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
+# Methods
 
+# Results
 
-## Results
+# Discussion
 
-## Discussion
-
-## Reference
+# Reference
 Please make sure to cite properly in your work, for example:
 
 [1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
