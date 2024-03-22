@@ -164,5 +164,5 @@ You can find more Markdown syntax at [this page](https://www.markdownguide.org/b
 Please make sure to cite properly in your work, for example:
 
 [1] A. Alahi, K. Goel, V. Ramanathan, A. Robicquet, L. Fei-Fei and S. Savarese, "Social LSTM: Human Trajectory Prediction in Crowded Spaces," 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Las Vegas, NV, USA, 2016, pp. 961-971, doi: 10.1109/CVPR.2016.110.
-
+[2] Gupta, A., Johnson, J., Fei-Fei, L., Savarese, S., & Alahi, A. (2018). Social GAN: Socially Acceptable Trajectories with Generative Adversarial Networks (Version 1). arXiv. https://doi.org/10.48550/ARXIV.1803.10892
 ---
