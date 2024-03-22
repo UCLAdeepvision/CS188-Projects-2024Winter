@@ -135,6 +135,50 @@ Comparing the performance of common models to the TraPHic model unveils an impor
 ### Forecasting Trajectory and Behavior of Road-Agents Using Spectral Clustering in Graph-LSTMs
 Paper: [https://arxiv.org/pdf/1912.01118.pdf](https://arxiv.org/pdf/1912.01118.pdf)
 
+#### Motivation
+Trajectory prediction is an active area of research, as it is crucial for safe navigation in autonomous driving. However, current autonomous vehicles are unable to perform efficient navigation in dense and heterogeneous traffic because of the lack of progress in research towards behavior prediction. Furthermore, traffic forecasting possesses a major challenge in ensuring accurate long-term predictions (3-5 seconds) since correlation of the data between the time-steps grows weaker as the margin of time increases. To solve these problems, the paper seeks to contribute a two-stream graph-LSTM network for traffic forecasting in urban traffic, where the first stream does not account for neighboring vehicles and the second stream serves as the behavior prediction and regularization of the first stream. Additionally, the paper proposes spectral cluster regularization for the reduction of long-term prediction errors, a theoretical upper bound of the regularized forecasting algorithm, and a rule-based behavior prediction algorithm to classify a road-agent’s traffic behavior as aggressive, conservative, or neutral.
+
+![3Motivation1]({{ '/assets/images/12/IMG_10.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+Fig. 8: Represent the spatial coordinates of road-agents as vertices of a dynamic geometric graph (DGG) to improve long-term prediction and predict the behavior of them
+
+
+
+#### Structure
+First, the paper defines the problem statement by presenting a definition of a vehicle trajectory. “The trajectory for the i-th road-agent is defined as a sequence $$Ψ_i{}(a,b)\in {\mathbb{R}^{2}}$$ where $$Ψ_i(a,b)={[x_t,y_t]^{\top}|t\in [a,b]}.[x,y]\in \mathbb{R}^{2}$$ denotes the spatial coordinates of the road-agent in meters according to the world coordinate frame and t denotes the time instance.” Then, it proceeds to define what we intend to predict with the trajectory and the prediction, which is “given the trajectory $$Ψ_i(0,τ)$$, predict $$Ψ_i(τ^{+},T)$$ for each road-agent $$v_i, i\in[0,N]$$” and “given the same trajectory, predict a label from {Overspeeding, Neutral, Underspeeding} for each road-agent $$v_i, i\in[0,N]$$”. With these definitions in play, the main intentions of the architecture are defined in predicting the trajectory and behavior of each road-agent, which will assist the autonomous vehicle’s ability to determine the long-term trajectory of all the neighboring road-agents.
+
+![3Structure1]({{ '/assets/images/12/IMG_11.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+Fig. 9: The trajectory and behavior prediction of the i-th road-agent. Input consists of the spatial coordinates and over the past τ seconds and eigenvectors of the DGGs corresponding to the first τ DGGs. Spectral clustering on the eigenvectors from the second stream to regularize the original loss function and perform back-propagation on the new loss function for improved long-term prediction
+
+Next, the overall flow of the approach must be set, following the figure # above: input consists of the spatial coordinates over the past τ seconds and the eigenvectors of the DGGs corresponding to the first τ DGGs. Then, the trajectory prediction problem must be solved through the first stream, using an LSTM-based sequence model. The behavior prediction problem can be solved by accepting the eigenvectors of the input DGGs and predicting the eigenvectors corresponding to those DGGs for the next τ seconds, which form the input to the behavior prediction algorithm. Finally, stream 2 can regularize stream 1 using a new regularization algorithm, which can be used to derive the upper bound on the prediction error of the regularized forecasting algorithm.
+
+#### Behavior Prediction Algorithm
+The defined algorithm for behavior prediction is as below:
+1. Form the set of predicted spectrums from stream 2 and compute the eigenvalue matrix
+2. For each set of predicted spectrums, compute the Laplacian matrix
+3. $$θ_i$$ is set to the i-th element of the diagonal matrix operator on the Laplacian matrix
+4. $$θ_i'$$ is equal to the change in $$θ_i$$ over time
+With some preset threshold parameters, some rules can be set to determine the behavior of a road-agent as either overspeeding, neutral, or underspeeding based on the final $$θ_i'$$ value.
+
+#### Spectral Clustering Regularization
+The original loss function of stream 1 is given by $$F_i=-\sum_{t=1}^{T}logPr(x_{t+1}|\mu_t,\sigma_t,\rho_t)$$. With the goal of optimizing the parameters $$\mu_t^{*},\sigma_t^{*}$$ to minimize the above loss equation , there is an issue of predicted trajectory diverging gradually from the ground truth, causing error-margins to increase as time passes. Therefore, a new regularization algorithm is introduced as below to tackle this issue:
+1. Stream 2 computes a spectrum sequence
+2. For each spectrum, perform clustering on the eigenvector corresponding to the second smallest eigenvalue
+3. Compute cluster centers from the clusters obtained from step 2
+4. Identify the cluster to which each road-agent belongs and retrieve the cluster center and deviation
+
+#### Upper Bound for Prediction Error
+Finally, an upper bound on the prediction error of the first stream must exist. LSTMs make accurate sequence predictions if elements of the sequence are correlated across time, but eigenvectors may not be correlated across time in a general sequence. The goal of this step is to show there exists a correlation between the Laplacian matrices across time-steps with a lower-bound to prove accurate sequence modeling.
+
+#### Results
+By using both sparse and dense datasets (NGSIM, Lyft Level 5, Argoverse Motion Forecasting, and Apolloscape Trajectory), we can witness the benefits of combining behavior prediction into trajectory prediction. The results were determined using the Average Displacement Error(ADE) and the Final Displacement Error (FDE) and compared our model to other methods including CS-LSTM, TraPHic, Social-GAN, and GRIP. All methods that are trajectory prediction models that do not involve any behavior prediction.
+
+![3Results1]({{ '/assets/images/12/IMG_12.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+Fig. 10: The main results are as above, showing the ADE and FDE of all the different compared models, with the two-stream graph on the very right
+
+Without a doubt, the results show that there is the least average displacement and final displacement error on the behavior prediction stream model, especially with the behavior prediction included. The final result brags an average and final displacement error clearly below 3 for all the datasets, which is only rivaled by the GRIP method. Finally, when discussing the behavior prediction accuracy, the paper observed a weighted accuracy of 92.96% on the Lyft dataset, 84.11% on the Argoverse dataset, and 96.72% on the Apolloscape dataset. With the high accuracy of the behavior algorithm introduced to the first stream that only performs trajectory prediction, there is great benefit to the final trajectory prediction values as demonstrated by the results above.
 
 
 
