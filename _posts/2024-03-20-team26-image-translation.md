@@ -45,7 +45,7 @@ Now, in the actual style transfer process, we can use $$G$$ to translate from st
 
 #### Architecture
 
-The generators $G$ and $F$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $D_X$ and $D_Y$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
+The generators $$G$$ and $$F$$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $$D_X$$ and $$D_Y$$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
 
 Detailed implementation of Resnet-based generator:
 
