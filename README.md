@@ -44,7 +44,7 @@ You should see an address pop on the terminal (http://127.0.0.1:4000/CS188-Proje
 
 1. Create a folder with your team id under ```./assets/images/your-teamid```, you will use this folder to store all the images in your project.
 
-2. Copy the template at ```./_posts/2024-01-01-team00-instruction-to-post.md``` and rename it with format "24W-teamXX-projectshortname.md" under ```./_posts/```, for example, **2024-01-01-team01-object-detection.md**
+2. Copy the template at ```./_posts/2024-01-01-team00-instruction-to-post.md``` and rename it with format "yyyy-mm-dd-teamXX-projectshortname.md" under ```./_posts/```, for example, **2024-01-01-team01-object-detection.md**
 
 3. Check out the sample post we provide at https://ucladeepvision.github.io/CS188-Projects-2024Winter/ and the source code at https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2024Winter/main/_posts/2024-01-01-team00-instruction-to-post.md as well as basic Markdown syntax at https://www.markdownguide.org/basic-syntax/
 
@@ -58,7 +58,7 @@ We will use git pull request to manage submissions.
 Once you've done, follow steps 3 and 4 in [pull-request-instruction](pull-request-instruction.md) to make a pull request BEFORE the deadline. Please make sure not to modify any file except your .md file and your images folder. We will merge the request after all submissions are received, and you should able to check your work in the project page on next week of each deadline.
 
 ## Deadlines  
-You should update your final blog post by making a pull request on March 17. 
+You should update your final blog post by making a pull request on March 22. 
 
 -----
 
