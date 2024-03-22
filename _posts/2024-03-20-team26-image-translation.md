@@ -44,6 +44,63 @@ To preserve cycle consistency, we want to make sure when our network translates 
 
 Now, in the actual style transfer process, we can use $G$ to translate from style $X$ to style $Y$, and $F$ to translate from style $Y$ to style $X$.
 
+### Architecture
+
+The generators $G$ and $F$ can be any architecture that can map an image from one domain to another. The implmentation provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $D_X$ and $D_Y$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
+
+
+Detailed implementation of Resnet-based generator:
+
+```python
+"""
+Parameters:
+    input_nc (int)      -- the number of channels in input images
+    output_nc (int)     -- the number of channels in output images
+    ngf (int)           -- the number of filters in the last conv layer
+    norm_layer          -- normalization layer
+    use_dropout (bool)  -- if use dropout layers
+    n_blocks (int)      -- the number of ResNet blocks
+    padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
+"""
+assert(n_blocks >= 0)
+super(ResnetGenerator, self).__init__()
+if type(norm_layer) == functools.partial:
+    use_bias = norm_layer.func == nn.InstanceNorm2d
+else:
+    use_bias = norm_layer == nn.InstanceNorm2d
+
+model = [nn.ReflectionPad2d(3),
+          nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0, bias=use_bias),
+          norm_layer(ngf),
+          nn.ReLU(True)]
+
+n_downsampling = 2
+for i in range(n_downsampling):  # add downsampling layers
+    mult = 2 ** i
+    model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=2, padding=1, bias=use_bias),
+              norm_layer(ngf * mult * 2),
+              nn.ReLU(True)]
+
+mult = 2 ** n_downsampling
+for i in range(n_blocks):       # add ResNet blocks
+
+    model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+
+for i in range(n_downsampling):  # add upsampling layers
+    mult = 2 ** (n_downsampling - i)
+    model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
+                                  kernel_size=3, stride=2,
+                                  padding=1, output_padding=1,
+                                  bias=use_bias),
+              norm_layer(int(ngf * mult / 2)),
+              nn.ReLU(True)]
+model += [nn.ReflectionPad2d(3)]
+model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
+model += [nn.Tanh()]
+
+self.model = nn.Sequential(*model)
+```
+
 ### Training
 
 To train Gan 1 $(G, D_Y)$, where $G$ is a mapping from $X$ to $Y$ and $D_Y$ is a discriminator for $Y$, we use the following loss function:
