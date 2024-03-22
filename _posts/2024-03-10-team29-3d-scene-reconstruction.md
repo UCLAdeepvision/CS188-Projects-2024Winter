@@ -7,7 +7,7 @@ date: 2024-03-10
 ---
 
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+> In this report, we first introduce the topic of 3D scene representation as a whole. We briefly go over classical approaches and explain some of the common issues preventing them from rendering a high-quality scene. Then, we discuss three deep learning based approaches in more depth, taking Neural Radiance Fields (NeRFs) as our starting point. Instant NGP improves upon the original NeRF paper by suggesting a hash encoding of inputs to the MLP that speeds up training at least 200x. Zero-1-to-3 combines NeRF and diffusion to offer extraordinary zero-shot scene synthesis abilities. Lastly, we give the most attention to 3D Gaussian Splatting, which represents the entire scene as a set of 3D Gaussians, enabling efficient training time and real-time scene rendering.
 
 
 <!--more-->
@@ -153,7 +153,7 @@ Figure 8 below, provided within the Instant NGP paper, documents comparison of P
 We can see that Instant NGP is competitive with NeRF after just 15 seconds of training and competitive with mip-NeRF after 1 to 5 minutes of training, while NeRF-based approaches train in the order of hours. This shows that Instant NGP provides immense upside over original NeRF by improving the training time at least 200x. 
 
 ## Zero-1-to-3
-This 3D scene rendering approach is vastly different from the idea of NeRFs. [Liu et. al](https://arxiv.org/abs/2303.11328) propose a framework for changing the camera viewpoint of an object given just a single RGB image. It capitalizes on the geometric priors of large diffusion models, which show extraordinary zero-shot abilities when generating diverse images from text descriptions. Their pre-trained diffusion model is conditionally finetuned on a synthetic dataset to learn controls of the relative camera viewpoint, which allow new images to be generated of the same object under a specified camera transformation. This viewpoint-conditioned diffusion approach can further be used for the task of 3D reconstruction from a single image.
+This 3D scene rendering combines the ideas introduced by NeRFs with diffusion. [Liu et. al](https://arxiv.org/abs/2303.11328) propose a framework for changing the camera viewpoint of an object given just a single RGB image. It capitalizes on the geometric priors of large diffusion models, which show extraordinary zero-shot abilities when generating diverse images from text descriptions. Their pre-trained diffusion model is conditionally finetuned on a synthetic dataset to learn controls of the relative camera viewpoint, which allow new images to be generated of the same object under a specified camera transformation. This viewpoint-conditioned diffusion approach can further be used for the task of 3D reconstruction from a single image.
 
 Given a single RGB image $$x \in \mathbb{R}^{H \times W \times 3}$$, the approach strives to synthesize an image of the object from a different camera viewpoint. Taking $$R \in \mathbb{R}^{3 \times 3}$$ and $$T \in \mathbb{R}^3$$ to be the camera rotation and camera translation of the desired viewpoint, respectively, we want to learn a model $$f$$ that synthesizes a new image under this camera transformation: 
 
