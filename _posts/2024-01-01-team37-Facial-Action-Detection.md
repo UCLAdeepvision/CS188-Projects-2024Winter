@@ -113,21 +113,23 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 {: style="width: 800px; max-width: 100%;"}
 *Fig 3. Architecture of JAA-Net Adaptive Attention Learning Module* [4].
 
-The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
+TThe loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
 
 $$
 E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} + (1 - v_{ik}) \log (1 - \hat{v}_{ik}) \right]
 $$
 
-where 
-- $$\(\hat{v}_{ik}\)$$ is the refined attention weight of the k-th point for the i-th AU
-- $$\(n_{am} = l/4 \times l/4\)$$ is the number of points in each attention map. 
+where:
+- \( \hat{v}_{ik} \) is the refined attention weight of the \( k \)-th point for the \( i \)-th AU.
+- \( n_{am} = \frac{l}{4} \times \frac{l}{4} \) is the number of points in each attention map.
+
 #### Facial AU Detection
 In the final stage of JAA-Net, assembled local AU features are combined with the face alignment feature and the global feature. This amalgamation is then fed into a network comprising two fully-connected layers with dimensions of \( d \) and \( 2n_{\text{au}} \), respectively. Subsequently, a softmax layer is employed to predict the probability of occurrence for each AU. This approach effectively addresses data imbalance issues commonly encountered in AU detection tasks, ensuring robust and accurate predictions across all AU classes. The formula of softmax loss is shown below:
 
 $$
-E_{\text{softmax}} = -\frac{1}{n_{au}} \sum_{i=1}^{n_{au}} w_i \left[ p_i \log \hat{p}_i + (1 - p_i) \log (1 - \hat{p}_i) \right]
+E_{\text{align}} = \frac{1}{2d_0^2} \sum_{j=1}^{n_{\text{align}}} \left( (y_{2j-1} - \hat{y}_{2j-1})^2 + (y_{2j} - \hat{y}_{2j})^2 \right)
 $$
+
 
 where:
 - $$\(p_i\)$$ denotes the ground-truth probability of occurrence for the i-th AU, which is 1 if occurrence and 0 otherwise.
