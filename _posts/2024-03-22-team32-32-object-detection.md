@@ -154,6 +154,57 @@ As seen in Figure 9, the architecture of GLENet can be split into the inference 
 
 GLENet is integrated with existing 3D object detectors to transform deterministic models into probabilistic models by representing the detection head and ground-truth bounding boxes with probability distributions. The model was integrated with the Voxel R-CNN framework and evaluated on the KITTI test set, which proved to greatly surpass most state-of-the-art detection methods in performance. It has been shown to significantly increase the localization reliability and detection accuracy of models, which is desirable for real-world applications. However, while GLENet is a powerful framework, some drawbacks include high complexity and computational costs, the lack of true distribution information, and the limited ability to generalize to more extensive datasets. [2]
 
+## Implementation: VoxelNet
+We decided to implement VoxelNet using the KITTI dataset. We started by downloading the KITTI dataset's Velodyne point clouds, training labels, camera calibration information, and left color images.
+When training we divide the 3D point cloud space into equally spaced voxels. Then we use random sampling to determine which sections are sampled to save computationally and reduce point imbalance.
+Then we augmented the selected points before training.
+The fully connected neural network consists of a linear layer, batch normalization, and ReLu layer. Then, through element-wise max pooling we determine the locally aggregated features. This is then aggregated with point-wise features.
+We use the convolutional middle layers to shrink the feature map to a fourth of its size.
+These layers are brought together in a region proposal network with 3 blocks of layers.[5]
+```
+class VFELayer(object):
+    def __init__(self, out_channels, name):
+        super(VFELayer, self).__init__()
+        self.units = int(out_channels / 2)
+        with tf.variable_scope(name, reuse=tf.AUTO_REUSE) as scope:
+            self.dense = tf.layers.Dense(
+                self.units, tf.nn.relu, name='dense', _reuse=tf.AUTO_REUSE, _scope=scope)
+            self.batch_norm = tf.layers.BatchNormalization(
+                name='batch_norm', fused=True, _reuse=tf.AUTO_REUSE, _scope=scope)
+    def apply(self, inputs, mask, training):
+        pointwise = self.batch_norm.apply(self.dense.apply(inputs), training)
+        aggregated = tf.reduce_max(pointwise, axis=1, keep_dims=True)
+        repeated = tf.tile(aggregated, [1, cfg.VOXEL_POINT_COUNT, 1])
+        concatenated = tf.concat([pointwise, repeated], axis=2)
+        mask = tf.tile(mask, [1, 1, 2 * self.units])
+        concatenated = tf.multiply(concatenated, tf.cast(mask, tf.float32))
+        return concatenated
+
+class ConvMiddleLayer(tf.keras.layers.Layer):
+    def __init__(self, out_shape):
+      super(ConvMiddleLayer, self).__init__()
+      self.out_shape = out_shape
+      self.conv1 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format="channels_first", padding="VALID")
+      self.conv2 = tf.keras.layers.Conv3D(64, (3,3,3), (1,1,1), data_format="channels_first", padding="VALID")
+      self.conv3 = tf.keras.layers.Conv3D(64, (3,3,3), (2,1,1), data_format="channels_first", padding="VALID")
+      self.bn1 = tf.keras.layers.BatchNormalization(trainable=True)
+      self.bn2 = tf.keras.layers.BatchNormalization(trainable=True)
+      self.bn3 = tf.keras.layers.BatchNormalization(trainable=True)
+    def call(self, input):
+      out = tf.pad(input, [(0,0)]*2 + [(1,1)]*3)
+      out = tf.nn.relu(self.bn1(self.conv1(out)))
+
+      out = tf.pad(out, [(0,0)]*3 + [(1,1)]*2)
+      out = tf.nn.relu(self.bn2(self.conv2(out)))
+
+      out = tf.pad(out, [(0,0)]*2 + [(1,1)]*3)
+      out = tf.nn.relu(self.bn3(self.conv3(out)))
+      return tf.reshape(out, self.out_shape)
+```
+![VoxelNet_result]({{ '/assets/images/31/voxelnet_result.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 10. VoxelNet Object Detection Result.*[5].
+
 ## Results/Comparison
 
 The models discussed above were evaluated on the KITTI server and compared against the 3D and BEV average precision benchmarks with an IoU threshold of 0.7. They were conducted on the car category of this dataset with three difficulty levels in the evaluation: easy, medium, and hard. We compare the results of these models upon the KITTI Cars Easy dataset below. Results are obtained from the respective journal articles.
@@ -195,5 +246,7 @@ There has been significant progress made in the field of 3D object detection thr
 [3] Zheng, W., Tang, W., Jiang, L., & Fu, C.-W. (2021, April 20). *SE-SSD: Self-Ensembling single-stage object detector from point cloud*. arXiv.Org. https://arxiv.org/abs/2104.09804
 
 [4] Zhou, Y., & Tuzel, O. (2017, November 17). *VoxelNet: End-to-End learning for point cloud based 3D object detection. arXiv.Org*. https://arxiv.org/abs/1711.06396
+
+[5] Adusumilli, G. (2020, September 18). Lidar Point-cloud based 3D object detection implementation with colab. Medium. https://medium.com/towards-data-science/lidar-point-cloud-based-3d-object-detection-implementation-with-colab-part-1-of-2-e3999ea8fdd4 
 
 ---
