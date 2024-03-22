@@ -101,9 +101,9 @@ $$
 
 
 where:
-- $$\(y_{2j-1}\)$$ and $$\(y_{2j}\)$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
-- $$\(\hat{y}_{2j-1}\)$$ and $$\(\hat{y}_{2j}\)$$ are the corresponding predicted results.
-- $$\(d_0\)$$ is the ground-truth inter-ocular distance for normalization.
+- $$y_{2j-1}$$ and $$y_{2j}$$ denote the ground-truth x-coordinate and y-coordinate of the j-th facial landmark.
+- $$\hat{y}_{2j-1}$$ and $$\hat{y}_{2j}$$ are the corresponding predicted results.
+- $$d_0$$ is the ground-truth inter-ocular distance for normalization.
 
 #### Global Feature Learning
 This module captures overall facial structure and texture information, providing crucial contextual information for AU detection. Its output, combined with the face alignment feature, contributes to the final AU detection process.
@@ -121,19 +121,19 @@ E_r = -\sum_{i=1}^{n_{au}} \sum_{k=1}^{n_{am}} \left[ v_{ik} \log \hat{v}_{ik} +
 $$
 
 where:
-- $$\( \hat{v}_{ik} \)$$ is the refined attention weight of the \( k \)-th point for the \( i \)-th AU.
-- $$\( n_{am} = \frac{l}{4} \times \frac{l}{4} \)$$ is the number of points in each attention map.
+- $$\hat{v}_{ik}$$ is the refined attention weight of the k-th point for the i-th AU.
+- $$n_{am} = \frac{l}{4} \times \frac{l}{4}$$ is the number of points in each attention map.
 
 #### Facial AU Detection
-In the final stage of JAA-Net, assembled local AU features are combined with the face alignment feature and the global feature. This amalgamation is then fed into a network comprising two fully-connected layers with dimensions of \( d \) and \( 2n_{\text{au}} \), respectively. Subsequently, a softmax layer is employed to predict the probability of occurrence for each AU. This approach effectively addresses data imbalance issues commonly encountered in AU detection tasks, ensuring robust and accurate predictions across all AU classes. The formula of softmax loss is shown below:
+In the final stage of JAA-Net, assembled local AU features are combined with the face alignment feature and the global feature. This amalgamation is then fed into a network comprising two fully-connected layers with dimensions of $$d$$ and $$2n_{\text{au}}$$, respectively. Subsequently, a softmax layer is employed to predict the probability of occurrence for each AU. This approach effectively addresses data imbalance issues commonly encountered in AU detection tasks, ensuring robust and accurate predictions across all AU classes. The formula of softmax loss is shown below:
 
 $$
 E_{\text{softmax}} = -\frac{1}{n_{au}} \sum_{i=1}^{n_{au}} w_i \left[ p_i \log \hat{p}_i + (1 - p_i) \log (1 - \hat{p}_i) \right]
 $$
 
 where:
-- $$\(p_i\)$$ denotes the ground-truth probability of occurrence for the i-th AU, which is 1 if occurrence and 0 otherwise.
-- $$ \(\hat{p}_i\) denotes the corresponding predicted probability of occurrence.
+- $$p_i$$ denotes the ground-truth probability of occurrence for the i-th AU, which is 1 if occurrence and 0 otherwise.
+- $$\hat{p}_i$$ denotes the corresponding predicted probability of occurrence.
 
 In some cases, some AUs appear rarely in training samples, for which the softmax loss often makes the network prediction strongly biased towards absence. To overcome this limitation, a weighted multi-label Dice coefficient loss is introduced:
 
@@ -141,7 +141,7 @@ $$
 E_{\text{dice}} = \frac{1}{n_{au}} \sum_{i=1}^{n_{au}} w_i \left( 1 - \frac{2p_i\hat{p}_i + \varepsilon}{p_i^2 + \hat{p}_i^2 + \varepsilon} \right)
 $$
 
-where $$\(\varepsilon\)$$ is the smooth term.
+where $$\varepsilon$$ is the smooth term.
 
 ### Loss Function
 JAA-Net introduces a novel local AU detection loss, enhancing the refinement of attention maps to extract more precise local features. This loss function is more effective than traditional methods, as it directly supervises attention map refinement and removes constraints on attention map differences, facilitating adaptive learning of attention.
@@ -150,7 +150,7 @@ $$
 E = E_{au} + \lambda_1 E_{align} + \lambda_2 E_r
 $$
 
-where $$\(E_{au}\)$$ and $$\(E_{align}\)$$ denote the losses of AU detection and face alignment, respectively, $$\(E_r\)$$ measures the difference before and after the attention refinement, which is a constraint to maintain the consistency, and $$\(\lambda_1\)$$ and $$\(\lambda_2\)$$ are trade-off parameters.
+where $$E_{au}$$ and $$E_{align}$$ denote the losses of AU detection and face alignment, respectively, $$E_r$$ measures the difference before and after the attention refinement, which is a constraint to maintain the consistency, and $$\lambda_1$$ and $$\lambda_2$$ are trade-off parameters.
 
 ### Advantage
 JAA-Net offers several advantages:
