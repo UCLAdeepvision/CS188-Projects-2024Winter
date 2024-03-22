@@ -11,8 +11,7 @@ date: 2024-03-22
 <!--more-->
 
 {: class="table-of-content"}
-
-- TOC
+* TOC
 {:toc}
 
 ## Main Content
@@ -38,24 +37,20 @@ Paired datasets are easier to train on, but they maybe hard to collect, especial
 
 ### Cycle-GAN
 
-Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
+Generative adversarial network (GAN) are deep learning frameworks that relies on a generator $$G$$ and a discriminator $$D$$. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
-![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [1].
+The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the ideaaaa is that our tralated image will preserve most of its semanics besides the style change.
 
-The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the idea is that our tralated image will preserve most of its semanics besides the style change.
-
-![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [1].
-
-To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $(G, D_Y)$ translating from style $X$ to style $Y$. Gan 2 $(F, D_X)$ translating from style $Y$ to style $X$. We additionally introduce a normalization term on the input image $I$ and the $F(G(I))$, the input image translated twice.
+To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
 
 ![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [1].
 ![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [1].
 
-Now, in the actual style transfer process, we can use $G$ to translate from style $X$ to style $Y$, and $F$ to translate from style $Y$ to style $X$.
+Now, in the actual style transfer process, we can use $$G$$ to translate from style $$X$$ to style $$Y$$, and $$F$$ to translate from style $$Y$$ to style $$X$$.
 
 #### Architecture
 
-The generators $G$ and $F$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $D_X$ and $D_Y$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
+The generators $$G$$ and $$F$$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations) .The discriminators $$D_X$$ and $$D_Y$$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
 
 Detailed implementation of Resnet-based generator:
 
@@ -111,13 +106,13 @@ self.model = nn.Sequential(*model)
 
 ![training-cycle-GAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [1].
 
-To train Gan 1 $(G, D_Y)$, where $G$ is a mapping from $X$ to $Y$ and $D_Y$ is a discriminator for $Y$, we use the following loss function:
+To train Gan 1 $$(G, D_Y)$$, where $$G$$ is a mapping from $$X$$ to $$Y$$ and $$D_Y$$ is a discriminator for $$Y$$, we use the following loss function:
 
 $$
-\mathcal{L}_{\text{GAN}}(G, D_T, X, Y) = \mathbb{E}_{y\ sim p_{\text{data}}(y)}[\log D_Y(y)] + \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log(1 - D_Y(G(x)))]
+\mathcal{L}_{\text{GAN}}(G, D_Y, X, Y) = \mathbb{E}_{y \sim p_{\text{data}}(y)}[\log D_Y(y)] + \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log(1 - D_Y(G(x)))]
 $$
 
-We want $G(x)$ to generate images similar to the distribution of $Y$, and we want $D_Y$ to distinguish between images generated by $G$ and images from $Y$. So we wan $G$ to minimize the loss and $D_Y$ to maximize the loss.
+We want $$G(x)$$ to generate images similar to the distribution of $$Y$$, and we want $$D_Y$$ to distinguish between images generated by $$G$$ and images from $$Y$$. So we wan $$G$$ to minimize the loss and $$D_Y$$ to maximize the loss.
 
 Additionally, to preserve cycle consistency, we need a cycle consistency loss:
 
@@ -125,7 +120,7 @@ $$
 \mathcal{L}_{\text{cyc}}(G, F) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\|F(G(x)) - x\|_1] + \mathbb{E}_{y \sim p_{\text{data}}(y)}[\|G(F(y)) - y\|_1]
 $$
 
-The idea is that for $x \in X$ and $y \in Y$, we want $F(G(x))$ to be similar to $x$ and $G(F(y))$ to be similar to $y$.
+The idea is that for $$x \in X$$ and $$y \in Y$$, we want $$F(G(x))$$ to be similar to $$x$$ and $$G(F(y))$$ to be similar to $$y$$.
 
 The overall obejctive function is then:
 
@@ -133,7 +128,7 @@ $$
 \mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}(G, D_Y, X, Y) + \mathcal{L}(F, D_X, Y, X) + \lambda \mathcal{L}_{\text{cyc}}(G, F)
 $$
 
-where $\lambda$ is a hyperparameter that controls the importance of the cycle consistency loss. And we hope to find $G^*, F^*$ where
+where $$\lambda$$ is a hyperparameter that controls the importance of the cycle consistency loss. And we hope to find $$G^*, F^*$$ where
 
 $$
 G^*, F^* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)
@@ -141,10 +136,52 @@ $$
 
 ### Stable Diffusion
 
-Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space. 
+Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space.
 
 Why might this be a good idea?  
 We can reduce the dimensionality with minimal loss of information! This makes training and image generation more efficient and allows for high-resolution image synthesis.
+
+### Diffusion Model
+
+Before diving into Stable Diffusion, we start by discussing the fundamental diffusion model. The diffusion model is a parameterized Markov chain trained using variational inference to produce samples matching the data after finite time [1]. The process it divided into two parts: the forward process which adds noise to the original image, and the backward process which gradually denoise the noisy input to get an image.
+
+![Diffusion]({{ '/assets/images/team26/diffusion.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 1. The diffusion and reverse illustrated as a directed graphical model* [1].
+
+In the forward pass, we add noise to the input image following a variance schedule $$\beta_1, ..., \beta_T$$. The approximate posterior (_diffusion process_) is defined as:
+
+$$
+q(\mathbf{x}_{1:T}|\mathbf{x}_0) := \prod_{t=1}^T q(\mathbf{x}_t|\mathbf{x}_{t-1})
+$$
+
+where
+
+$$
+q(\mathbf{x}_t|\mathbf{x}_{t-1}) := \mathcal{N}(\mathbf{x}_t; \sqrt{1 - \beta_t}\mathbf{x}_{t-1},\beta_t\mathbf{I})
+$$
+
+The quantity we are maximizing is the variational lower bound (VLB) as seen in VAE models.
+
+The backward denoising process obtains a joint distribution (_reverse process_), which is defined as a Markov chain with learned Gaussian transitions starting at $$p(\mathbf{x}_T) = \mathcal{N}(\mathbf{x}_T;\mathbf{0},\mathbf{I})$$:
+
+$$
+p_{\theta}(\mathbf{x}_{0:T}) := p(\mathbf{x}_T) \prod_{t=1}^T p_{\theta}(\mathbf{x}_{t-1}|\mathbf{x}_t)
+$$
+
+where
+
+$$
+p_{\theta}(\mathbf{x}_{t-1}|\mathbf{x}_t) := \mathcal{N}(\mathbf{x}_{t-1}; \mathbf{\mu}_{\theta}(\mathbf{x}_t, t), \Sigma_{\theta}(\mathbf{x}_t, t))
+$$
+
+During the backward process, instead of directly denoising the image, predicting the noise and subtracting it from the image turned out to be a more feasible approach.
+
+While the conventional diffusion model achieves satisfying results by generating high quality images, it directly operates in pixel space, making the training process expensive in terms of computational resources. The sequential evaluation for inference also made the model slow. In order to train on limited computational resources while sacrificing little loss in generated image quality and flexibility, we turn to the Latent Diffusion Model (LDM).
+
+### Latend Diffusion Model
+
+Instead of sampling from the pixel space, the Latent Diffusion Model samples from the latent space of a powerful pretrained autoencoder [2]. The autoencoder is universal, and is trained only once in order to apply multiple LDM trainings. The autoencoder is trained by combination of a perceptual loss and a patch-based adversarial objective [2] such that the reconstruction are confined to the image manifold and avoids blurriness if solely relying on pixel space losses. More formally, the 
 
 ### Training
 
@@ -293,14 +330,384 @@ accelerate launch train_text_to_image.py \
   --output_dir=${OUTPUT_DIR}
 ```
 
-We fine-tuned for 1000 epochs and 3000 epochs.
+We fine-tuned for 1000 epochs and 3000 epochs. We indeed saw improvement after fine-tuning, and 1000-step and 3000-step tuning did not show significant difference.
+
+### FID Score
+We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. 
+
+```bash
+base_datasets=("/home/zichunl/others/cs188_proj/monet2photo/testA")
+
+target_datasets=("/home/zichunl/others/cs188_proj/monet2photo/generated_pretrained" \
+    "/home/zichunl/others/cs188_proj/monet2photo/generated_monet_1000" \
+    "/home/zichunl/others/cs188_proj/monet2photo/generated_monet_3000" \
+    "/home/zichunl/others/cs188_proj/monet2photo/generated_cyclegan")
+
+base_names=("true_monet")
+target_names=("sd_pretrained" "sd_1000" "sd_3000" "cyclegan")
+
+npzs_path="/localhome/zichunl/fid"
+
+for i in ${!base_datasets[@]}; do
+    data=${base_datasets[i]}
+    name=${base_names[i]}
+    CUDA_VISIBLE_DEVICES=0 python fid_score.py $data /home/zichunl/fid/val_$name \
+    --save-stats --num-workers=8 --device=cuda
+done
+
+for i in ${!target_datasets[@]}; do
+    data=${target_datasets[i]}
+    name=${target_names[i]}
+    CUDA_VISIBLE_DEVICES=0 python fid_score.py $data /home/zichunl/fid/val_$name \
+    --save-stats --num-workers=8 --device=cuda
+done
+
+for base_name in ${base_names[@]}; do
+    for target_name in ${target_names[@]}; do
+        echo "$base_name and $target_name"
+        CUDA_VISIBLE_DEVICES=0 python fid_score.py \
+        $npzs_path/val_$base_name.npz $npzs_path/val_$target_name.npz \
+        --num-workers=8 --device=cuda
+    done
+done
+```
+
+```python
+"""Calculates the Frechet Inception Distance (FID) to evalulate GANs
+
+The FID metric calculates the distance between two distributions of images.
+Typically, we have summary statistics (mean & covariance matrix) of one
+of these distributions, while the 2nd distribution is given by a GAN.
+
+When run as a stand-alone program, it compares the distribution of
+images that are stored as PNG/JPEG at a specified location with a
+distribution given by summary statistics (in pickle format).
+
+The FID is calculated by assuming that X_1 and X_2 are the activations of
+the pool_3 layer of the inception net for generated samples and real world
+samples respectively.
+
+See --help to see further details.
+
+Code apapted from https://github.com/bioinf-jku/TTUR to use PyTorch instead
+of Tensorflow
+
+Copyright 2018 Institute of Bioinformatics, JKU Linz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+import os
+import pathlib
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+
+import numpy as np
+import torch
+import torchvision.transforms as TF
+from PIL import Image
+from scipy import linalg
+from torch.nn.functional import adaptive_avg_pool2d
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    # If tqdm is not available, provide a mock version of it
+    def tqdm(x):
+        return x
+
+from inception import InceptionV3
+
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument('--batch-size', type=int, default=50,
+                    help='Batch size to use')
+parser.add_argument('--num-workers', type=int,
+                    help=('Number of processes to use for data loading. '
+                          'Defaults to `min(8, num_cpus)`'))
+parser.add_argument('--device', type=str, default=None,
+                    help='Device to use. Like cuda, cuda:0 or cpu')
+parser.add_argument('--dims', type=int, default=2048,
+                    choices=list(InceptionV3.BLOCK_INDEX_BY_DIM),
+                    help=('Dimensionality of Inception features to use. '
+                          'By default, uses pool3 features'))
+parser.add_argument('--save-stats', action='store_true',
+                    help=('Generate an npz archive from a directory of samples. '
+                          'The first path is used as input and the second as output.'))
+parser.add_argument('path', type=str, nargs=2,
+                    help=('Paths to the generated images or '
+                          'to .npz statistic files'))
+
+IMAGE_EXTENSIONS = {'bmp', 'jpg', 'jpeg', 'pgm', 'png', 'ppm',
+                    'tif', 'tiff', 'webp', 'JPEG'}
+
+
+class ImagePathDataset(torch.utils.data.Dataset):
+    def __init__(self, files, transforms=None):
+        self.files = files
+        self.transforms = transforms
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, i):
+        path = self.files[i]
+        img = Image.open(path).convert('RGB') #.resize((512, 512))
+        if self.transforms is not None:
+            img = self.transforms(img)
+        return img
+
+
+def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
+                    num_workers=1):
+    """Calculates the activations of the pool_3 layer for all images.
+
+    Params:
+    -- files       : List of image files paths
+    -- model       : Instance of inception model
+    -- batch_size  : Batch size of images for the model to process at once.
+                     Make sure that the number of samples is a multiple of
+                     the batch size, otherwise some samples are ignored. This
+                     behavior is retained to match the original FID score
+                     implementation.
+    -- dims        : Dimensionality of features returned by Inception
+    -- device      : Device to run calculations
+    -- num_workers : Number of parallel dataloader workers
+
+    Returns:
+    -- A numpy array of dimension (num images, dims) that contains the
+       activations of the given tensor when feeding inception with the
+       query tensor.
+    """
+    model.eval()
+
+    if batch_size > len(files):
+        print(('Warning: batch size is bigger than the data size. '
+               'Setting batch size to data size'))
+        batch_size = len(files)
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+    transform = TF.Compose([
+        TF.Resize((256, 256)),
+        TF.ToTensor(),
+        TF.Normalize(mean=mean, std=std)
+    ])
+
+    dataset = ImagePathDataset(files, transforms=transform)
+    dataloader = torch.utils.data.DataLoader(dataset,
+                                             batch_size=batch_size,
+                                             shuffle=False,
+                                             drop_last=False,
+                                             num_workers=num_workers)
+
+    pred_arr = np.empty((len(files), dims))
+
+    start_idx = 0
+
+    for batch in tqdm(dataloader):
+        batch = batch.to(device)
+
+        with torch.no_grad():
+            pred = model(batch)[0]
+
+        # If model output is not scalar, apply global spatial average pooling.
+        # This happens if you choose a dimensionality not equal 2048.
+        if pred.size(2) != 1 or pred.size(3) != 1:
+            pred = adaptive_avg_pool2d(pred, output_size=(1, 1))
+
+        pred = pred.squeeze(3).squeeze(2).cpu().numpy()
+
+        pred_arr[start_idx:start_idx + pred.shape[0]] = pred
+
+        start_idx = start_idx + pred.shape[0]
+
+    return pred_arr
+
+
+def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-4):
+    """Numpy implementation of the Frechet Distance.
+    The Frechet distance between two multivariate Gaussians X_1 ~ N(mu_1, C_1)
+    and X_2 ~ N(mu_2, C_2) is
+            d^2 = ||mu_1 - mu_2||^2 + Tr(C_1 + C_2 - 2*sqrt(C_1*C_2)).
+
+    Stable version by Dougal J. Sutherland.
+
+    Params:
+    -- mu1   : Numpy array containing the activations of a layer of the
+               inception net (like returned by the function 'get_predictions')
+               for generated samples.
+    -- mu2   : The sample mean over activations, precalculated on an
+               representative data set.
+    -- sigma1: The covariance matrix over activations for generated samples.
+    -- sigma2: The covariance matrix over activations, precalculated on an
+               representative data set.
+
+    Returns:
+    --   : The Frechet Distance.
+    """
+
+    mu1 = np.atleast_1d(mu1)
+    mu2 = np.atleast_1d(mu2)
+
+    sigma1 = np.atleast_2d(sigma1)
+    sigma2 = np.atleast_2d(sigma2)
+
+    assert mu1.shape == mu2.shape, \
+        'Training and test mean vectors have different lengths'
+    assert sigma1.shape == sigma2.shape, \
+        'Training and test covariances have different dimensions'
+
+    diff = mu1 - mu2
+
+    # Product might be almost singular
+    covmean, _ = linalg.sqrtm(sigma1.dot(sigma2), disp=False)
+    if not np.isfinite(covmean).all():
+        msg = ('fid calculation produces singular product; '
+               'adding %s to diagonal of cov estimates') % eps
+        print(msg)
+        offset = np.eye(sigma1.shape[0]) * eps
+        covmean = linalg.sqrtm((sigma1 + offset).dot(sigma2 + offset))
+
+    # Numerical error might give slight imaginary component
+    if np.iscomplexobj(covmean):
+        if not np.allclose(np.diagonal(covmean).imag, 0, atol=1e-3):
+            m = np.max(np.abs(covmean.imag))
+            raise ValueError('Imaginary component {}'.format(m))
+        covmean = covmean.real
+
+    tr_covmean = np.trace(covmean)
+
+    return (diff.dot(diff) + np.trace(sigma1)
+            + np.trace(sigma2) - 2 * tr_covmean)
+
+
+def calculate_activation_statistics(files, model, batch_size=50, dims=2048,
+                                    device='cpu', num_workers=1):
+    """Calculation of the statistics used by the FID.
+    Params:
+    -- files       : List of image files paths
+    -- model       : Instance of inception model
+    -- batch_size  : The images numpy array is split into batches with
+                     batch size batch_size. A reasonable batch size
+                     depends on the hardware.
+    -- dims        : Dimensionality of features returned by Inception
+    -- device      : Device to run calculations
+    -- num_workers : Number of parallel dataloader workers
+
+    Returns:
+    -- mu    : The mean over samples of the activations of the pool_3 layer of
+               the inception model.
+    -- sigma : The covariance matrix of the activations of the pool_3 layer of
+               the inception model.
+    """
+    act = get_activations(files, model, batch_size, dims, device, num_workers)
+    mu = np.mean(act, axis=0)
+    sigma = np.cov(act, rowvar=False)
+    return mu, sigma
+
+
+def compute_statistics_of_path(path, model, batch_size, dims, device,
+                               num_workers=1):
+    if path.endswith('.npz'):
+        with np.load(path) as f:
+            m, s = f['mu'][:], f['sigma'][:]
+    else:
+        path = pathlib.Path(path)
+        files = sorted([file for ext in IMAGE_EXTENSIONS 
+                        for file in path.glob('**/*.{}'.format(ext))]) # change to '*.{}' for class-wise fid
+        m, s = calculate_activation_statistics(files, model, batch_size,
+                                               dims, device, num_workers)
+
+    return m, s
+
+
+def calculate_fid_given_paths(paths, batch_size, device, dims, num_workers=1):
+    """Calculates the FID of two paths"""
+    for p in paths:
+        if not os.path.exists(p):
+            raise RuntimeError('Invalid path: %s' % p)
+
+    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
+
+    model = InceptionV3([block_idx]).to(device)
+
+    m1, s1 = compute_statistics_of_path(paths[0], model, batch_size,
+                                        dims, device, num_workers)
+    m2, s2 = compute_statistics_of_path(paths[1], model, batch_size,
+                                        dims, device, num_workers)
+    fid_value = calculate_frechet_distance(m1, s1, m2, s2)
+
+    return fid_value
+
+
+def save_fid_stats(paths, batch_size, device, dims, num_workers=1):
+    """Calculates the FID of two paths"""
+    if not os.path.exists(paths[0]):
+        raise RuntimeError('Invalid path: %s' % paths[0])
+
+    if os.path.exists(paths[1]):
+        raise RuntimeError('Existing output file: %s' % paths[1])
+
+    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
+
+    model = InceptionV3([block_idx]).to(device)
+
+    print(f"Saving statistics for {paths[0]}")
+
+    m1, s1 = compute_statistics_of_path(paths[0], model, batch_size,
+                                        dims, device, num_workers)
+
+    np.savez_compressed(paths[1], mu=m1, sigma=s1)
+
+
+def main():
+    args = parser.parse_args()
+
+    if args.device is None:
+        device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
+    else:
+        device = torch.device(args.device)
+
+    if args.num_workers is None:
+        try:
+            num_cpus = len(os.sched_getaffinity(0))
+        except AttributeError:
+            # os.sched_getaffinity is not available under Windows, use
+            # os.cpu_count instead (which may not return the *available* number
+            # of CPUs).
+            num_cpus = os.cpu_count()
+
+        num_workers = min(num_cpus, 8) if num_cpus is not None else 0
+    else:
+        num_workers = args.num_workers
+
+    if args.save_stats:
+        save_fid_stats(args.path, args.batch_size, device, args.dims, num_workers)
+        return
+    sum_fid, total = 0, 0
+    path = args.path
+    fid_value = calculate_fid_given_paths(args.path,
+                                          args.batch_size,
+                                          device,
+                                          args.dims,
+                                          num_workers)
+    print('FID: ', fid_value)
+
+if __name__ == '__main__':
+    main()
+```
 
 ## Reference
 
-Please make sure to cite properly in your work, for example:
+[1] Ho, J., Jain, A. N., & Abbeel, P. (2020). Denoising diffusion probabilistic models. _arXiv (Cornell University)_.
 
-[1] Yuan, Yuan, et al. "Unsupervised image super-resolution using cycle-in-cycle generative adversarial networks." Proceedings of the IEEE conference on computer vision and pattern recognition workshops. 2018.
-
-[2] Kumar, Ankur. "The Illustrated Image Captioning using transformers." ankur3107.github.io. 2022.
+[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
 
 ---
