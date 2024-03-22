@@ -290,13 +290,36 @@ and the linear networks on the stereo-temporal architecture.
 
 ## Training
 
+All networks were trained with SGD with momentum=0.9, and used a batch
+size of 10. Networks were trained for 20 epochs, except for
+mono-temporal and stereo. To account for the additional parameters
+seen in mono-temporal and stereo, they were given 30 epochs to
+train. Stereo-temporal was not given these 10 extra epochs due to
+compute time constraints and the max pooling used to reduce the
+parameter space.
+
+It should also be noted that each model required drastically different
+amounts of training time. Unfortunately, this was not tracked precisely, as this
+level of variance was not expected. Rough numbers are available below.
+
+| Model                 | Training Time |
+|-----------------------|---------------|
+| Mono                  | 10 Hours      |
+| Stereo                | 16 Hours      |
+| Mono, last 3 frames   | 1 Day         |
+| Stereo, Last 3 Frames | 2 Days        |
+
+While some of this is due to the inefficiency in concatenation and
+preparing the forward pass, it suggests that VGGNet and the increased
+size linear layers increase the time of the forward and backward
+pass. This is a concern for self driving vehicles, where 3D bounding
+box information needs to be available in real time.
 
 # Results
 
 
 # Discussion
 
-Test
 
 ## Ego-net vs Deep3dBox
 
