@@ -8,7 +8,8 @@ date: 2024-03-11
 
 
 > 3D object detection is a very important task that is critical to many current and relevant problems. It has numerous applications for developing car technology involving features such as obstacle avoidance and autonomous driving. Another valuable application is medical imaging, specifically brain tumor segmentation. 
-Our paper explores the most recent advances in 3D object detection using point clouds. Doing this, we acknowledge that work in this area is less progressed than with 2D object detection. We analyze performance and model design, evaluating models with the widely used KITTI dataset as a common benchmark. TODO: update
+Our paper explores the most recent advances in 3D object detection using point clouds. Doing this, we acknowledge that work in this area is less progressed than with 2D object detection. We analyze performance and model design, evaluating prominent 3D object detection models VoxelNet, PointRCNN, SE-SSN, and GLENet with the widely used KITTI dataset as a common benchmark.
+In our examination, we determined that VoxelNet, as one of the earlier models in 3D object detection, had a poorer performance than the later advancements. After VoxelNet, PointRCNN performs next best, then SE-SSN, and then GLENet. With each development, we discuss how differences in design decisions and architecture contribute to improved average precision and inference times. These advancements in 3D object detection show a lot of promise and potential for future computer vision applications.  
 
 <!--more-->
 {: class="table-of-content"}
