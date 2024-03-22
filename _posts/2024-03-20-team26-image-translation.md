@@ -103,7 +103,7 @@ bash ./datasets/download_cyclegan_dataset.sh monet2photo
 # train the model
 python train.py --dataroot ./datasets/monet2photo --name monet_cyclegan --model cycle_gan
 # test the model
-python test.py --dataroot ./datasets/monet2photo --name maps_cyclegan --model cycle_gan
+python train.py --dataroot ./datasets/monet2photo/ --name monet_cyclegan --model cycle_gan --batch_size 8 --epoch_count=1 --n_epochs=50 --n_epochs_decay=50
 # download the pretrained model (style to monet)
 bash ./scripts/download_cyclegan_model.sh style_monet
 # test the pretrained model
