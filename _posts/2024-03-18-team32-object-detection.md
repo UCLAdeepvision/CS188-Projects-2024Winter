@@ -137,7 +137,7 @@ The model utilizes a Hybrid discrete-continuous loss function
 Geometric constraints from 2D bounding box
 for training. 
 
-![EGO10]({{ '/assets/images/32/ed1.png' | relative_url }})
+![EGO10]({{ '/assets/images/32/3d1.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
 
@@ -183,7 +183,7 @@ necessary correction to θray (column 2), and dimensions based on the ITTI objec
 
 Orientation Loss:
 
-![EGO10]({{ '/assets/images/32/3d6.png' | relative_url }})
+![EGO10]({{ '/assets/images/32/3d7.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
 
@@ -232,7 +232,9 @@ The model was also able to demonstrate the "Attention" where it focuses on featu
 
 # Discussion
 
-## Comparison between Ego-net and 3D Bounding Box Estimation based method
+Test
+
+## Ego-net vs Deep3dBox
 
 Ego-net (the IGR based method), being based on the work of the earlier 3D Bound box estimation based method, performed better.
 
