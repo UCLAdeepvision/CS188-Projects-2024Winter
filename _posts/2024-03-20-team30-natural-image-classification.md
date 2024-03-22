@@ -117,64 +117,14 @@ configuration = ViTConfig(
 model = ViTForImageClassification(configuration).to(device)
 
 ```
-
-As Hugging Face does not have the CoAtModel, we use an existing Pytorch implementation. Here is a snippet of the code. See the notebook (linked at the end) for the full code of all models and training.
-
-
-```
-class CoAtNet(nn.Module):
-    def __init__(self, image_size, in_channels, num_blocks, channels, num_classes=1000, block_types=['C', 'C', 'T', 'T']):
-        super().__init__()
-        ih, iw = image_size
-        block = {'C': MBConv, 'T': Transformer}
-
-
-        self.s0 = self._make_layer(
-            conv_3x3_bn, in_channels, channels[0], num_blocks[0], (ih // 2, iw // 2))
-        self.s1 = self._make_layer(
-            block[block_types[0]], channels[0], channels[1], num_blocks[1], (ih // 4, iw // 4))
-        self.s2 = self._make_layer(
-            block[block_types[1]], channels[1], channels[2], num_blocks[2], (ih // 8, iw // 8))
-        self.s3 = self._make_layer(
-            block[block_types[2]], channels[2], channels[3], num_blocks[3], (ih // 16, iw // 16))
-        self.s4 = self._make_layer(
-            block[block_types[3]], channels[3], channels[4], num_blocks[4], (ih // 32, iw // 32))
-
-
-        self.pool = nn.AvgPool2d(ih // 32, 1)
-        self.fc = nn.Linear(channels[-1], num_classes, bias=False)
-
-
-    def forward(self, pixel_values, label):
-        x = self.s0(pixel_values)
-        x = self.s1(x)
-        x = self.s2(x)
-        x = self.s3(x)
-        x = self.s4(x)
-
-
-        x = self.pool(x).view(-1, x.shape[1])
-        x = self.fc(x)
-        return x
-
-
-    def _make_layer(self, block, inp, oup, depth, image_size):
-        layers = nn.ModuleList([])
-        for i in range(depth):
-            if i == 0:
-                layers.append(block(inp, oup, image_size, downsample=True))
-            else:
-                layers.append(block(oup, oup, image_size))
-        return nn.Sequential(*layers)
-```
-### Results
-![YOLO]({{ 'assets/images/30/results1.png' | relative_url }})
+### ResNet results
+![YOLO]({{ 'assets/images/30/results1new.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*{'test_loss': 1.649795651435852, 'test_accuracy': 0.4512101910828025, 'test_runtime': 365.9368, 'test_samples_per_second': 10.726, 'test_steps_per_second': 1.342}*.
 
-![YOLO]({{ 'assets/images/30/results2.png' | relative_url }})
+### ViT results
+
+![YOLO]({{ 'assets/images/30/results2new.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*{'test_loss': 1.167932152748108, 'test_accuracy': 0.6178343949044586, 'test_runtime': 389.9207, 'test_samples_per_second': 10.066, 'test_steps_per_second': 1.259}*.
 
 ### Code
 The full code for the experiments can be found here
