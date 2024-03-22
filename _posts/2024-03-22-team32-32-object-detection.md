@@ -85,7 +85,7 @@ Mean average precision is a metric that evaluates the trade-offs between precisi
 $$mAP = \frac{1}{n}\sum_{i}^{n}{AP_i}$$
 
 ### Datasets
-The KITTI dataset is one of the most commonly used benchmark datasets in 3D object detection tasks, particularly for autonomous driving. It is composed of six hours of traffic scenario recordings, which were recorded from a camera mounted on top of a car. It is a diverse dataset that includes a variety of real-world scenarios which vary from urban to rural driving conditions, freeway to local traffic, and static to dynamic objects. The dataset also includes 3D annotated ground-truth bounding boxes which are labeled ‘Car’, ‘Pedestrian’, ‘Cyclist’, ‘Truck’, etc., which are useful for training and testing 3D object detection models.
+The KITTI dataset is one of the most commonly used benchmark datasets in 3D object detection tasks, particularly for autonomous driving. It is composed of six hours of traffic scenario recordings, which were recorded from a camera mounted on top of a car. It is a diverse dataset that includes a variety of real-world scenarios which vary from urban to rural driving conditions, freeway to local traffic, and static to dynamic objects. The KITTI 3D object detection dataset consists of 3713 training images, 3769 validation images, and 7518 testing images. This data set includes 3D annotated ground-truth bounding boxes which are labeled ‘Car’, ‘Pedestrian’, and ‘Cyclist’. The dataset is divided into ‘Easy’, ‘Medium’, and ‘Hard’ categories based on bounding box size, level of occlusion, and truncation percentages.
 
 ## Models
 ### VoxelNet
@@ -138,9 +138,7 @@ Overall, at each iteration during training, the student SSD is optimized with th
 The advantages of SE-SSD include a simpler architecture that requires fewer computational resources since it is a single-stage object detector rather than a two-stage object detector. It is also better at generalization and the results achieve state-of-the-art performance in accuracy and efficiency for object detection from point clouds. However, there are some disadvantages including the complexity of the self-ensembling technique which may lead to longer training times. SE-SSD also requires additional hyperparameters and is sensitive to erroneous predictions during the training process. [3]
 
 ### GLENet
-Many traditional 3D object detection architectures face challenges with accurately detecting objects in ambiguous scenarios. Oftentimes, ground-truth annotations are inaccurate or inconsistent in situations involving occluded objects, incomplete LiDAR data, or subjective data labeling errors. These traditional models take a deterministic approach, where they do not account for uncertainty during learning, which poses the issue of vulnerability to ambiguous ground-truth annotations. 
-
-GLENet, developed by Zhang et al aims to address the uncertain and complex nature of 3D object ground-truth annotations through a probabilistic approach as opposed to a deterministic one. It is a generative deep learning framework derived from conditional variational autoencoders, and it improves upon robustness of object detectors by introducing uncertainty. 
+GLENet, developed by Zhang et al aims to address the uncertain and complex nature of 3D object ground-truth annotations through a probabilistic approach as opposed to a deterministic one. Traditional 3D object detection architectures take a deterministic approach and face challenges in situations involving occluded objects, incomplete LiDAR data, or subjective data labeling errors. GLENet on the other hand is a generative deep learning framework derived from conditional variational autoencoders that improves upon the robustness of object detectors by introducing label uncertainty.
 
 GLENet accounts for variation in bounding boxes by mapping point clouds to multiple potential ground truth bounding boxes. The label uncertainty of each object is generated based on the variance of the distribution of its potential ground-truth bounding boxes. As seen in Figure 8, GLENet predicts a range of bounding boxes for each 3D point cloud. For incomplete point clouds with 1 or 5 points, there is higher variance in the bounding boxes and thus a higher label uncertainty. For more complete point clouds with 335 or 693 points, there is lower variance and more consistent bounding boxes, resulting in a lower label uncertainty.
 
@@ -157,14 +155,6 @@ Conditional variational autoencoders (CVAE) are used in this context to generate
 As seen in Figure 9, the architecture of GLENet can be split into the inference process and the training process. During the inference process, a point cloud C is taken in as the input, and the sampling process is performed to output a variety of plausible bounding boxes. The input is first passed into the prior network, which consists of PointNet and MLP layers, to predict the mean and standard deviation of the Gaussian distribution. Context information outputted from the context encoder is then concatenated with multiple samples of the distribution and passed into a prediction network. The prediction network takes the concatenated inputs and passes them through MLP layers to predict the shape and size, position, and orientation of bounding boxes for each sample. Furthermore, during the training process, a point cloud C and its corresponding bounding box X are taken in as inputs. The bounding box is parameterized and concatenated with the point cloud and passed through the recognition network. Then, a combination of the context encoder, prior network, and prediction network are used to optimize parameters used for estimating the Gaussian distribution. The loss function is a combination of Huber loss, binary cross-entropy loss, and KL-divergence. 
 
 GLENet is integrated with existing 3D object detectors to transform deterministic models into probabilistic models by representing the detection head and ground-truth bounding boxes with probability distributions. The model was integrated with the Voxel R-CNN framework and evaluated on the KITTI test set, which proved to greatly surpass most state-of-the-art detection methods in performance. It has been shown to significantly increase the localization reliability and detection accuracy of models, which is desirable for real-world applications. However, while GLENet is a powerful framework, some drawbacks include high complexity and computational costs, the lack of true distribution information, and the limited ability to generalize to more extensive datasets. [2]
-
-## Own Experiments
-### Code Block
-```
-# This is a sample code block
-import torch
-print (torch.__version__)
-```
 
 ## Results/Comparison
 
