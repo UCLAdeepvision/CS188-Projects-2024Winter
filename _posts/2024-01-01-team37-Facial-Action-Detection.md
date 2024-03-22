@@ -15,7 +15,7 @@ Facial Action Detection is an important aspect in improving human and technology
 
 ![Illustration of Facial Pose Detection and Transformation]({{ 'assets/images/team37/Facial-Pose-Detection-and-Transformation.png' | relative_url}})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. Architecture of EAC-Net*
+*Fig 1. Illustration of Facial Pose Detection and Transformation*
 
 Visualizing the process helps when we talk about the usefulness of facial activity recognition in applications. A practical example of the change that facial action detection technology provides is shown in Figure 1. The technique starts with a source image and uses unique pose displacements that are applied to generate a target image with a changed posture. This procedure illustrates how capable these systems are in detecting, predicting, and modifying facial expressions, bringing up new possibilities for complex interactions between humans and machines. In applications that include sentiment analysis to current time responsive models in virtual worlds, the accuracy and flexibility shown here are essential.
 
@@ -32,9 +32,9 @@ In this project, we will be focused on the implementation and evaluation of thre
 #### Brief introduction of the key concepts of facial action units and detection.
 Facial Action Units (FAUs) are the basic concepts used to analyze and interpret a variety of emotions and facial movements. ⁤⁤It also serves as the basis for comprehending human face expressions. ⁤⁤The expression of emotions depends on the movement of a particular group of facial muscles, which corresponds to each FAU.
 
-![Illustration of Facial Pose Detection and Transformation]({{'assets/images/team37/Facial-Action-Detection.png'| relative_url}})
+![Illustration of Facial Action Detection]({{'assets/images/team37/Facial-Action-Detection.png'| relative_url}})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. Architecture of EAC-Net*
+*Fig 2. Facial Action Detection*
 
 A structured flowchart can help us see and comprehend the complex process of facial action recognition as we dive deeper into the details (see Figure 2). The flow chart illustrates how the source picture is transformed, with a focus on action unit (AU) detection and position adjustments, to create a target image that includes the detected face motions. Complex algorithms that analyze facial features and recognize patterns and changes related to various expressions are required to detect these action units. ⁤⁤In fields like emotion identification, for example, this technique is essential because precisely localizing these units might improve our comprehension of human interactions and emotions. ⁤⁤As technology develops, techniques for identifying these action units get more complex, utilizing sophisticated computer models to boost the precision and dependability of real-time analysis. 
 
@@ -49,7 +49,7 @@ The EAC-Net is a convolutional neural network (CNN) designed for Facial Action U
 
 ![EAC-Net-Architecture]({{ 'assets/images/team37/EAC-Net-Architecture.png'| relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. Architecture of EAC-Net* [1].
+*Fig 3. Architecture of EAC-Net* [1].
 
 #### Finetuning Network
 The base of the EAC-Net utilizes a fine-tuned pre-trained VGG 19-layer network. The lower-level convolutional layers (groups 1 and 2) are retained with their original parameters for extracting basic visual features. In contrast, the parameters of the higher-level convolutional layers (groups 3 and 4) are fine-tuned specifically for AU detection. This approach ensures the network has a solid foundation in understanding the input images at both basic and complex levels.
@@ -71,7 +71,7 @@ The attention map is a critical component of the E-Net, designed to give more at
 
 ![EAC-Net-Attention-Map]({{ 'assets/images/team37/EAC-Net-Attention-Map.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. Attention Map of EAC-Net* [1].
+*Fig 4. Attention Map of EAC-Net* [1].
 
 Formula for calculating weight of each pixel:
 $$
@@ -85,7 +85,7 @@ JAA-Net, Joint learning and Adaptive Attention Network, presents an approach to 
 
 ![JAA-Net Architecture Framework]({{'assets/images/team37/JAA-Net-Architecture.png'| relative_url}})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 3. Architecture of JAA-Net* [4].
+*Fig 5. Architecture of JAA-Net* [3].
 
 ### Structure
 JAA-Net is composed of several interconnected modules:
@@ -112,7 +112,7 @@ The core of AU detection in JAA-Net, this module refines the attention map of ea
 
 ![JAA-Net Adaptive Attention Learning Architecture]({{'assets/images/team37/JAA-Net-Adaptive-Attention-Learning.png'| relative_url}})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 3. Architecture of JAA-Net Adaptive Attention Learning Module* [4].
+*Fig 6. Architecture of JAA-Net Adaptive Attention Learning Module* [3].
 
 The loss essentially measures the sigmoid cross entropy between the refined attention maps and the initial attention maps, formula as shown below:
 
@@ -169,13 +169,13 @@ The model involves a two main modules:
 
 ![ANFL]({{ 'assets/images/team37/ANFL.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 2. Structure of ANFL* [3].
+*Fig 7. Structure of ANFL* [4].
 
 - Multi-dimensional Edge Feature Learning (MEFL): This module learns multiple task-specific relationship cues as the edge representation for each pair of AUs2. It considers both connected and un-connected node pairs defined in the ANFL module. The module also has two main components:Facial display-specific AU representation modelling (FAM) which locates activation cues of each AU from the full face representation, and AU relationship modelling (ARM) which extracts features related to both AUs’ activation, producing multi-dimensional edge features.
 
 ![MEFL]({{ 'assets/images/team37/MEFL.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 2. Structure of MEFL* [3].
+*Fig 8. Structure of MEFL* [4].
 
 ResNet-50 is used as one of the backbones for the model. It provides the initial full face representation, which is then processed by the ANFL module to generate node features. These features are further utilized by the MEFL module to learn the multi-dimensional edge features, enhancing the AU recognition performance. The model achieves state-of-the-art results on two widely used datasets for AU recognition.
 
@@ -210,7 +210,7 @@ The model outperforms both JAA-Net and ResNet-50, which is not surprising since 
 We attempted to train a model using JAA-Net that is public on BP4D dataset. With limited resources, we had to scale down the dataset, but we were successful to train JAA-Net and obtained its performance metrics. The code, trained models (12 in total, with each being a snapshot after a epoch), and attention heatmaps can be found in this repository: https://github.com/HiccupHan/CS188-PyTorch-JAANet
 
 ### Dataset
-We were able to obtain a subset of BP4D dataset.BP4D-Spontaneous dataset is a database of videos of facial expressions in a group of young adults. The participants in the video clips are around 18-29 years of age from various ethnicity backgrounds. The expressions they displayed in these videos are induced from natural stimulus. Facial features are tracked in both 2D and 3D domains. The entire dataset is about 2.6TB in size. We utilized the metadata associated with AU activation and facial landmark information included with the dataset. [2] The sub-dataset we use contains 125884 images sampled from frames of videos, and ground truth labels of the presence of 12 AU labels and facial landmarks. The dataset we obtained was missing AU activation labels and facial landmark information for some pictures, causing a mismatch between images and labels.  This issue was discovered during training when the model displayed low loss but low accuracy during testing with new images. Because of lack of knowledge to properly label these images, we determined to exclude them from the dataset. The final dataset used contained 83924 images for training and 45809 images for testing. Training was done locally on a laptop with a RTX 3070Ti as it requires a large amount of memory and time, and it was not realistic to do on a Google Cloud VM with the few credits that were available. Because of limited resources, training set was kept small compared to the test set. 
+We were able to obtain a subset of BP4D dataset.BP4D-Spontaneous dataset is a database of videos of facial expressions in a group of young adults. The participants in the video clips are around 18-29 years of age from various ethnicity backgrounds. The expressions they displayed in these videos are induced from natural stimulus. Facial features are tracked in both 2D and 3D domains. The entire dataset is about 2.6TB in size. We utilized the metadata associated with AU activation and facial landmark information included with the dataset. [4] The sub-dataset we use contains 125884 images sampled from frames of videos, and ground truth labels of the presence of 12 AU labels and facial landmarks. The dataset we obtained was missing AU activation labels and facial landmark information for some pictures, causing a mismatch between images and labels.  This issue was discovered during training when the model displayed low loss but low accuracy during testing with new images. Because of lack of knowledge to properly label these images, we determined to exclude them from the dataset. The final dataset used contained 83924 images for training and 45809 images for testing. Training was done locally on a laptop with a RTX 3070Ti as it requires a large amount of memory and time, and it was not realistic to do on a Google Cloud VM with the few credits that were available. Because of limited resources, training set was kept small compared to the test set. 
 
 ### Methods And Results
 Some minor modifications to the code base was required to work with our specific dataset, but nothing with JAA-Net's structure were changed. During the preprocessing step, similarity transformation is conducted on each image, cropping every image around the face. Then interocular distances of each sample and weight loss of each AU for the training set is calculated. The model was trained on the training set (processed image) for 12 epochs with learning rate originally set at 0.00007 for first  that  0.000096 and decays down to 0.000024. Training took more than 50 hours, which underscores a significant drawback of this model: it requires a lot of resources and time to train. This is an older model using CNN and attention mechanisms, and they can be difficult to train. 
@@ -248,7 +248,7 @@ Using the attention mechanism in the model, we generated heatmaps from some of t
 ![AU-7-PERSON-1]({{ 'assets/images/team37/1_au_2.png' | relative_url }})
 ![AU-2-PERSON-2]({{ 'assets/images/team37/0_au_2.png' | relative_url }})
 ![AU-7-PERSON-2]({{ 'assets/images/team37/0_au_7_2.png' | relative_url }})
-*Fig 5. Attention Heatmaps Generated By JAA-Net for AU-02 and AU-07*
+*Fig 9. Attention Heatmaps Generated By JAA-Net for AU-02 and AU-07*
 
 ### Future Improvements And General Discussion
 
@@ -259,8 +259,8 @@ Nonetheless, the results from JAA-Net is impressive, especially for an older mod
 ## Reference
 [1] Li, W., Abtahi, F., Zhu, Z., & Yin, L. (2017, May). Eac-net: A region-based deep enhancing and cropping approach for facial action unit detection. In 2017 12th IEEE International Conference on Automatic Face & Gesture Recognition (FG 2017) (pp. 103-110). IEEE.
 
-[2] Yin, L., Wei, X., Sun, Y., Wang, J., & Rosato, M. J. (2006, April). A 3D Facial Expression Database For Facial Behavior Research. In 7th International Conference on Automatic Face and Gesture Recognition (pp. 211-216)1. IEEE.
+[2] Luo, C., Song, S., Xie, W., Shen, L., & Gunes, H. (2022, July). Learning Multi-dimensional Edge Feature-based AU Relation Graph for Facial Action Unit Recognition. In Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence. International Joint Conferences on Artificial Intelligence Organization.
 
-[3] Luo, C., Song, S., Xie, W., Shen, L., & Gunes, H. (2022, July). Learning Multi-dimensional Edge Feature-based AU Relation Graph for Facial Action Unit Recognition. In Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence. International Joint Conferences on Artificial Intelligence Organization.
+[3] Shao, Z., Liu, Z., Cai, J., & Ma, L. (2020, September). Deep Adaptive Attention for Joint Facial Action Unit Detection and Face Alignment. In European Conference on Computer Vision (pp. 725-740). Springer.
 
-[4] Shao, Z., Liu, Z., Cai, J., & Ma, L. (2020, September). Deep Adaptive Attention for Joint Facial Action Unit Detection and Face Alignment. In European Conference on Computer Vision (pp. 725-740). Springer.
+[4] Yin, L., Wei, X., Sun, Y., Wang, J., & Rosato, M. J. (2006, April). A 3D Facial Expression Database For Facial Behavior Research. In 7th International Conference on Automatic Face and Gesture Recognition (pp. 211-216)1. IEEE.
