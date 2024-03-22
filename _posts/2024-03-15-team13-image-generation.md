@@ -590,7 +590,7 @@ def train_cycle_gan(dataloader_X, dataloader_Y, cycleGAN, num_epochs=200):
 *Fig 11. CycleGAN Example Outputs*.[7]
 
 ### Performance
-The CycleGAN model is compared to several baseline models both quantitatively and qualitatively, using the same evaluation dataset and metrics as "pix2pix". 
+The CycleGAN model is compared to several baseline models both quantitatively and qualitatively, using the same evaluation dataset and metrics as "pix2pix".
 
 Baseline models we used include **CoGAN** (learns one GAN generator for domain X and one for domain Y , with tied weights on the first few layers for shared latent representations), **SimGAN** (uses an adversarial loss to train a translation from X to Y), **Feature loss + GAN** (a variant of SimGAN where the L1 loss is computed over deep image features using a pretrained network), **BiGAN/ALI** (learn the inverse mapping function F : X → Z), and **pix2pix**.
 
@@ -604,7 +604,7 @@ Second metric is **FCN Score**. This automatic quantitative measure assesses how
 
 ![CycleGAN FCN Score]({{ '/assets/images/team13/cyclegan_fcn.png' | relative_url }})
 {: style="width: 100%; max-width: 100%;"}
-*Fig 13. CycleGAN FCN Score*[6]
+*Fig 13. CycleGAN FCN Score*.[6]
 
 The last metric is **Semantic segmentation metrics**, which uses per-pixel accuracy, per-class accuracy, and mean-IoU to evaluate performance on Cityscapes photo to labels tasks. The performance table is shown in Figure 14.
 
@@ -612,14 +612,14 @@ The last metric is **Semantic segmentation metrics**, which uses per-pixel accur
 {: style="width: 100%; max-width: 100%;"}
 *Fig 14. CycleGAN Semantic Segmentation Metrics*[6]
 
-From the above table we can see that CycleGAN outperforms all other baseline models on both subjective human judgment and objective machine-based metrics. These results shows that CycleGAN indeed has better performance and ability to generate indistinguishable images from the target images. 
+From the above table we can see that CycleGAN outperforms all other baseline models on both subjective human judgment and objective machine-based metrics. These results shows that CycleGAN indeed has better performance and ability to generate indistinguishable images from the target images.
 
 
 ## Text-to-image Generation with Imagen
 
 In this section, we will discuss text-to-image generation with Imagen [8], one of the latest and best performing text-to-image models released by Google in December 2023. To enhance our understanding of such sophisticated models, we also explore simplified versions like MinImagen, which isolates Imagen's salient features for educational purposes. This approach demystifies the complex technology, making it more accessible and providing a hands-on learning experience.
 
-## Imagen Architecture
+### Imagen Architecture
 
 Imagen first takes a textual prompt as the input and encodes it using a pre-trained T5 text encoder, which encapsulates the semantic information within the text. Imagen then feeds the encoding to the image generator, a diffusion model that starts with Gaussian noise and gradually denoise the image to generate a 64x64 small image as described by the textual prompt. Finally, the small image is upscaled by two super-resolution models (a type of diffusion model), generating a high-resolution 1024x1024 image as the output.
 
@@ -999,47 +999,6 @@ To assess the quality of the generated images, the authors show each subject a g
 
 To assess the image-caption alignment, the authors show each subject a generated image and its reference caption and ask, "Does the caption accurately describe the above image?" The subject can respond with “yes”, “somewhat”, and “no”, which corresponds to a score of 100, 50, and 0. The resulted alignment rate is 91.4, demonstrating a high level of congruence between the captions and the generated images. This qualitative assessment underscores Imagen's ability to not only produce visually compelling images but also to ensure these creations are meaningfully aligned with their textual descriptions, highlighting the model's nuanced understanding of language and visual representation. [8]
 
-## Basic Syntax
-### Image
-Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
-
-You can add an image to your survey like this:
-![YOLO]({{ '/assets/images/UCLAdeepvision/object_detection.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 1. YOLO: An object detection method in computer vision* [1].
-
-Please cite the image if it is taken from other people's work.
-
-
-### Table
-Here is an example for creating tables, including alignment syntax.
-
-|             | column 1    |  column 2     |
-| :---        |    :----:   |          ---: |
-| row1        | Text        | Text          |
-| row2        | Text        | Text          |
-
-
-
-### Code Block
-```
-# This is a sample code block
-import torch
-print (torch.__version__)
-```
-
-
-### Formula
-Please use latex to generate formulas, such as:
-
-$$
-\tilde{\mathbf{z}}^{(t)}_i = \frac{\alpha \tilde{\mathbf{z}}^{(t-1)}_i + (1-\alpha) \mathbf{z}_i}{1-\alpha^t}
-$$
-
-or you can write in-text formula $$y = wx + b$$.
-
-### More Markdown Syntax
-You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/).
 
 ## Reference
 Please make sure to cite properly in your work, for example:
@@ -1058,14 +1017,13 @@ Please make sure to cite properly in your work, for example:
 
 [7] https://towardsdatascience.com/cyclegan-learning-to-translate-images-without-paired-training-data-5b4e93862c8d
 
-[8] Saharia, C., Chan, W., Saxena, S., Li, L., Whang, J., Denton, E., Ghasemipour, S. K. S., Ayan, B. K., Mahdavi, S. S., Lopes, R. G., Salimans, T., Ho, J., Fleet, D. J., & Norouzi, M. (2022, May 23). Photorealistic text-to-image diffusion models with Deep Language understanding. arXiv.org. https://arxiv.org/abs/2205.11487 
+[8] Saharia, C., Chan, W., Saxena, S., Li, L., Whang, J., Denton, E., Ghasemipour, S. K. S., Ayan, B. K., Mahdavi, S. S., Lopes, R. G., Salimans, T., Ho, J., Fleet, D. J., & Norouzi, M. (2022, May 23). Photorealistic text-to-image diffusion models with Deep Language understanding. arXiv.org. https://arxiv.org/abs/2205.11487
 
-[9] O’Connor, R. (2022, October 18). How imagen actually works. Assembly AI. https://www.assemblyai.com/blog/how-imagen-actually-works/ 
+[9] O’Connor, R. (2022, October 18). How imagen actually works. Assembly AI. https://www.assemblyai.com/blog/how-imagen-actually-works/
 
 [10] Roberts, A., & Raffel, C. (2020). Exploring transfer learning with T5: The text-to-text transfer transformer. Google Research. https://blog.research.google/2020/02/exploring-transfer-learning-with-t5.html?ref=assemblyai.com
 
-[11] Nichol, A., & Dhariwal, P. (2021, February 18). Improved denoising diffusion probabilistic models. arXiv.org. https://arxiv.org/abs/2102.09672 
+[11] Nichol, A., & Dhariwal, P. (2021, February 18). Improved denoising diffusion probabilistic models. arXiv.org. https://arxiv.org/abs/2102.09672
 
 [12] O’Connor, R. (2022, October 18). MinImagen: Build Your Own Imagen Text-to-Image Model. Assembly AI. https://www.assemblyai.com/blog/minimagen-build-your-own-imagen-text-to-image-model/
-
 ---
