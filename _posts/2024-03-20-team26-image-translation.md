@@ -74,6 +74,16 @@ $$
 G^*, F^* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)
 $$
 
+## Stable Diffusion
+
+Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space. 
+
+Why might this be a good idea?  
+We can reduce the dimensionality with minimal loss of information! This makes training and image generation more efficient and allows for high-resolution image synthesis.
+
+
+## Image Captioning with Transformers
+
 ## Reference
 
 Please make sure to cite properly in your work, for example:
