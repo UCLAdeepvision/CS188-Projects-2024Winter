@@ -1,9 +1,9 @@
 ---
 layout: post
 comments: true
-title: Post Template
-author: UCLAdeepvision
-date: 2024-01-01
+title: Diffusion HD Video Generation 
+author: Shan
+date: 2024-03-21
 ---
 
 
@@ -23,7 +23,7 @@ Your survey starts here. You can refer to the [source code](https://github.com/l
 Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
 
 You can add an image to your survey like this:
-![YOLO]({{ '/assets/images/UCLAdeepvision/object_detection.png' | relative_url }})
+![YOLO]({{ '/assets/images/team3/test.jpeg' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 1. YOLO: An object detection method in computer vision* [1].
 
