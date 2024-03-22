@@ -135,4 +135,26 @@ Comparing the performance of common models to the TraPHic model unveils an impor
 ### Forecasting Trajectory and Behavior of Road-Agents Using Spectral Clustering in Graph-LSTMs
 Paper: [https://arxiv.org/pdf/1912.01118.pdf](https://arxiv.org/pdf/1912.01118.pdf)
 
+
+
+
+
+
+### Result Comparison
+
+This section will go over a detailed comparison of the three models covered above: FastMobileNet (FMNet), TraPHic, and a two-stream Graph-LSTM model. The comparison will cover the different approaches and applications of each model. 
+
+The FastMobileNet (FMNet) model, an adaptation of MobileNet-v2, is specifically tailored for the high-speed inference required by Self-Driving Vehicles (SDVs). The FMNet model focuses on efficiently predicting the movements of Vulnerable Road Users (VRUs). FMNet introduces significant modifications to the original MobileNet-v2 architecture.. This is achieved through the feature fusion approach that allows the model to process raster input alongside other state features, such as velocity and acceleration, without necessitating additional fully-connected layers. Additionally, FMNet employs different rasterization techniques, enabling the model to adaptively capture the contextual environment surrounding the SDV through varied resolutions and rasterization settings. 
+
+The TraPHic model introduces a novel approach to handling the intricate dynamics of dense and heterogeneous traffic environments. Its key advantage is the incorporation of weighted interactions among road actors, significantly enhancing the accuracy of trajectory predictions. This model employs a hybrid CNN-LSTM architecture, which leverages the sequential processing strength of RNNs and the feature interaction capabilities of CNNs, facilitating a nuanced understanding of road actor movements.
+
+The Two-stream Graph-LSTM model works by integrating behavior prediction into the trajectory forecasting process. The model operates by using two streams: one focused on trajectory prediction without considering neighboring vehicles, and the second stream serving both as a behavior predictor and a regularizer for the first. This dual-stream approach gives the model the ability to refine its trajectory predictions based on road agement behavior. Road agent behavior is classified as either: aggressive, conservative, or neutral. The model takes advantage of spectral cluster regularization that notably reduces long-term prediction errors.
+
+Each of the discussed deep learning models presents a set of advantages tailored to specific challenges in the realm of autonomous driving systems. FastMobileNet shines with its focus on speed and efficiency, making it ideal for real-time applications requiring the prediction of VRU motion. The TraPHic model stands out for its innovative treatment of weighted interactions, offering robust performance in complex, dense traffic environments. Meanwhile, the two-stream Graph-LSTM model provides a holistic approach by incorporating behavior prediction, promising enhanced accuracy in long-term forecasting. 
+
+### Conclusion
+
+The study of road agent behavior and trajectory prediction through three distinct deep learning models demonstrates the diversity of solutions to this problem. Each model: the FastMobileNet (FMNet) for predicting the motion of Vulnerable Road Users (VRUs) using high-definition maps and ConvNets, the TraPHic model for trajectory prediction in dense and heterogeneous traffic, and the two-stream graph-LSTM model for forecasting the trajectory and behavior of road-agents, demonstrates unique strengths and architectural innovations tailored to address specific challenges in trajectory and behavior prediction.
+
+
 ---
