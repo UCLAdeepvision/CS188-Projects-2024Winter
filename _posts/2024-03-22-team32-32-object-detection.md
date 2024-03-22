@@ -103,8 +103,6 @@ Overall, the model was trained on the GPU efficiently, and used the KITTI 3D obj
 
 In general, the benefits of this model include its machine learned features, and efficient implementation by utilizing the GPU to do parallel voxel grid operations, as well as by using sparse vector representations. Disadvantage is that this model needs to be extended to image 3D-object detection, joint LiDAR, and can further improve in localization accuracy and detection results. [4]
 
-### PointPillars
-
 ### PointRCNN
 
 PointRCNN utilizes a raw point cloud to generate a bounding box for 3D object detection. It is composed of two core stages and is the first two-stage 3D object detector. 
@@ -138,7 +136,7 @@ Overall, at each iteration during training, the student SSD is optimized with th
 The advantages of SE-SSD include a simpler architecture that requires fewer computational resources since it is a single-stage object detector rather than a two-stage object detector. It is also better at generalization and the results achieve state-of-the-art performance in accuracy and efficiency for object detection from point clouds. However, there are some disadvantages including the complexity of the self-ensembling technique which may lead to longer training times. SE-SSD also requires additional hyperparameters and is sensitive to erroneous predictions during the training process. [3]
 
 ### GLENet
-GLENet, developed by Zhang et al aims to address the uncertain and complex nature of 3D object ground-truth annotations through a probabilistic approach as opposed to a deterministic one. Traditional 3D object detection architectures take a deterministic approach and face challenges in situations involving occluded objects, incomplete LiDAR data, or subjective data labeling errors. GLENet on the other hand is a generative deep learning framework derived from conditional variational autoencoders that improves upon the robustness of object detectors by introducing label uncertainty.
+GLENet, developed by Zhang et al, aims to address the uncertain and complex nature of 3D object ground-truth annotations through a probabilistic approach as opposed to a deterministic one. Traditional 3D object detection architectures take a deterministic approach and face challenges in situations involving occluded objects, incomplete LiDAR data, or subjective data labeling errors. GLENet on the other hand is a generative deep learning framework derived from conditional variational autoencoders that improves upon the robustness of object detectors by introducing label uncertainty.
 
 GLENet accounts for variation in bounding boxes by mapping point clouds to multiple potential ground truth bounding boxes. The label uncertainty of each object is generated based on the variance of the distribution of its potential ground-truth bounding boxes. As seen in Figure 8, GLENet predicts a range of bounding boxes for each 3D point cloud. For incomplete point clouds with 1 or 5 points, there is higher variance in the bounding boxes and thus a higher label uncertainty. For more complete point clouds with 335 or 693 points, there is lower variance and more consistent bounding boxes, resulting in a lower label uncertainty.
 
