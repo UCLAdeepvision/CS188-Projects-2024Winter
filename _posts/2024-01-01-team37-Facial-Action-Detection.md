@@ -71,7 +71,7 @@ The attention map is a critical component of the E-Net, designed to give more at
 
 ![EAC-Net-Attention-Map]({{ 'assets/images/team37/EAC-Net-Attention-Map.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. Attention Map of EAC-Net* [1].
+*Fig 2. Attention Map of EAC-Net* [1].
 
 Formula for calculating weight of each pixel:
 $$
