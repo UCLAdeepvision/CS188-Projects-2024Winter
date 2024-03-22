@@ -22,9 +22,10 @@ Trajectory prediction is the process of predicting the future positions of agent
 
 A common way to tackle the problem is to encode the scene as a rasterized HD semantic map. This is typically done by taking the classified actors extracted from the AV’s perception system and overlaying their locations and class attributes on top of a bird’s eye view of the scene. This lets us treat the problem as a computer vision task, as we can then feed these maps into a Convnet-based architecture like ResNet. One advantage of this approach is that this allows for the use of various pretrained vision models, where the backbone can be used as a feature extractor.
 
+### fwef
 
-![ConvNet]({{ '/assets/images/19/convnet.webp' | relative_rul }})
-{: style="width: 400px; max-width: 100%;"}
+![Convnet]({{ '/assets/images/19/convnet.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
 *Fig 1. A deep learning-based approach to trajectory prediction* [1].
 
 Instead of class predictions, the model returns $$n$$ pairs of values, where each pair represents the predicted future (x,y) location of a target, and $n$ represents the number of future frames to predict. The loss is simply calculated to be the Mean Squared Error (MSE) between the locations of the predicted and actual values of agents:
@@ -72,9 +73,9 @@ class EfficientNet(nn.Module):
 
 ![Resnet and Efficientnet Results]({{ '/assets/images/19/convnet_results.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 2. Visualizations of Resnet and Efficientnet performance during training. The cyan dots represents the model's predicted location, while the purple dots represents the ground truth locations* [1].
+*Fig 2. Visualizations of Resnet and Efficientnet performance during training. The cyan dots represents the model's predicted location, while the purple dots represents the ground truth locations*.
 
-From the visualizations above, we see that both the Resnet and Efficientnet models are able to predict the general path of each agent. However, one important thing to note is that Efficientnet was able to train the same number of iterations as Resnet in about 1/3rd of the time.
+From the visualizations above, we see that the Resnet and Efficientnet models are both able to predict the general path of each agent. However, one important thing to note is that Efficientnet was able to train the same number of iterations as Resnet in about 1/3rd of the time.
 
 ## VectorNet
 
