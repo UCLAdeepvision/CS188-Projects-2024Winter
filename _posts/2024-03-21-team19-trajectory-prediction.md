@@ -27,15 +27,16 @@ A common way to tackle the problem is to encode the scene as a rasterized HD sem
 {: style="width: 400px; max-width: 100%;"}
 *Fig 1. A deep learning-based approach to trajectory prediction* [1].
 
-Instead of class predictions, the model returns $n$ pairs of values, where each pair represents the predicted future (x,y) location of a target, and $n$ represents the number of future frames to predict. The loss is simply calculated to be the Mean Squared Error (MSE) between the locations of the predicted and actual values of agents:
+Instead of class predictions, the model returns $$n$$ pairs of values, where each pair represents the predicted future (x,y) location of a target, and $n$ represents the number of future frames to predict. The loss is simply calculated to be the Mean Squared Error (MSE) between the locations of the predicted and actual values of agents:
 
 $$
-Loss = \frac{1}{n} \sum_{i}^{n}
+L(x, x_p) = \frac{1}{n} \sum_{i}^{n} (x - x_p)^2
 $$
 
+where $$x$$ and $$x_p$$ can be either the x or y coordinate of each agent location at a given frame.
 ### Implementation
 
-To see this model in action, we ran Woven Planet’s prediction [notebook](https://github.com/woven-planet/l5kit/blob/master/examples/agent_motion_prediction/agent_motion_prediction.ipynb), which uses the Lyft’s Level 5 Self-driving motion prediction dataset [2] for training. While Woven’s notebook uses a pretrained ResNet model as the backbone, we decided to experiment using an EfficientNet instead. EfficientNet utilizes a technique called compound-coefficient to scale up models efficiently [3], which lends nicely to the scale of Lyft's dataset. The following code snippet shows how the EfficientNet backbone is implemented. Note how the first and last layer is modified in order to accommodate the input and output shape:
+To see this model in action, we ran Woven Planet’s prediction [notebook](https://github.com/woven-planet/l5kit/blob/master/examples/agent_motion_prediction/agent_motion_prediction.ipynb), which uses the Lyft’s Level 5 Self-driving motion prediction dataset [2] for training. While Woven’s notebook uses a pretrained ResNet model as the backbone, we decided to experiment using an EfficientNet instead. EfficientNet utilizes a technique called compound-coefficient to scale up models efficiently [3], which is especially useful given the scale of Lyft's dataset. The following code snippet shows how the EfficientNet backbone is implemented. Note how the first and last layer is modified in order to accommodate the input and output shape:
 
 ```
 class EfficientNet(nn.Module):
@@ -66,6 +67,14 @@ class EfficientNet(nn.Module):
     def to(self, device):
         return self.model.to(device=device)
 ```
+
+### Results
+
+![Resnet and Efficientnet Results]({{ '/assets/images/19/convnet_results.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Fig 2. Visualizations of Resnet and Efficientnet performance during training. The cyan dots represents the model's predicted location, while the purple dots represents the ground truth locations* [1].
+
+From the visualizations above, we see that both the Resnet and Efficientnet models are able to predict the general path of each agent. However, one important thing to note is that Efficientnet was able to train the same number of iterations as Resnet in about 1/3rd of the time.
 
 ## VectorNet
 
