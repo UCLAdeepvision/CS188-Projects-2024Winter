@@ -264,3 +264,5 @@ Nonetheless, the results from JAA-Net is impressive, especially for an older mod
 [3] Shao, Z., Liu, Z., Cai, J., & Ma, L. (2020, September). Deep Adaptive Attention for Joint Facial Action Unit Detection and Face Alignment. In European Conference on Computer Vision (pp. 725-740). Springer.
 
 [4] Yin, L., Wei, X., Sun, Y., Wang, J., & Rosato, M. J. (2006, April). A 3D Facial Expression Database For Facial Behavior Research. In 7th International Conference on Automatic Face and Gesture Recognition (pp. 211-216)1. IEEE.
+
+[5] Li, Y., Zeng, J., Shan, S., & Chen, X. (2019). Self-supervised Representation Learning from Videos for Facial Action Unit Detection. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
