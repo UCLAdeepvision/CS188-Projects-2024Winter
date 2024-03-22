@@ -169,13 +169,13 @@ The model involves a two main modules:
 
 ![ANFL]({{ 'assets/images/team37/ANFL.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 7. Structure of ANFL* [4].
+*Fig 7. Structure of ANFL* [2].
 
 - Multi-dimensional Edge Feature Learning (MEFL): This module learns multiple task-specific relationship cues as the edge representation for each pair of AUs2. It considers both connected and un-connected node pairs defined in the ANFL module. The module also has two main components:Facial display-specific AU representation modelling (FAM) which locates activation cues of each AU from the full face representation, and AU relationship modelling (ARM) which extracts features related to both AUs’ activation, producing multi-dimensional edge features.
 
 ![MEFL]({{ 'assets/images/team37/MEFL.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 8. Structure of MEFL* [4].
+*Fig 8. Structure of MEFL* [2].
 
 ResNet-50 is used as one of the backbones for the model. It provides the initial full face representation, which is then processed by the ANFL module to generate node features. These features are further utilized by the MEFL module to learn the multi-dimensional edge features, enhancing the AU recognition performance. The model achieves state-of-the-art results on two widely used datasets for AU recognition.
 
@@ -204,6 +204,11 @@ The total loss is calculated as the sum of $$L_{WA}$$ and $$L_E$$.
 
 ### Performance 
 The reported results are shown below:
+
+![ResNetResults]({{ 'assets/images/team37/results.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Table 1. ResNet-50 results* [2].
+
 The model outperforms both JAA-Net and ResNet-50, which is not surprising since ResNet is only utilized as a backbone structure and the model is new with more sophisticated structure.
 
 ## Experiments
@@ -232,7 +237,7 @@ The model was then tested on the test set, which yielded the following results:
 |  11   |          0.550392         |          0.764053       |       0.040060     |       0.000596       |
 |  12   |          0.552339         |          0.767260       |       0.039748     |       0.000620       |
 
-*Table 1. Results from JAA-Net*
+*Table 2. Results from JAA-Net*
 
 As can be seen from the table, JAA-Net is relatively reliable, with low failure rate. Overall, we see that F1 score shows a gradual increase, but the increase is not significant, signaling that learning rate can be tuned further to improve performance. Mean error also decreased, hovering around 0.04 range, indicating the consistency in model's prediction errors. There are two interesting patterns that can be observed from these results:
 - Accuracy fluctuation:
