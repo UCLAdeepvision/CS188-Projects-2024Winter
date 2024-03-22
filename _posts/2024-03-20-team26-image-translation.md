@@ -81,8 +81,13 @@ Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to d
 Why might this be a good idea?  
 We can reduce the dimensionality with minimal loss of information! This makes training and image generation more efficient and allows for high-resolution image synthesis.
 
+### Training
+
+[TODO]
 
 ## Image Captioning with Transformers
+
+To caption an image, we can use a encoder-decoder architecture. To do so, we use a pre-trained Transformer-based vision model as encoder and  a pre-trained language model as decoder. The encoder produces an embedding of the image, which can be used by the decoder to generate a caption.
 
 ## Reference
 
