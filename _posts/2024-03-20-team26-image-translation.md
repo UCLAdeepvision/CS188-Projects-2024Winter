@@ -3,7 +3,7 @@ layout: post
 comments: true
 title: Post Template
 author: UCLAdeepvision
-date: 2024-01-01
+date: 2024-03-22
 ---
 
 > This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
@@ -18,6 +18,26 @@ date: 2024-01-01
 ## Main Content
 
 Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
+
+## Introduction
+
+Our team is investigating style transfer in the context of image-to-image translation.
+
+## Background
+
+### Image-to-image translation
+
+The goal of image-to-image translation is learning a mapping between input image and the output image. The dataset used for this problem is typically two sets of images we want to learn the mapping between. These datasets come in the form of
+
+1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
+2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
+
+## Cycle-GAN
+
+Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English). 
+
+To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $(G, D_g)$ translating from style 1 to style 2. Gan 2 $(F, D_f)$ translating from style 2 to style 1. We additionally introduce a normalization term on the input image $I$ and the $F(G(I))$, the input image translated twice.
+
 
 ## Basic Syntax
 
