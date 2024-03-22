@@ -15,15 +15,15 @@ date: 2024-03-22
 * TOC
 {:toc}
 
-## Introduction
+## Introduction to Trajectory Prediction
 
-Alan inserts his introduction to the problem here. Can base off of past ones.
+Alan inserts his introduction to the problem here. Can base off of past ones. Talk about pedestrian problem and social acceptability of certain trajectories. Wwant to avoid collisions!
 
 ## Papers and Approaches
 
 # Social LSTMs
 
-[Social LSTM: Human Trajectory Prediction in Crowded Spaces](https://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf)
+[Social LSTM: Human Trajectory Prediction in Crowded Spaces](https://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf) [1]
 
 Humans have the ability to “read” one another, predicting each other’s general motions, each obeying a set of untold rules that help us predict the motion of other humans. However, trying to predict this motion with machines has proven to be a difficult task. Previous methods have either used functions to predict behavior or only consider other people in close proximity.
 
@@ -34,19 +34,25 @@ Humans have the ability to “read” one another, predicting each other’s gen
 Social LSTMs base themselves on the traditional LSTM architecture, which has proven to be very useful for sequence prediction tasks such as caption generation, translation, video translation, and more. In their specific model, the authors of Social LSTM introduce a few key ideas. Firstly, each trajectory is represented by its own LSTM model. Secondly, the LSTMs are linked to each other via a special layer called a social pooling layer.
 
 ![SocialLSTM]({{ '/assets/images/team10/sociallstms.png' | relative_url }})
-{: style="width: 400px; max-width: 100%; text-align: center;"}
+{: style="width: 100%; max-width: 100%; text-align: center;"}
 
-## Social GANs
+This social pooling layer is based on human intuition. Individuals usually make decisions about their path based on the motion of neighboring people and other surrounding objects. At each timestep, each LSTM cell receives pooled hidden state information from neighboring LSTM cells. These “Social hidden-state” tensors are encoded with positional information. With this, we can predict a new position for each trajectory.
+
+> This method has proven effective for groups of individuals, not just predicting individuals.
+
+---
+
+# Social GANs
 
 [Social GAN: Socially Acceptable Trajectories with Generative Adversarial Networks](https://arxiv.org/pdf/1803.10892.pdf)
 
 ![Social GANs]({{ '/assets/images/team10/socialGAN.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
-### Introduction
+#### Introduction
 Human motion is inherently ‘multi-modal’: given any position, we have many ‘socially plausible’ methods of maneuvering throughout space to get to our destination. This suggests modeling a recurrent sequence to make predictions on future behavior and pooling information across various agents that impact possible suggested movements. Previous methods, RNN-based architectures and traditionally used methods based on specialized features (i.e. physics-based approaches) suffered from certain primary limitations: using only a neighborhood of agents to compute due to being unable to model interactions between all agents in a computationally efficient manner (1) and only being able to learn ‘average behavior’ instead of generally acceptable and more likely behaviors based on a history of movements at a given time step (2). 
 
-### Social GAN Architecture
+#### Social GAN Architecture
 This following proposed architecture addresses these limitations by employing Generative Adversarial Networks which have empirically been able to overcome intractable probabilistic computations and further projections of behaviors. Instead of generating images, as has been commonly employed in the past, the architecture proposes to generate multiple trajectories given a history where a generator creates candidates and the discriminator evaluates them, pushing the generator to learn ‘good behaviors’ that can fool the discriminator (to generate ‘socially acceptable motion trajectories’) in a crowded environment with numerous agents. 
 
 ![Social GANs]({{ '/assets/images/team10/sgarch.png' | relative_url }})
@@ -108,12 +114,15 @@ Another key observation was made relative to the latent space: in understanding 
 
 Overall, this methodology proposes a novel solution to generating predictions based on global interactions via a relative-distance pooling method, allowing the network to learn social norms of agent-movement by training against a discriminator. In directly imposing a variety loss with said pooling layers, this allowed training of a network that could produce multiple viable probabilistic solutions to trajectory predictions given diverse samples.
 
+# Comparing Social LSTM and Social GAN
+
+Social LSTM and Social GAN are two methods of trajectory prediction that focus on socially accetable trajectories. They can both be applied to street pedestrian-esque problems, and thus can be effectively compared using this kind of scenario.
+
+We decided to evaluate and compare Social LSTM and Social GAN using the [TrajNet++ Framework](https://github.com/vita-epfl/trajnetplusplusbaselines) that is based on [3].
+
+
 
 # VectorNet
-
-# Other
-
-## Comparisons
 <!-- 
 ## Main Content
 Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
@@ -164,5 +173,9 @@ You can find more Markdown syntax at [this page](https://www.markdownguide.org/b
 Please make sure to cite properly in your work, for example:
 
 [1] A. Alahi, K. Goel, V. Ramanathan, A. Robicquet, L. Fei-Fei and S. Savarese, "Social LSTM: Human Trajectory Prediction in Crowded Spaces," 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Las Vegas, NV, USA, 2016, pp. 961-971, doi: 10.1109/CVPR.2016.110.
+
 [2] Gupta, A., Johnson, J., Fei-Fei, L., Savarese, S., & Alahi, A. (2018). Social GAN: Socially Acceptable Trajectories with Generative Adversarial Networks (Version 1). arXiv. https://doi.org/10.48550/ARXIV.1803.10892
+
+[3] Kothari, P., Kreiss, S., & Alahi, A. (2020). Human Trajectory Forecasting in Crowds: A Deep Learning Perspective (Version 3). arXiv. https://doi.org/10.48550/ARXIV.2007.03639
+
 ---
