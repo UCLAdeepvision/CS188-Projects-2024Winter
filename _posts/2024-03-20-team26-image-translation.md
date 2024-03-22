@@ -32,12 +32,17 @@ The goal of image-to-image translation is learning a mapping between input image
 1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
 2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
 
+Paired datasets are easier to train on, but they maybe hard to collect (e.g. there is not a Monet painitng for every real image). Thus, we need methods to effectively train on unpaired datasets.
+
 ## Cycle-GAN
 
-Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English). 
+Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
+
+The goal of our Cycle GAN is to learn a mapping between two image styles $A$ and $B$. So if we have preserve cycle consistency, the ideaaaa is that our tralated image will preserve most of its semanics besides the style change.
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $(G, D_g)$ translating from style 1 to style 2. Gan 2 $(F, D_f)$ translating from style 2 to style 1. We additionally introduce a normalization term on the input image $I$ and the $F(G(I))$, the input image translated twice.
 
+Now, in the actual style transfer process, we can use $G$ to translate from style 1 to style 2, and $F$ to translate from style 2 to style 1.
 
 ## Basic Syntax
 
