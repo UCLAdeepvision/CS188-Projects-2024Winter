@@ -156,11 +156,9 @@ GLENet is integrated with existing 3D object detectors to transform deterministi
 
 ## Implementation: VoxelNet
 We decided to implement VoxelNet using the KITTI dataset. We started by downloading the KITTI dataset's Velodyne point clouds, training labels, camera calibration information, and left color images.
-When training we divide the 3D point cloud space into equally spaced voxels. Then we use random sampling to determine which sections are sampled to save computationally and reduce point imbalance.
-Then we augmented the selected points before training.
-The fully connected neural network consists of a linear layer, batch normalization, and ReLu layer. Then, through element-wise max pooling we determine the locally aggregated features. This is then aggregated with point-wise features.
-We use the convolutional middle layers to shrink the feature map to a fourth of its size.
-These layers are brought together in a region proposal network with 3 blocks of layers.[5]
+When training we divided the 3D point cloud space into equally spaced voxels. Then we used random sampling to determine which sections to sample. This helps to save computationally and reduce point imbalance. Then we augmented the selected points before training.
+The fully connected neural network consists of a linear layer, batch normalization, and ReLu layer. Through element-wise max pooling we determine the locally aggregated features. This is aggregated with the point-wise features. We use the convolutional middle layers to transform the voxels into dense 4D feature maps and shrink the feature map to a fourth of its size.
+These layers are brought together in a region proposal network with 3 blocks of layers, giving us our final detection results.[5]
 ```
 class VFELayer(object):
     def __init__(self, out_channels, name):
