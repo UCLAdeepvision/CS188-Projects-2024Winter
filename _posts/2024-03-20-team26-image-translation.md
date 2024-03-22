@@ -13,7 +13,7 @@ date: 2024-03-22
 {: class="table-of-content"}
 
 - TOC
-  {:toc}
+{:toc}
 
 ## Main Content
 
@@ -32,15 +32,24 @@ The goal of image-to-image translation is learning a mapping between input image
 1. Paired: the dataset is tuples of image in set 1 and corresponding image in set 2
 2. Unpaired: the dataset just has two sets of images without 1-to-1 correspondence.
 
+![paired-unpaired-datasets]({{ '/assets/images/team26/paired_unpaired_ds.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 1. Illustration of unpaired vs paired dataset* [1].
+
 Paired datasets are easier to train on, but they maybe hard to collect, especially in style transfer (e.g. there is not a Monet painting for every real image). Thus, we need methods to effectively train on unpaired datasets.
 
 ### Cycle-GAN
 
 Generative adversarial network (GAN) are deep learning frameworks that relies on a generator G and a discriminator D. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
-The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the ideaaaa is that our tralated image will preserve most of its semanics besides the style change.
+![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [1].
+
+The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the idea is that our tralated image will preserve most of its semanics besides the style change.
+
+![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [1].
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $(G, D_Y)$ translating from style $X$ to style $Y$. Gan 2 $(F, D_X)$ translating from style $Y$ to style $X$. We additionally introduce a normalization term on the input image $I$ and the $F(G(I))$, the input image translated twice.
+
+![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [1].
+![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [1].
 
 Now, in the actual style transfer process, we can use $G$ to translate from style $X$ to style $Y$, and $F$ to translate from style $Y$ to style $X$.
 
@@ -61,8 +70,6 @@ Parameters:
     n_blocks (int)      -- the number of ResNet blocks
     padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
 """
-assert(n_blocks >= 0)
-super(ResnetGenerator, self).__init__()
 if type(norm_layer) == functools.partial:
     use_bias = norm_layer.func == nn.InstanceNorm2d
 else:
@@ -101,6 +108,8 @@ self.model = nn.Sequential(*model)
 ```
 
 #### Training
+
+![training-cycle-GAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [1].
 
 To train Gan 1 $(G, D_Y)$, where $G$ is a mapping from $X$ to $Y$ and $D_Y$ is a discriminator for $Y$, we use the following loss function:
 
@@ -290,6 +299,8 @@ We fine-tuned for 1000 epochs and 3000 epochs.
 
 Please make sure to cite properly in your work, for example:
 
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
+[1] Yuan, Yuan, et al. "Unsupervised image super-resolution using cycle-in-cycle generative adversarial networks." Proceedings of the IEEE conference on computer vision and pattern recognition workshops. 2018.
+
+[2] Kumar, Ankur. "The Illustrated Image Captioning using transformers." ankur3107.github.io. 2022.
 
 ---
