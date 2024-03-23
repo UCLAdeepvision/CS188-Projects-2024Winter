@@ -138,7 +138,8 @@ CNNs have a wide set of benefits over traditional methods and have transformed f
 Existing approaches require training multiple models or additional components like segmentation or bounding-box regression. DDFD, on the other hand, proposes a better, more efficient solution, using a single deep convolutional neural network (CNN). The proposed method achieves comparable or better performance to state-of-the-art methods without the need for complex annotations.
 
 #### Architecture
-Foundationally, DDFD is an AlexNet fine tuned for face detection. AlexNet is an influential and innovative model for image classification leveraging 5 convolution layers for extracting features followed by 3 fully connected layers for classification. DDFD modifies this architecture by converting the final 3 fully connected layers to convolutional ones. This enables the network to process images of any size, liberating it form the constraints of fixed-size input images. Further, because the fully connected layers have been replaced by convolutional once, the network instead outputs a heatmap representing probability of a face at a given location. 
+
+Foundationally, DDFD is an AlexNet fine tuned for face detection. AlexNet is an influential and innovative model for image classification leveraging 5 convolution layers for extracting features followed by 3 fully connected layers for classification. DDFD modifies this architecture by converting the final 3 fully connected layers to convolutional ones. This enables the network to process images of any size, liberating it form the constraints of fixed-size input images. Further, because the fully connected layers have been replaced by convolutional once, the network instead outputs a heatmap representing probability of a face at a given location.
 
 Following these convolution layers DDFD employs non-maximal suppression (NMS) to refine the detection process and localize faces. NMS ensures each detected face corresponds to a single precise location by merging overlapping regions. NMS iteratively selects the highest confidence detection and suppresses all nearby detections that significantly overlap.
 
@@ -147,16 +148,18 @@ One strategic choice that sets apart DDFD from other models is its use of a slid
 NMS and the sliding window approach are coupled with a scaling algorithm that enables DDFD to accurately localize faces of different sizes and orientations. DDFD resizes the input image in discrete steps, three times per octave (an octave being a doubling of the image dimension) enabling the detector to scan for faces that could otherwise be missed if they are too small or too large for the default window size. Coupled with NMS and sliding window, the scaling approach contributes significantly to accurate localization of faces. Scaling adjusts the lens to detect faces of all sizes while NMS sharpens the focus, allowing the model to pinpoint the exact location of a face among the expanded search regions. The result is an incredibly robust system which can detect faces in a variety of orientations with high accuracy.
 
 #### Training Process
+
 DDFD was fine-tuned on the AFLW dataset with 21K images containing 24K face annotations. During training data augmentation was employed through random cropping and flipping, resulting in 200,000 positive and 20M negative examples. The model was trained using 50K iterations with a batch size of 128, including 32 positive and 96 negative examples per batch.
 
 #### Evaluation Results
+
 DDFD was benchmarked on a variety of datasets including PASCAL Face, AFW, and FDDB datasets showing competitive perofrmance across varied face orientations and occlusions.
 
 ![DDFD Eval]({{ 'assets/images/2/DDFD/eval.png' | relative_url }})
 Fig 4. Evaluation of Models on PASCAL Face Dataset [2].
 {: style="width: 400px; max-width: 100%; margin: auto;"}
 
-When evaluated on the PASCAL Face Dataset, DDFD demonstrated superior performance compared to R-CNN, especially in handling faces without bounding-box regression or selective search. DDFD achieved this performance by focusing on high recall and precise localization. 
+When evaluated on the PASCAL Face Dataset, DDFD demonstrated superior performance compared to R-CNN, especially in handling faces without bounding-box regression or selective search. DDFD achieved this performance by focusing on high recall and precise localization.
 
 #### Pros and Cons
 
@@ -174,10 +177,11 @@ DDFD also faces challenges with complex annotations. Although the model does not
 
 Lastly, occlusion handling remains an area of improvement for DDFD. While the detector has some capability to manage occlusions, it can struggle with faces that are heavily obscured. This is partly due to the lack of datapoints representing such faces in the training set. Moving forward, it will be crucial to evolve the training data with a wider array of occluded examples to improve the model's robustness in practical scenarios, where occlusions are a common occurrence.
 
-
 ### FaceNet <a id="facenet"></a>
 
-facenet text
+One interesting system that has made extraordinary headway in facial recognition technology is called Facenet, developed by Google. The paper introduces FaceNet, a system designed to tackle the challenges of efficient face verification and recognition at scale. Unlike traditional approaches, FaceNet directly learns a mapping from face images to a compact Euclidean space where distances represent face similarity. This space enables easy implementation of tasks like face recognition, verification, and clustering using FaceNet embeddings as feature vectors. FaceNet employs a deep convolutional network trained to optimize embeddings directly, rather than using an intermediate bottleneck layer. Training involves triplets of matching/non-matching face patches generated via a novel online triplet mining method. This approach significantly enhances representational efficiency, achieving state-of-the-art face recognition performance with only 128 bytes per face. FaceNet sets new accuracy records, achieving 99.63% on the Labeled Faces in the Wild dataset and 95.12% on YouTube Faces DB, reducing error rates by 30% compared to previous best results.
+
+Moreover, the paper introduces the concept of harmonic embeddings and a harmonic triplet loss, enabling compatibility and direct comparison between different versions of face embeddings produced by various networks. This innovation provides a standardized framework for evaluating and comparing face recognition models. By addressing the challenge of model interoperability, researchers can better understand the strengths and weaknesses of different architectures and approaches. Overall, FaceNet represents a significant advancement in the field of face recognition, offering both superior performance and a standardized methodology for evaluation and comparison.
 
 ## Final words
 
