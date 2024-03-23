@@ -45,26 +45,20 @@ The label processing is quite difficult, as labelling needs to be added on a pix
 
 ![DATA2]({{ '/assets/images/32/data2.png' | relative_url }})
 {: style="width: 600px; max-width: 100%;"}
-<!-- ### Metric for Evaluation: Bounding Box
 
-The official 3D Metric various across different dataset varies
-AP used, where a 2D bounding box is compared against the 3D Bounding box
-
-The Precision x Recall is a curve for each class where precision is Y axis and Recall is X axis.
-
-We want Precision and recall both to be high or hug the top right corner. The area under the curve is used to summarize performance.
-
-AUC is often used to calculate Average Precision, a very common metric used to measure other segmentation tasks. mAP is the mean AP across different object classes
-
-<!-- IMAGE -->
-<!-- 
 ### Metric for Evaluation: Orientation
 
-KITTI uses “Average Orientation Similarity”, which is calculated using the cosine similarity between predicted orientation and GT orientation.
+KITTI uses “Average Orientation Similarity”, which is calculated using the cosine similarity between predicted orientation and GT orientation. It is calculated using the alpha variable in the label.
 
-There is also metrics that measures model performance at detecting center of a 3D box bounded object
+![DATA3]({{ '/assets/images/32/data3.png' | relative_url }})
+{: style="width: 600px; max-width: 100%;"}
 
-IMAGE --> -->
+In Deep3DBox, the loss function also uses the following criterion:
+
+![DATA3]({{ '/assets/images/32/data5.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+
+
 
 
 
