@@ -114,7 +114,7 @@ The key innovation used in the TraPHic architecture is the distinction made betw
 
 Each feature space layer begins with a fully connected layer, followed by an exponential linear unit (ELU) activation layer. This output is then passed through a single layer LSTM block with 64 hidden layers, producing the hidden state vectors for each layer. 
 
-The horizon layer passes the output from this initial set of layers into another fully connected layer followed by an ELU layer, while the neighbor layer and the ego layer pass the output directly in the pooling step. The hidden vectors are pooled into feature maps, the horizon map $H_i$, the neighbor map $N_i$, and the ego map $h_i$ respectively. Both the horizon and neighbor layer then pass their maps through two convolution layers followed by a max pooling operation to form the feature vectors $f_{hz}$ and $f_{nb}$. Finally, the three feature vectors $h_i$, $f_{hz}$, and $f_{nb}$ are concatenated into z, which is passed through a final LSTM layer to decode the feature encodings into a trajectory prediction sequence. 
+The horizon layer passes the output from this initial set of layers into another fully connected layer followed by an ELU layer, while the neighbor layer and the ego layer pass the output directly in the pooling step. The hidden vectors are pooled into feature maps, the horizon map $$H_i$$, the neighbor map $$N_i$$, and the ego map $$h_i$$ respectively. Both the horizon and neighbor layer then pass their maps through two convolution layers followed by a max pooling operation to form the feature vectors $$f_{hz}$$ and $$f_{nb}$$. Finally, the three feature vectors $$h_i$$, $$f_{hz}$$, and $$f_{nb}$$ are concatenated into z, which is passed through a final LSTM layer to decode the feature encodings into a trajectory prediction sequence. 
 
 #### Results
 
@@ -124,7 +124,7 @@ The horizon layer passes the output from this initial set of layers into another
 
 The model was compared to a few common approaches, namely a sequence to sequence RNN encoder used for vehicle trajectory prediction (RNN-ED) and a convolutional social LSTM used for sparse trajectory prediction. 
 
-Using the NGSIM dataset, which represents sparse homogenous traffic conditions, the TraPHic model does not perform better than commonly used trajectory prediction models. However, it performs significantly better on a dense heterogeneous traffic dataset compared to other models, with an average displacement error of 0.78 compared to the next lowest error of 1. 15 from the CS-LSTM. 
+Using the NGSIM dataset, which represents sparse homogenous traffic conditions, the TraPHic model does not perform better than commonly used trajectory prediction models. However, it performs significantly better on a dense heterogeneous traffic dataset compared to other models, with an average displacement error of 0.78 compared to the next lowest error of 1.15 from the CS-LSTM. 
 
 Comparing the performance of common models to the TraPHic model unveils an important discrepancy in the design of current trajectory prediction models, which tend to focus primarily on interactions between small amounts of similar road actors and cannot be accurately applied to scenes with many varied actors. Thus, the innovations presented with weighted interactions using implicit behavior and constraint factors is very pertinent to the future development of trajectory prediction models, especially in terms of developing autonomous vehicles. 
 
@@ -184,7 +184,7 @@ Without a doubt, the results show that there is the least average displacement a
 
 
 
-### Result Comparison
+## Result Comparison
 
 This section will go over a detailed comparison of the three models covered above: FastMobileNet (FMNet), TraPHic, and a two-stream Graph-LSTM model. The comparison will cover the different approaches and applications of each model. 
 
@@ -196,7 +196,7 @@ The Two-stream Graph-LSTM model works by integrating behavior prediction into th
 
 Each of the discussed deep learning models presents a set of advantages tailored to specific challenges in the realm of autonomous driving systems. FastMobileNet shines with its focus on speed and efficiency, making it ideal for real-time applications requiring the prediction of VRU motion. The TraPHic model stands out for its innovative treatment of weighted interactions, offering robust performance in complex, dense traffic environments. Meanwhile, the two-stream Graph-LSTM model provides a holistic approach by incorporating behavior prediction, promising enhanced accuracy in long-term forecasting. 
 
-### Conclusion
+## Conclusion
 
 The study of road agent behavior and trajectory prediction through three distinct deep learning models demonstrates the diversity of solutions to this problem. Each model: the FastMobileNet (FMNet) for predicting the motion of Vulnerable Road Users (VRUs) using high-definition maps and ConvNets, the TraPHic model for trajectory prediction in dense and heterogeneous traffic, and the two-stream graph-LSTM model for forecasting the trajectory and behavior of road-agents, demonstrates unique strengths and architectural innovations tailored to address specific challenges in trajectory and behavior prediction.
 
