@@ -160,7 +160,7 @@ They also evaluate on articulated human pose estimation, achieving an APK of 0.2
 ![kv5]({{ '/assets/images/32/kv5.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 
-<!-- ### Analysis  -->
+### Analysis 
 <!-- The authors present a thorough analysis of their method's behavior across multiple dimensions: -->
 
 <!-- #### Effect of Object Characteristics
@@ -178,27 +178,25 @@ To better understand viewpoint failures, they analyze the error modes for predic
 
 Only around 3% of instances have errors unexplained by these two modes. -->
 
-<!-- ### Pros
+#### Pros
 The key strengths of the proposed method are:
 
-1. It achieves significant performance improvements over prior state-of-the-art methods across all the pose estimation tasks of viewpoint prediction, keypoint localization, and keypoint detection on the challenging PASCAL 3D dataset.
+<!-- 1. It achieves significant performance improvements over prior state-of-the-art methods across all the pose estimation tasks of viewpoint prediction, keypoint localization, and keypoint detection on the challenging PASCAL 3D dataset. -->
 
-2. By using an end-to-end trained convolutional architecture, it avoids the need for explicit modeling of part appearances or deformations, letting the CNN implicitly learn the relevant representations.
+1. By using an end-to-end trained convolutional architecture, it avoids the need for explicit modeling of part appearances or deformations, letting the CNN implicitly learn the relevant representations.
 
-3. It presents a principled approach to combine local appearance cues with global viewpoint context for improving keypoint predictions.
+2. It presents a principled approach to combine local appearance cues with global viewpoint context for improving keypoint predictions.
 
-4. The extensive analysis of performance factors like object characteristics and error modes provides valuable insights to guide future work in this area.
-
-### Cons
+#### Cons
 Some potential limitations of the work are:
 
 1. While avoiding explicit part modeling is a strength, the proposed method still relies on the discriminative power of the CNN architecture. It lacks explicit 3D geometric reasoning which could be beneficial.
 
 2. The experiments and analysis are restricted to rigid object categories like vehicles, furniture etc. The applicability to non-rigid or highly articulated objects like animals is not evaluated.  
 
-3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases.
+<!-- 3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases. -->
 
-4. While incorporating viewpoint improves over pure appearance models, precise localization of keypoints with high accuracy remains a challenge based on the PCK/APK numbers reported. -->
+3. While incorporating viewpoint improves over pure appearance models, precise localization of keypoints with high accuracy remains a challenge based on the PCK/APK numbers reported.
 
 
 
