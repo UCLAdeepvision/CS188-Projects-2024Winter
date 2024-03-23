@@ -242,7 +242,7 @@ box. As a result, extending this model to more information requires
 nontrivial preprocessing decisions. These are presented in diagram
 from below.
 
-![PREPOCESSING]({{ '/assets/images/32/preprocessor.svg' | relative_url}})
+![PREPROCESSING structure]({{ '/assets/images/32/preprocessor.svg' | relative_url}})
 
 In words, each of the images are extracted from their file, then
 compared against the ground truth labels to find the location of the
@@ -302,12 +302,13 @@ It should also be noted that each model required drastically different
 amounts of training time. Unfortunately, this was not tracked precisely, as this
 level of variance was not expected. Rough numbers are available below.
 
-| Model                 | Training Time |
-|-----------------------|---------------|
-| Mono                  | 10 Hours      |
-| Stereo                | 16 Hours      |
-| Mono, last 3 frames   | 1 Day         |
-| Stereo, Last 3 Frames | 2 Days        |
+| Model                 | Training Time | Num Epochs | Reason                                                       |
+|-----------------------|---------------|------------|--------------------------------------------------------------|
+| Mono                  | 10 Hours      | 10         | Reccomended value in other projects                          |
+| Stereo                | 16 Hours      | 20         | More parameters                                              |
+| Mono, last 3 frames   | 1 Day         | 30         | More parameters                                              |
+| Stereo, Last 3 Frames | 2 Days        | 20         | Compute time constraints only allowed training for 20 epochs |
+
 
 While some of this is due to the inefficiency in concatenation and
 preparing the forward pass, it suggests that VGGNet and the increased
@@ -315,8 +316,46 @@ size linear layers increase the time of the forward and backward
 pass. This is a concern for self driving vehicles, where 3D bounding
 box information needs to be available in real time.
 
+Validation and training were split by whether the last digit of the id
+ended in 9. This resulted in 10% of the data being reserved for
+validation. 
+
 # Results
 
+
+After training for a variable number of epochs, we obtained the results below
+
+| Model           | Mean IoU | Std IoU | Mean Angle Difference (rad) | Std Angle Difference (rad) |
+|-----------------|----------|---------|-----------------------------|----------------------------|
+| Stereo temporal | 0.956    | 0.00023 | -0.0037                     | 0.2515                     |
+| Mono temporal   | 0.983    | 0.00059 | -0.0087                     | 0.2229                     |
+| Stereo          | 0.993    | 0.00026 | -0.0338                     | 0.1167                     |
+| Baseline        | 0.992    | 0.0012  | 0.0003                      | 0.1439                     |
+
+
+Notably, all models were able to perform dimension size vehicle
+estimation with high precision, with an IoU of effectively 1. However,
+these models exhibit high differences in orientation prediction. While
+models exhibit a mean angle difference close to ground truth,
+including temporality appears to double standard deviation in angle
+difference. This implies the model exhibits poor training performance
+when provided with temporal data, which could be an indication of
+several things:
+
+1. Pose estimation does not require temporal data, so adding it effectively adds noise to the linear network
+2. The increased number of inputs to the first linear network increases the parameter count, requiring quadratically more training time rather than the linear increase that was given.
+3. The architecture performs poorly with downsampling, which was required in the stereo temporal model.
+
+However, stereo vision without temporal data resulted in an 18.9%
+decrease in Std. angle difference, which implies that stereo vision
+greatly assists with pose estimation. This makes sense, as stereo
+vision gives the model access to parallax, which increases its ability
+to judge depth and determine angle.
+
+Finally, it's worth noting that our baseline model has roughly the
+same angle deviation as seen in the paper, which is a good indication
+these results stem purely from architecture, and not choice of
+optimizer or hyperparameters.
 
 # Discussion
 
