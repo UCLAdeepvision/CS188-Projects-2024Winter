@@ -2,12 +2,12 @@
 layout: post
 comments: true
 title: Object Tracking
-author: Bryan Kwan
+author: Bryan Kwan and Chanakya Gidipally
 date: 2024-03-21
 ---
 
 
-> Object tracking has been a prevalent Computer Vision task for many years with many different deep learning approaches. In this report, we will explore the inner workings of two different approaches, DeepSORT for multiple object tracking and SiamRPN++ for single object tracking, comparing and contrasting their capabilities. Finally, we have a short demo on DeepSORT with YOLOv8.
+> Object tracking has been a prevalent Computer Vision task for many years with many different deep learning approaches. In this report, we will explore the inner workings of two different approaches, DeepSORT for multiple object tracking and SiamRPN++ for single object tracking, comparing and contrasting their capabilities. We also briefly look at ODTrack, a more recent tracking algorithm. Finally, we have a short demo on DeepSORT with YOLOv8.
 
 
 <!--more-->
@@ -120,7 +120,7 @@ The most popular tracking algorithm, DeepSORT, is applicable to many application
 
 ![DeepSORT]({{ '/assets/images/team36/deepsort.webp' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 8. The architecture of DeepSORT using YOLOv4 as its detection model.* [1].
+*Fig 8. The architecture of DeepSORT using YOLOv4 as its detection model.* [3].
 
 In DeepSORT, each tracked object is assigned to a track. When a new object is detected on the frame, it is proposed to be assigned to a new track. Within the next three frames, the new proposed track has to be successfully associated with a measurement in order for the track to be added. Existing objects are all assigned to a single track which allows for easy identification and robustness to noisy measurement data in cases of occlusion, background clutter, and more. If there are no new measurements associated with an existing track after a certain number of timesteps, the track will be removed [3].
 
@@ -253,6 +253,39 @@ def min_cost_matching(
 #### Discussions
 DeepSORT is increasingly robust to occlusions due to its Kalman filter that can predict states even when there are noisy observations for an object. It also provides computationally efficient and easy implementation for multiple object tracking, making it widely used in many cases. However, a bottleneck of the algorithm is the object detector. A bad object detector will degrade performance and lead to tracking failures and drift. Additionally, it may be hard to track objects in low illumination and when there are other factors that can affect the detection performance. DeepSORT is also not very scalable as it relies on pretrained architectures to do feature extraction and detection. Because it also only takes into account appearance and motion information, it can be susceptible to performance degradation when non-rigid transformations occur [3]. 
 
+### ODTrack
+ODTrack (Online Dense Temporal Token Learning for Visual Tracking) is a new framework designed for video-level object tracking.
+
+Some of the problems associated with object tracking is that traditional methods only cover a limited number of frames which fail to capture long term dependencies across the videos. If objects are obscured by other objects, the frame by frame analysis has difficulty re-identifying them once they reappear in a new frame. If objects undergo changes in size or shape throughout a video, traditional frameworks may struggle to track the object from information from a single frame. ODTrack aims to address these problems [4].
+
+#### Core functionalities:
+Online tokenization: ODTrack processes the entire video as a whole instead of analyzing each frame independently and then extracts the features about the object’s appearance from each frame which are then compressed into a sequence of tokes.
+Temporal Information Capture (How the object moves across frames): ODTrack employs online token propagation which iteratively updates the token sequence across video frames which allows it to capture the object’s motion patterns.
+Frame-to-Frame Association: ODTrack can effectively associate the object between frames which allows it to track the object’s movement throughout the entire video [4].
+
+#### Architecture: 
+##### Feature Extraction Backbone: 
+1. Where ODTrack processes each frame of the video
+2. Uses pretrained model to extract features from each frame
+
+##### Tokenization Module:
+1. The information from the features are fed into the tokenization module which compresses the features into a sequence of tokens
+2. With the changes of the video, it refines the token sequence to incorporate the information of the objects changed appearance and   motion across frames
+
+##### Frame-to-Frame Association Module:
+1. Takes the last 
+
+#### Pros:
+Simplicity and Efficiency: This is a much more streamlined approach with online token propagation allowing for computational efficiency.
+
+Effective Long-term Dependency Capture: ODTrack has the ability to capture these long-term dependencies through the propagated token sequence which leads to more accurate tracking. This also makes the framework very flexible to handle videos of various lengths, qualities, and scenarios [4].
+
+#### Cons:
+Information Loss: Compressing information into tokens can lead to loss of detail which may cause some discrepancies in the object characteristics for tracking.
+
+New: ODTrack is a relatively new framework so it may not be as tested as other traditional methods, so there is lots of room to improve.
+
+
 ## Demo
 Code Base: [Github](https://github.com/nwojke/deep_sort.git)
 
@@ -265,7 +298,7 @@ Code Base: [Github](https://github.com/nwojke/deep_sort.git)
 As you can see there are multiple boxes within each frame surrounding the multiple objects in the video. DeepSORT is also robust to camera movement as the demo videos show. These demo videos are pretty clear and not noisy so it remains to be seen if DeepSORT can have similar performance with more noisy data.
 
 ## Conclusion
-For single object tracking tasks, SiamRPN++ is a great option that isn’t computationally expensive and is very accurate when you want to optimize for a specific tracking environment. Additionally, the one shot learning task minimizes online training. In comparison, DeepSORT is a better option when you want to generalize to many different domains, environments, and scenarios due to its multiple object tracking structure, ability to track through noisy camera data, and efficiency. However, the detection model and appearance extractor may need fine-tuning which requires more online training. Each tracking algorithm has their own benefits and are useful in different situations which is why both are still widely used today.
+For single object tracking tasks, SiamRPN++ is a great option that isn’t computationally expensive and is very accurate when you want to optimize for a specific tracking environment. Additionally, the one shot learning task minimizes online training. In comparison, DeepSORT is a better option when you want to generalize to many different domains, environments, and scenarios due to its multiple object tracking structure, ability to track through noisy camera data, and efficiency. However, the detection model and appearance extractor may need fine-tuning which requires more online training. Each tracking algorithm has their own benefits and are useful in different situations which is why both are still widely used today. ODTrack is also a solid option for computational efficiency and robustness to different tracking scenarios.
 
 
 ## Reference
@@ -274,5 +307,7 @@ For single object tracking tasks, SiamRPN++ is a great option that isn’t compu
 [2] Li, Bo, et al. "High performance visual tracking with siamese region proposal network." Proceedings of the IEEE conference on computer vision and pattern recognition. 2018.
 
 [3] Wojke, Nicolai, Alex Bewley, and Dietrich Paulus. "Simple online and realtime tracking with a deep association metric." 2017 IEEE international conference on image processing (ICIP). IEEE, 2017.
+
+[4] Zheng, Yaozong, et al. "ODTrack: Online Dense Temporal Token Learning for Visual Tracking." arXiv preprint arXiv:2401.01686 (2024).
 
 ---
