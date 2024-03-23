@@ -39,7 +39,7 @@ Text to video generation is a computer vision task that uses deep learning to cr
 
 ### Forward Diffusion Process
 
-In diffusion, the forward process entails the adding of noise to the datapoint. Diffusion models usually sample this noise from a Gaussian distribution according to a noise schedule, but other distributions are possible. Diffusion models usually have a Markov Chain structure (meaning that future events only depend on the current state). By the end of the process, the datapoint should resemble the Gaussian noise, while maintaining key features of the image, allowing for the backward process to detect and utilize those features to reconstruct the whole image.It is typical to use a cosine noise schedule which has this Markov structure: 
+In diffusion, the forward process entails the adding of noise to the datapoint. Diffusion models usually sample this noise from a Gaussian distribution according to a noise schedule, but other distributions are possible. Diffusion models usually have a Markov Chain structure (meaning that future events only depend on the current state). By the end of the process, the datapoint should resemble the Gaussian noise, while maintaining key features of the image, allowing for the backward process to detect and utilize those features to reconstruct the whole image. It is common to use a cosine noise schedule which retains this Markov structure: 
 
 $$
 q(\mathbf{z}_t|\mathbf{z}_s) = \mathcal{N}(\mathbf{z}_t; (\alpha_t/\alpha_s)\mathbf{z}_s, \sigma^2_{t|s}\mathbf{I})
@@ -47,6 +47,8 @@ $$
 
 
 ### Backward Diffusion Process
+
+The backward process can be understood as running the forward diffusion process in the other direction. Starting with a very noisy image, the idea to sample noise from a Gaussian distribution and progressively remove this noise from the image until the original image has been reconstructed. The reverse process aims to learn the conditional distribution $$ p_\theta (\mathbf{x}_{t-1} | \mathbf{x}_t) $$ which represents the noise we need to subtract from the order at time t in order to obtain the image at time t-1.
 
 ## Video Diffusion Models
 
@@ -239,7 +241,7 @@ Sample results from Imagen Video
 
 ## Experiments
 
-We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below. All of the images use the same prompt, duration, and number of frames.
+We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below. All of the images use the same prompt, duration, and number of frames. The code we used to generate these samples is accessible in this [Google colab notebook](https://colab.research.google.com/drive/1lp-ph3_XAeXiEKvwyvva009TH6O9H0pX?usp=sharing).
 
 The prompt is 'A futuristic cityscape at dusk, with flying cars weaving between neon-lit skyscrapers'.
 
