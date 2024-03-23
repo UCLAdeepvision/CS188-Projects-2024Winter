@@ -328,7 +328,7 @@ Total Loss:
 
 ### Analysis
 
-The model was able to beat stereo/semantic segmentation models. It was able to achieve:
+The model was able to beat stereo/semantic segmentation models thanks to its clever geometric insights. It was able to achieve:
 
 - 1st place for Average Orientation Estimation, Average Precision on KITTI Easy/Moderate datasets
 
