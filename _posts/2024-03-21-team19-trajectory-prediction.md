@@ -123,7 +123,7 @@ Where $$L_{\text{traj}}$$ represents the negative Gaussian log-likelihood for th
 
 The trajectory prediction capabilities of autonomous vehicle (AV) systems are benchmarked against metrics that reflect their precision and efficiency in real-world scenarios. VectorNet stands out in this domain, as illustrated by both its ADE (Average Displacement Error) and DE@3s metrics, which demonstrate its exceptional ability to predict the future positions of on-road agents. It boasts an ADE of 1.81 meters, showcasing superior average accuracy across time steps, and a DE@3s of 4.01 meters, highlighting its precision in short-term trajectory forecasting. This performance surpasses traditional approaches like constant velocity models and LSTM-based architectures, which were once standard.
 
-![Vectornet efficiency]({{ 'assets/images/19/performance.png' | relative_url }})
+![Vectornet efficiency]({{ 'assets/images/19/efficiency.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 *Fig 4. FLOPs and param # for Vectornet compared with other Resnet models [4]*.
 
