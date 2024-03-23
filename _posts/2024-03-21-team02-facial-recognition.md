@@ -30,16 +30,6 @@ Facial recognition is the technology of identifying human beings by analyzing th
 
 Facial recognition has gained significant attention and relevance in today's digital landscape due to its multifaceted applications and implications across various domains. From enhancing security measures to streamlining user authentication processes, facial recognition provides unparalleled convenience and efficiency. We can see facial recognition integrated in law enforcement, retail, healthcare, and even social media platforms. This highlights its versatility and potential to revolutionize how we interact with technology and each other.
 
-### Face recognition processing flow
-
-![Face recognition processing flow]({{ 'assets/images/2/DDFD/Process-flow.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-_Fig 1. replace this_ [1].
-
-![Face recognition processing flow]({{ 'assets/images/2/DDFD/processflow2.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-_Fig 2. replace this_ [1].
-
 ### Face recognition tasks
 
 These are the most important tasks in face recognition:
