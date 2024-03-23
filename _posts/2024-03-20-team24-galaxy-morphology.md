@@ -72,37 +72,6 @@ This approach found their unsupervised generative model clustered galaxies accor
 However, there are challenges. For example, if we have six clusters predominantly consisting of objects with less than two secondary sources, AstroVaDEr doesn't distinguish based on the primary source's morphology but rather on the secondary sources' placement. This underscores the value of human judgment, especially since the model sometimes overemphasizes the presence of companion objects. Moreover, when the batch size exceeds a certain threshold, the network may fail to prepare batches quickly enough for efficient GPU processing. All in all, we conclude that AstroVaDEr unexpectedly places high importance on the presence of companion objects – demonstrating the importance of human interpretation.
 
 
-### Variational Autoencoders
-
-
-### Table
-Here is an example for creating tables, including alignment syntax.
-
-|             | column 1    |  column 2     |
-| :---        |    :----:   |          ---: |
-| row1        | Text        | Text          |
-| row2        | Text        | Text          |
-
-### Code Block
-```
-# This is a sample code block
-import torch
-print (torch.__version__)
-```
-### Formula
-Please use latex to generate formulas, such as:
-
-$$
-\tilde{\mathbf{z}}^{(t)}_i = \frac{\alpha \tilde{\mathbf{z}}^{(t-1)}_i + (1-\alpha) \mathbf{z}_i}{1-\alpha^t}
-$$
-
-or you can write in-text formula $$y = wx + b$$.
-
-### More Markdown Syntax
-You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/).
-
-
-
 ### Vision Transformers
 
 A glance at the state-of-the-art models reveals, as expected, that Vision Transformers (ViTs) have been included in the efforts to classify galaxies [7]. Transformers, in general, are more scalable with massive amounts of data, such as in this case. ViTs have been shown to scale exceptionally well as the amount of training data increases, thanks to their self-attention mechanism (see Fig. 4) and lack of convolutional inductive biases compared to their older cousin, the CNN. This makes them attractive for leveraging the vast quantities of unlabeled galaxy images from surveys.
