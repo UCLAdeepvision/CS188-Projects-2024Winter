@@ -123,6 +123,29 @@ We decided to evaluate and compare Social LSTM and Social GAN using the [TrajNet
 
 
 # VectorNet
+
+## Introduction 
+There are more real world applications for human trajectory forecasting including evacuation analysis, more efficient public transportation, to how crowds behave during chaotic events. Early approaches to this used handcrafted representations based on domain knowledge to predict where people (agents) in a crowd would go. However, social interactions in the crows are diverse and subtle, making these predictions difficult to capture manually. 
+Due to the recent advantages of deep learning - large models are able to accurately predict and outperform handcrafted approaches. VectorNet by Waymo, a self-driving car company backed by Alphabet, is a state-of-the-art deep learning model for trajectory prediction. Its main novel advantages include using vector representations to model spatial agent interactions and employing deep sets architecture to reason about interacting agents. To test the performance of Vector Net, this group uses TrajNet++, a large-scale benchmark tailored for evaluating interaction forecasting. 
+
+## Architecture
+The architecture of VectorNet has two primary novel strengths. The first being its use of vectors to encode data, whether it be agents, lanes, crosswalks, etc. Vector representation naturally captures the spatial relationships and geometry between agents, which is crucial information about interactions in trajectory prediction tasks. The vector representation also allows for the second main advantage of vector net, GNNs. Conventional neural networks employ a layer-wise architecture, where each layer performs linear transformations followed by non-linear activations to learn relevant patterns from the input data. However, graph neural networks (GNNs) adopt a distinct approach by utilizing neighborhood-based aggregations to generate representations that evolve over iterations.
+The primary advantage of GNNs lies in their ability to handle tasks that are beyond the scope of traditional Convolutional Neural Networks (CNNs). While CNNs excel at tasks such as object detection, image classification, and pattern recognition, they achieve this through the use of convolutional layers and pooling operations tailored for grid-structured data.
+
+There are two fundamental limitations that hinder the application of CNNs to graph-structured data: 1. Computational Complexity: Applying CNNs to graph data is computationally challenging due to the arbitrary and intricate topology of graphs, which lack the spatial locality inherent in grid-like structures. Additionally, the absence of a fixed node ordering further complicates the utilization of CNNs. 2. Loss of Relational Information: When graph data is projected onto a grid or image representation, valuable information regarding the depth and distance relationships between key entities is lost. This projection process effectively discards the rich relational structure inherent in graph data.
+
+Convolutional Neural Networks have demonstrated remarkable success in tackling problems where the underlying data representation exhibits a grid-like structure, such as image classification. These architectures leverage their learnable filters efficiently by applying them to all input positions, thereby reusing local patterns. However, many compelling tasks involve data that cannot be represented in a grid-like format and instead resides in an irregular domain. Examples of such data include 3D meshes, social networks, telecommunication networks, biological networks, and brain connectomes, all of which can be naturally represented as graphs.
+In GNNs, nodes embed information with regards to an object or entity. This could include positional data or attributes of the object. Edges could represent the relationship between a node and how embeddings update.
+
+For the vector net paper, they set $v_i = [d_i^s, d_i^e, a_i, j]$. Where each polyline P with nodes $\{v_1, v_2, …, v_P\}$ defines our subgraph GNN layer as: 
+
+$ v_i^{l+1} = \phi_{rel} (g_{enc}(v_i^{(l)}), \phi_{agg}(\{g_{enc}(v_i^{(l)})\})) $,
+
+where $\phi_{agg}(.)$ is max-pooling, $\phi_{rel}(.)$ is concatenation. 
+	A few other primary equations that Vector Net uses is its loss function: 
+$$L = L_{traj} + \alpha * L_{node}$$
+Where $L_{traj}$ is NLL for trajectory prediction, $L_{node}$ is loss from graph completion task, and $\alpha$ is the scaling factor.  Metrics that can evaluate its performance is the average displacement error (ADE), and the displacement error at t, or the displacement error in meters at time $t = 1, 2, 3$
+
 <!-- 
 ## Main Content
 Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
@@ -177,5 +200,7 @@ Please make sure to cite properly in your work, for example:
 [2] Gupta, A., Johnson, J., Fei-Fei, L., Savarese, S., & Alahi, A. (2018). Social GAN: Socially Acceptable Trajectories with Generative Adversarial Networks (Version 1). arXiv. https://doi.org/10.48550/ARXIV.1803.10892
 
 [3] Kothari, P., Kreiss, S., & Alahi, A. (2020). Human Trajectory Forecasting in Crowds: A Deep Learning Perspective (Version 3). arXiv. https://doi.org/10.48550/ARXIV.2007.03639
+
+[4] J. Gao et al., "VectorNet: Encoding HD Maps and Agent Dynamics From Vectorized Representation," 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 2020, pp. 11522-11530, doi: 10.1109/CVPR42600.2020.01154.
 
 ---
