@@ -288,12 +288,12 @@ To fix this issue, the authors of 3DGS decided to instead represent the covarian
 
 From here everything can be plugged back into Fig. 18 and that would be our group of projected Gaussians.
 
-### The Rasterizer.
+### The Rasterizer
 
 Now we have those sets of Gaussians, but they are projected to some viewing perspective, like that of the bike, and now we have to render our image.
 
-![Frustum]({{ '/assets/images/Team29/Frustum.png' | relative_url }})
-{: style="width: 800px; max-width: 100%;"}
+![Frustum]({{ '/assets/images/Team29/Frustum.jpg' | relative_url }})
+{: style="width: 1000px; max-width: 100%;"}
 *Figure 23: The Viewing Frustum*
 
 With the given figure above, the image that is directly infront of the camera is the image that we want to render. On that note, as you may have realized from the previous section that we almost have this image already; we just have to do some tinkering to actually get the the colors and what not, as what we have currently are not pixel values, but rather full Gaussians that we need to extract those densities from.
@@ -358,7 +358,7 @@ The first is at 500 iterations and the next is at 995. The reason behind these c
 </video>
 
 <video src="../../../assets/images/Team29/995.mp4" controls>
-  500 its
+  995 its
 </video>
 
 ## Conclusion
