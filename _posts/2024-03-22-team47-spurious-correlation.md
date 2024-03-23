@@ -49,7 +49,7 @@ As a more concrete example, see:
 
 ![SpuCoEx1]({{ '/assets/images/47/spuco_ex1.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Fig 1. Examples of Spuriously Correlated Features in Two Separate Contexts* [TODO: FIX].
+*Fig 1. Examples of Spuriously Correlated Features in Two Separate Contexts* [4].
 
 Consider the top row of this image. In the training dataset, we have a that images of females with blonde hair are common, as are images of males with dark hair. However, for example, images of males with blonde hair are rare. Thus, if we train a model to classify the gender of a person given an image of their face using the following dataset, the model will likely have significantly higher error rates on atypical groups (e.g. males with blonde hair here). This is an example of a spuriously correlated feature, where the core feature is male/female, and the spurious feature is the hair color (which we trivially know to not determine the gender of a person).
 
@@ -59,7 +59,7 @@ This interpretation of a model potentially highly weighing a spurious feature wh
 
 ![SpuCoEx2]({{ '/assets/images/47/spuco_ex2.png' | relative_url }})
 {: style="width: 900px; max-width: 100%;"}
-*Fig 2. Grad-CAM heatmaps of model(s) which have learned spurious features.* [TODO: FIX].
+*Fig 2. Grad-CAM heatmaps of model(s) which have learned spurious features.* [2].
 
 The above heatmaps support this intuition. We see much higher weights being placed on the backgrounds of the images vs the actual subject (which is the object to be classified in both cases). The fourth image from the left demonstrates the spurious correlation exactly. We see the model highly weighing most of the pixels in the background and explicitly not taking into account the region where the bird is in the image. This same phenomenon occurs in the other images as well, with the model placing a significant weight on the background (which we want to be relatively unrelated to model output). Thus, these activation mappings go to show the nature of a model which has learned spurious correlations.
 
