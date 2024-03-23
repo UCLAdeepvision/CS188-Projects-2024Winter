@@ -205,27 +205,10 @@ Total Loss:
 {: style="width: 400px; max-width: 100%;"}
 
 
-### Results
-
-The model was able to beat stereo/semantic segmentation models. It was able to:
-
-- 1st place for Average Orientation Estimation, Average Precision on KITTI Easy/Moderate datasets
-
-- 1st place on KITTI Hard in Orientation Score (excludes 2D bounding box estimation)
-
-- Beats SubCNN in other metrics (e.g. 3D box IoU)
-3-8 deg of orientation error across KITTI Easy/Moderate/Hard
-
-![EGO10]({{ '/assets/images/32/3d11.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-
-
-The model was also able to demonstrate the "Attention" where it focuses on features such as tires and mirrors to determine orientation. 
-
-![EGO10]({{ '/assets/images/32/3d12.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-
 # Methods
+
+[Source Code Link](https://github.com/AlexWalburg/cs188poseestimation)
+
 
 This model was highly successful in mono 3D pose estimation by use of
 clever geometric insights. We were interested to see if these
@@ -358,6 +341,27 @@ these results stem purely from architecture, and not choice of
 optimizer or hyperparameters.
 
 # Discussion
+
+
+### Deep3dBox
+
+The model was able to beat stereo/semantic segmentation models. It was able to:
+
+- 1st place for Average Orientation Estimation, Average Precision on KITTI Easy/Moderate datasets
+
+- 1st place on KITTI Hard in Orientation Score (excludes 2D bounding box estimation)
+
+- Beats SubCNN in other metrics (e.g. 3D box IoU)
+3-8 deg of orientation error across KITTI Easy/Moderate/Hard
+
+![EGO10]({{ '/assets/images/32/3d11.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+
+
+The model was also able to demonstrate the "Attention" where it focuses on features such as tires and mirrors to determine orientation. 
+
+![EGO10]({{ '/assets/images/32/3d12.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
 
 
 ## Ego-net vs Deep3dBox
