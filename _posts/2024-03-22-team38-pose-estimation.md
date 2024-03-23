@@ -105,25 +105,33 @@ The details of the classification side are as follows. After receiving the bound
 This new crop is fed into a CNN using ResNet-101 as its backbone. The CNN is fully convolutional. At the output layer, instead of using the fully connected layers of the base ResNet, a 1x1 convolutional layer with 3 output channels per keypoint (for a total of 17 * 3 = 51 channels) is used. The first 17 channels—referred to as the heatmaps—represent the a binary classification for whether a pixel is within radius $R$ of a keypoint $k$, ie $h_k(x_i)=1$ if $\|x_i-l_k\|\leq R$, where $l_k$ is the estimated keypoint location. The remaining 34 channels—referred to as the offsets—represent the estimated vector from the pixel to the associated keypoint, forming a vector field.
 
 Following this 1x1 convolution, atrous convolution was used with 3 output channels per keypoint and an output stride of 8 pixels, followed by bilinear interpolation, scaling the output back to the 353x257 crop. The upsampled output then fuses the heatmaps and offsets as follows:
+
 $$
 f_k(x_i) = \sum_j \frac{1}{\pi R^2} G(x_j + F_k(x_j) - x_i) h_k(x_j) \tag{4}
 $$
+
 where $G$ is the bilinear interpolation kernel. This function effectively sums the expected keypoint locations from each pixel associated with that keypoint, forming a highly precise activation map.
 
 This model was trained using two output heads, corresponding to the heatmaps and offsets. The heatmap loss $L_h$ was calculated as the log loss for each position and keypoint combination, while the offset loss was calculated as: 
+
 $$
 L_o(\theta) = \sum \limits_{k=1:K} \sum \limits_{i:\|l_k-x_i\|\leq R} H(\| F_k(x_i) - (l_k - x_i) \|) \tag{5}
 $$
+
 where $H(u)$ is the Huber robust loss ($\frac{u^2}{2}$ for $|u|\leq \delta$ and $\delta (|u| - \frac{\delta}{2})$ otherwise, for some $\delta$), $l_k$ is the k-th keypoint location. Loss for offsets is only calculated for positions actually within the radius $R$ of the keypoint. The final loss, then was
+
 $$
 L(\theta) = \lambda_h L_h(\theta) \lambda_o L_o(\theta) \tag{6}
 $$
+
 where $\lambda_h$ and $\lambda_o$ were scaling factors for balance—the values used in MultiPose were $\lambda_h = 4$ and $\lambda_o = 1$. This loss was complicated when considering other people’s keypoints may appear in the background of a bounding box in crowded circumstances. For this circumstance, the heatmap loss only considered the keypoints associated with the person in the foreground.
 
 Two final features of MultiPose relate back to the use of the person detector, with the fist being an alternative method of pose scoring. Instead of relying on the base model of Faster RCNN for drawing bounding boxes, a new score was developed. This score was calculated as the average maximal activation for each keypoint:
+
 $$
 \text{score}(\mathcal{I}) = \frac{1}{K} \sum\limits^K_{k=1} \max\limits_{x_i} f_k(x_i) \tag{7}
 $$
+
 This modification helped guide the bounding boxes to provide more valuable context clues, and generally focus the objective on maximizing joint location confidence. The final feature was the use of a variant of non-max-suppression. Instead of using IOU to eliminate overlapping bounding boxes, the similarity score was calculated using OKS—the same evaluation metric mentioned earlier. This change was primarily useful in differentiating between two people in close proximity, or two poses for the same person—both might have a high IOU, but two poses for the same person are more likely to have a higher OKS, than two poses for separate, but close, people.
 
 MultiPose took full advantage of the recent release of COCO, training the model both on the base COCO dataset, as well as a dataset supplemented by in-house data. The results were competitive with prior state-of-the-art results for COCO, such as CMU-Pose and Mask-RCNN, for both the supplemented dataset and the original COCO dataset.
@@ -149,45 +157,61 @@ If testing:
 To train the model by calculating the loss between ground truth heatmaps, the model requires that all ground truth images are converted from key point predicted images to heatmaps around the key point positions. 
 
 Dark addresses the standard coordinate decoding method (i.e. deriving the key point position from a heat map) which takes a heat map and identifies the coordinates of the maximal ($m$) and second maximal ($s$) activation. It then uses the following formula to produce the coordinate of the point:
+
 $$
 \mathbf{p} = \mathbf{m} + 0.25\frac{\mathbf{s}-\mathbf{m}}{\|\mathbf{s}-\mathbf{m}\|_2} \tag{8}
 $$
+
 This equation produces a key point at the maximal heat map pixel location shifted by ¼ toward the second maximal position. The final position in the original image is produced by the following equation where $\lambda$ is the resolution reduction ratio. 
+
 $$
 \mathbf{\hat{p}} = \lambda \mathbf{p} \tag{9}
 $$
+
 DARK claims that this standard coordinate prediction system is flawed because the maximum activation in the predicted heatmap is not the actual position of the key point but rather merely a coarse location of it. 
 
 To overcome this, DARK’s coordinate decoding method utilizes the predicted heat map’s distribution structure to discover the maximum activation position. DARK assumes that both the predicted and ground truth heat map follow a 2D gaussian distribution. Using this assumption, they model the heat map with the following two equations (10 being the generic equation and 11 being an equivalent yet simplified version) and use the second one (11) to predict $\mu$, the corresponding key point position: 
+
 $$
 \mathcal{G}(\mathbf{x};\mathbf{\mu},\Sigma) = \dfrac{1}{(2\pi)|\Sigma|^{\frac{1}{2}}}\exp(-\frac{1}{2} (\mathbf{x}-\mathbf{\mu})^T \Sigma^{-1} (\mathbf{x}-\mathbf{\mu})) \tag{10}
 $$
+
 $$
 \mathcal{P}(\mathbf{x};\mathbf{\mu},\Sigma) = \ln(\mathcal{G}) = -\ln(2\pi) - \frac{1}{2}\ln(|\Sigma|) - \frac{1}{2}(\mathbf{x}-\mathbf{\mu})^T \Sigma^{-1} (\mathbf{x}-\mathbf{\mu}) \tag{11}
 $$
+
 To solve for $\mu$ they utilize the underlying distribution’s structure as $\mu$ is an extreme point in the distribution, thus the first derivative at $\mu$ is trivially: 
+
 $$
 \left. \mathcal{D}'(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = 
 \left. \frac{\partial\mathcal{P}^T}{\partial \mathbf{x}} \right|_{\mathbf{x}=\mathbf{\mu}} =
 \left. -\Sigma^{-1}(\mathbf{x}-\mathbf{\mu}) \right|_{\mathbf{x}=\mathbf{\mu}} = 0 \tag{12}
 $$
+
 Using the first derivative as well as the second derivative defined below (13) they compute $\mu$ using the following equation (14): 
+
 $$
 \mathcal{D}''(\mathbf{m}) = \left. \mathcal{D}''(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = -\Sigma^{-1} \tag{13}
 $$
+
 $$
 \mathbf{\mu} = \mathbf{m} - (\mathcal{D}''(\mathbf{m}))^{-1}\mathcal{D}'(\mathbf{m}) \tag{14}
 $$
+
 Once obtaining $\mu$ they also apply equation (9) from above to predict the coordinate in the original image space. DARK’s method determines the underlying maximum more accurately by exploring the heat map’s statistics in its entirety. Furthermore, it is computationally efficient as it only computes the first and second derivative with respect to one pixel per heat map. 
 
 DARK’s proposed algorithm relies on a crucial assumption: the predicted heatmaps follow a gaussian distribution. However, most of the time heatmaps predicted by models do not possess a well distributed gaussian structure compared to the training heatmap data. To overcome this, DARK suggests modulating the heatmap distribution by using a gaussian kernel K with the same variation as the training data to smooth out multiple peaks in the heatmap $h$ by using the following equation where ⊛ denotes the convolution operation. 
+
 $$
 \mathbf{h}' = K ⊛ h \tag{15}
 $$
+
 To preserve the magnitude of the original heatmap $h$, simply scale $h'$ so that its maximal activation is the same as $h$’s using: 
+
 $$
 \mathbf{h}' = \dfrac{\mathbf{h}' - \min(\mathbf{h}')}{\max(\mathbf{h}') - \min(\mathbf{h}')} * \max(\mathbf{h}) \tag{16}
 $$
+
 By using this distribution modulation, DARK’s experiments validated further performance improvements of their coordinate decoding method. 
 
 One final change DARK makes to the traditional heatmap based models is a change in the coordinate encoding process. The standard method leads to inaccurate and biased heatmap generation which they overcome by placing their heatmaps’ center at a non-quantised location which represents the accurate ground-truth coordinate.
