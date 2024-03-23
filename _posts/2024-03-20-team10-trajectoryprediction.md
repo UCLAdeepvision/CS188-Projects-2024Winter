@@ -33,7 +33,7 @@ Humans have the ability to “read” one another, predicting each other’s gen
 
 Social LSTMs base themselves on the traditional LSTM architecture, which has proven to be very useful for sequence prediction tasks such as caption generation, translation, video translation, and more. In their specific model, the authors of Social LSTM introduce a few key ideas. Firstly, each trajectory is represented by its own LSTM model. Secondly, the LSTMs are linked to each other via a special layer called a social pooling layer.
 
-![SocialLSTM]({{ '/assets/images/team10/sociallstms.png' | relative_url }})
+![SocialLSTM]({{ '/assets/images/10/sociallstms.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 This social pooling layer is based on human intuition. Individuals usually make decisions about their path based on the motion of neighboring people and other surrounding objects. At each timestep, each LSTM cell receives pooled hidden state information from neighboring LSTM cells. These “Social hidden-state” tensors are encoded with positional information. With this, we can predict a new position for each trajectory.
@@ -46,7 +46,7 @@ This social pooling layer is based on human intuition. Individuals usually make 
 
 [Social GAN: Socially Acceptable Trajectories with Generative Adversarial Networks](https://arxiv.org/pdf/1803.10892.pdf)
 
-![Social GANs]({{ '/assets/images/team10/socialGAN.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/socialGAN.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Pedestrians moving towards one another with socially-acceptable predictions. [2]</em>
 
@@ -56,7 +56,7 @@ Human motion is inherently ‘multi-modal’: given any position, we have many �
 #### Social GAN Architecture
 This following proposed architecture addresses these limitations by employing Generative Adversarial Networks which have empirically been able to overcome intractable probabilistic computations and further projections of behaviors. Instead of generating images, as has been commonly employed in the past, the architecture proposes to generate multiple trajectories given a history where a generator creates candidates and the discriminator evaluates them, pushing the generator to learn ‘good behaviors’ that can fool the discriminator (to generate ‘socially acceptable motion trajectories’) in a crowded environment with numerous agents. 
 
-![Social GANs]({{ '/assets/images/team10/sgarch.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/sgarch.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Encoder-decoder structure connecting LSTM cells of the Social-GAN architecture with both generator and discriminator. [2]</em>
 
@@ -65,7 +65,7 @@ The model: an RNN Encoder-Decoder generator and RNN-based encoder discriminator 
 #### GANs
 The generative adversarial network functions with two neural networks trained in complete opposition where generative model $$G$$ attempts to use the probabilistic data distribution to ‘fool’ the discriminator and discriminative model $$D$$ that estimates the probability that a provided sample was from $$G$$ versus the training set. $$G$$ inputs a latent variable, $$z$$, and outputs a generated sample $$G(z)$$; $$D$$ takes in a sample $$x$$ and outputs whether or not the input belongs to the data set or not. Thus we have the following ‘min-max objective’:
 
-![Social GANs]({{ '/assets/images/team10/ganloss.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/ganloss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>GAN optimization formula. [2]</em>
 
@@ -76,7 +76,7 @@ The model consists of the aforementioned 3 key components: Generator ($$G$$), Po
 
 With the generator, using $$\phi(\cdot)$$ as a single layer MLP with ReLU non-linear activation, $$W_{ee}$$ as the embedding weight, $$W_{encoder}$$ as the shared embedding weight between all individuals, and the given locational input $$x_i^t, y_i^t$$, we obtain the following recurrence for the embeddings of each agent at time t for the LSTM cell of the encoder:
 
-![Social GANs]({{ '/assets/images/team10/socialganeq2.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/socialganeq2.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Encoder initialization. [2]</em>
 
@@ -84,7 +84,7 @@ However, one LSTM per person fails to capture the understanding of inter-agent i
 
 To produce future scenarios with respect to the past, the generation of new output requires a conditional for the decoder initialization:
 
-![Social GANs]({{ '/assets/images/team10/socialganeq3.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/socialganeq3.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Decoder initialization. [2]</em>
 
@@ -92,19 +92,19 @@ where $$\gamma(\cdot)$$ is a fully-connected layer with ReLU activation and $$W_
 
 After the given encoder and decoder initialization, we obtain the predictions as follows:
 
-![Social GANs]({{ '/assets/images/team10/socialganeq4.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/socialganeq4.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Final predictions of the model. [2]</em>
 
 The discriminator ultimately consists of a separate encoder which takes as input some real or generated data and classifies them accordingly. Based on the encoder’s last hidden state, the model uses an additional fully-connected layer to generate a classification score. This ideally teaches subtle social interaction rules and classifies trajectories that aren’t acceptable as ‘fake’, using L2 loss on top of adversarial loss to indicate how ‘far’ generated samples are from the ideal data distribution. To further encourage diverse samples on trajectory prediction (in the case of being able to move in multiple directions to mimic humans’ multi-modal movement capability), the authors employed a variety loss function which selected the best of $$k$$ generated output predictions by randomly sampling the latent space!
 
-![Social GANs]({{ '/assets/images/team10/variety_loss.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/variety_loss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>L-variety loss optimization for best trajectory. [2]</em>
 
 This loss considers only the best trajectory, pushing the network to cover the space that best conforms to the past trajectory and provides high probabilistic predictions in realistic directions.
 
-![Social GANs]({{ '/assets/images/team10/pm_vs_social_pool.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/pm_vs_social_pool.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Social Pooling (red-grid) vs. Social GAN Pooling Mechanism (distance metric comparison). [2]</em>
 
@@ -113,7 +113,7 @@ Using the LSTMs, the authors were able to determine the hidden states with respe
 
 When removing the pooling, we observe that agents fail to consider the paths of others, which in turn may result in convergent pathways (which are realistically infeasible when considering walking scenarios). Pooling via relative distance enforces a global understanding of other agents and what is technically feasible with respect to the current state of agents and the ‘conformity to social norms’ and practices when referring to movement. Observe the following image where we have agents without the pooling mechanism (SGAN) versus agents with the pooling mechanism (SGAN-P).
 
-![Social GANs]({{ '/assets/images/team10/sgan_vs_sganp.png' | relative_url }})
+![Social GANs]({{ '/assets/images/10/sgan_vs_sganp.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>SGAN vs. SGAN-P (without pooling and with pooling mechanism integrated into architecture prediction performance comparison) [2]</em>
 
@@ -145,7 +145,7 @@ We then process the data scenes to include scenes where interactions happen:
 
 An example of an interaction between the agents is shown here:
 
-![Example Interaction]({{ '/assets/images/team10/interactionexample.png' | relative_url }})
+![Example Interaction]({{ '/assets/images/10/interactionexample.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 *Paths for 5 different agents.*
 
@@ -163,19 +163,19 @@ The following was used to initialize the baseline Social GAN model and train it:
 
 > All models were trained for 25 epochs using PyTorch Adam optimizer with `lr=1e-3`, `weight_decay=1e-4`. Learning rate was annealed using the following schedule:
 >
-> ![Example Interaction]({{ '/assets/images/team10/lrannealingschedule.png' | relative_url }})
+> ![Example Interaction]({{ '/assets/images/10/lrannealingschedule.png' | relative_url }})
 > {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 **Training Loss Curves**
 
 Social LSTM
 
-![Example Interaction]({{ '/assets/images/team10/sociallstmtrainloss.png' | relative_url }})
+![Example Interaction]({{ '/assets/images/10/sociallstmtrainloss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 Social GAN
 
-![Example Interaction]({{ '/assets/images/team10/socialgantrainloss.png' | relative_url }})
+![Example Interaction]({{ '/assets/images/10/socialgantrainloss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 #### Results
@@ -199,12 +199,12 @@ TrajNet++ has ample evaluation scripts that capture relevant trajectory predicti
 
 **Social LSTM**
 
-![Social LSTM Results]({{ '/assets/images/team10/sociallstmresults.png' | relative_url }})
+![Social LSTM Results]({{ '/assets/images/10/sociallstmresults.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 **Social GAN**
 
-![Social GAN Results]({{ '/assets/images/team10/socialganresults.png' | relative_url }})
+![Social GAN Results]({{ '/assets/images/10/socialganresults.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 
 #### Discussion
@@ -216,14 +216,14 @@ Based on the results, we can observe that in these scenarios, the Social LSTM ha
 # VectorNet
 
 #### Introduction 
-![Overall]({{ '/assets/images/team10/Overall.jpg' | relative_url }})
+![Overall]({{ '/assets/images/10/Overall.jpg' | relative_url }})
 <em>TrajNet++ benchmark [5]</em>
 
 There are more real world applications for human trajectory forecasting including evacuation analysis, more efficient public transportation, to how crowds behave during chaotic events. Early approaches to this used handcrafted representations based on domain knowledge to predict where people (agents) in a crowd would go. However, social interactions in the crows are diverse and subtle, making these predictions difficult to capture manually. 
 Due to the recent advantages of deep learning - large models are able to accurately predict and outperform handcrafted approaches. VectorNet by Waymo, a self-driving car company backed by Alphabet, is a state-of-the-art deep learning model for trajectory prediction. Its main novel advantages include using vector representations to model spatial agent interactions and employing deep sets architecture to reason about interacting agents. To test the performance of Vector Net, this group uses TrajNet++, a large-scale benchmark tailored for evaluating interaction forecasting. 
 
 #### Architecture
-![Architecture]({{ '/assets/images/team10/Architecture.jpg' | relative_url }})
+![Architecture]({{ '/assets/images/10/Architecture.jpg' | relative_url }})
 <em>Overall architecture of VectorNet [4]</em>
 
 The architecture of VectorNet has two primary novel strengths. The first being its use of vectors to encode data, whether it be agents, lanes, crosswalks, etc. Vector representation naturally captures the spatial relationships and geometry between agents, which is crucial information about interactions in trajectory prediction tasks. The vector representation also allows for the second main advantage of vector net, GNNs. Conventional neural networks employ a layer-wise architecture, where each layer performs linear transformations followed by non-linear activations to learn relevant patterns from the input data. However, graph neural networks (GNNs) adopt a distinct approach by utilizing neighborhood-based aggregations to generate representations that evolve over iterations.
@@ -231,7 +231,7 @@ The primary advantage of GNNs lies in their ability to handle tasks that are bey
 
 There are two fundamental limitations that hinder the application of CNNs to graph-structured data: 1. Computational Complexity: Applying CNNs to graph data is computationally challenging due to the arbitrary and intricate topology of graphs, which lack the spatial locality inherent in grid-like structures. Additionally, the absence of a fixed node ordering further complicates the utilization of CNNs. 2. Loss of Relational Information: When graph data is projected onto a grid or image representation, valuable information regarding the depth and distance relationships between key entities is lost. This projection process effectively discards the rich relational structure inherent in graph data.
 
-![Training]({{ '/assets/images/team10/Training.jpg' | relative_url }})
+![Training]({{ '/assets/images/10/Training.jpg' | relative_url }})
 <em>Training VectorNet and retrieving the node/edge embeddings to update weightings for next layer. [4]</em>
 
 Convolutional Neural Networks have demonstrated remarkable success in tackling problems where the underlying data representation exhibits a grid-like structure, such as image classification. These architectures leverage their learnable filters efficiently by applying them to all input positions, thereby reusing local patterns. However, many compelling tasks involve data that cannot be represented in a grid-like format and instead resides in an irregular domain. Examples of such data include 3D meshes, social networks, telecommunication networks, biological networks, and brain connectomes, all of which can be naturally represented as graphs.
