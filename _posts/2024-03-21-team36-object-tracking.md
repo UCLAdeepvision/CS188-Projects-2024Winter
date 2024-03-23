@@ -260,7 +260,9 @@ Some of the problems associated with object tracking is that traditional methods
 
 #### Core functionalities:
 Online tokenization: ODTrack processes the entire video as a whole instead of analyzing each frame independently and then extracts the features about the object’s appearance from each frame which are then compressed into a sequence of tokes.
+
 Temporal Information Capture (How the object moves across frames): ODTrack employs online token propagation which iteratively updates the token sequence across video frames which allows it to capture the object’s motion patterns.
+
 Frame-to-Frame Association: ODTrack can effectively associate the object between frames which allows it to track the object’s movement throughout the entire video [4].
 
 #### Architecture: 
