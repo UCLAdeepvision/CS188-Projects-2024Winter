@@ -1,54 +1,173 @@
 ---
 layout: post
 comments: true
-title: Diffusion HD Video Generation 
-author: Shan
+title: Text-to-Video Generation
+author: Shan Jiang, Brandon Vuong, Seth Carlson, Joseph Yu
 date: 2024-03-21
 ---
 
+> In this paper, we conduct a comparative analysis of text-conditional video generation models, with an emphasis on Imagen Video. We will do a deep dive into the architecture and design of Imagen Video and follow it with a comparison to other modern video generation models such as VideoGPT and Sora. Each model presents unique approaches to tackling the challenge of generating high-quality videos based on textual prompts. Through this paper, we aim to provide a brief overview of video generation methods through the exploration of some of the most advanced models today.
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+- [Introduction](#introduction)
+- [Imagen Video](#imagen-video)
+  - [Cascaded Architecture](#cascaded-architecture)
+  - [SR3: Mechanism of Super-Resolution Block](#sr3-mechanism-of-super-resolution-block)
+  - [V-Prediction](#v-prediction)
+- [Conclusion](#conclusion)
+
+## Introduction
+
+Text to video generation is a computer vision task that uses deep learning to create a video from a text description. It takes an input of a text script, like a story or description and ideally outputs a high definition video that encapsulates the content of the script. It uses natural language prompts to understand the content of the text for the video output. Here is an example using Sora, a video generation model developed by OpenAI:
+
+<div style="text-align: center;">
+  <video width="740px" controls>
+    <source src="https://cdn.openai.com/sora/videos/italian-pup.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <p style="text-align: center;">
+    Fig 1. Prompt: The camera directly faces colorful buildings in Burano Italy. An adorable dalmatian looks through a window on a building on the ground floor. Many people are walking and cycling along the canal streets in front of the buildings. [1].
+  </p>
+</div>
+
+## Imagen Video
+
+Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames. We will now be discussing the architecture of Imagen Video.
+
+<!--
+## Diffusion Models -->
+
+## Cascaded Architecture:
+
+Cascaded Diffusion Models, introduced by Ho et al. in 2022, have emerged as a powerful technique for generating high-resolution outputs from diffusion models, achieving remarkable success in diverse applications such as class-conditional ImageNet generation and text-to-image creation. These models operate by initially generating an image or video at a low resolution and then progressively enhancing the resolution through a sequence of super-resolution diffusion models. This approach allows Cascaded Diffusion Models to tackle highly complex, high-dimensional problems while maintaining simplicity in each sub-model.
+
+![Architecture]({{ '/assets/images/team3/architecture.png' | relative_url }})
+{: style=" max-width: 100%;"}
+_Figure 2: The cascaded sampling pipeline starting from a text prompt input to generating a 5.3-
+second, 1280×768 video at 24fps. “SSR” and “TSR” denote spatial and temporal super-resolution
+respectively, and videos are labeled as frames×width×height. In practice, the text embeddings are
+injected into all models, not just the base model._ [1].
+
+The figure above summarizes the entire cascading pipeline of Imagen Video:
+
+- Text encoder : Encode text prompt to text_embedding
+- Base video diffusion model
+- SSR\*3 (spatial super-resolution): increase spatial resolution for all video frames
+- TSR\*3 (temporal super-resolution): increase temporal resolution by filling in intermediate frames between video frames
+
+## SR3: Mechanism of Super-Resolution Block:
+
+The SSR (Super-Resolution via Repeated Refinement) and TSR blocks implement a mechanism for conditional image generation known as SR3. This method revolves around training on sets that comprise pairs of low-resolution (LR) and high-resolution (HR) images. The inputs for training include:
+
+- A low-resolution image, denoted as x
+- Noisy image y<sub>t</sub>, which is derived from High-Resolution image y<sub>0</sub> using the equation $$\bar{y}=\sqrt{\gamma}y_0+\sqrt{1-\gamma}\epsilon$$
+- Noise variance $\gamma$, which correlates with the total number of training step T.
+
+![Algorithm1]({{ '/assets/images/team3/algorithm1.png' | relative_url }})
+{: style=" width:600px; max-width: 100%;"}
+_Fig 3: Algorithm for diffusion._
+
+<p style="font-size: 14px">Remark: The meaning of the loss function here is to make the difference between the noise output by the model and the randomly sampled Gaussian noise as small as possible.</p>
+
+Inference Process:
+
+![Algorithm2]({{ '/assets/images/team3/algorithm2.png' | relative_url }})
+{: style=" width: 600px ; max-width: 100%;"}
+_Fig 4: Algorithm for iterative refinement._
+
+The process begins with a low-resolution image x and a noisy image y<sub>t</sub> containing Gaussian noise, aiming to output a high-resolution image. This input undergoes T iterations of a specific formula to produce a super-resolution (SR) image. This procedure can be seen as progressively eliminating noise from the image. With sufficient iterations, noise is effectively removed, resulting in an enhanced super-resolution image.
+
+![Unet]({{ '/assets/images/team3/unet.png' | relative_url }})
+{: style=" max-width: 100%;"}
+_Fig 5: Description of the U-Net architecture with skip connections. The low resolution input image x is interpolated to the target
+high resolution, and concatenated with the noisy high resolution image yt. We show the activation dimensions for the example task of
+16×16 → 128×128 super resolution._
+
+Spatial Super-Resolution:
+
+Use bilinear interpolation to upsample a low-resolution video (such as 32 x 80 x 48) to a high-resolution video (such as 32 x 320 x 192) x, then concatenate x with the noisy high-resolution video y<sub>t</sub> in the channel dimension as the input data of U-Net.
+
+Temporal Super-Resolution:
+
+Upsample a low frame number video (such as 32 x 320 x 192) to a high frame number video (such as 64 x 320 x 192) x by inserting blank frames or repeated frames. Then concatenate x with the noisy high-frame video y<sub>t</sub> in the channel dimension as the input data of U-Net.
+
+## V-Prediction
+
+Instead of using conventional $$\epsilon$$-prediction to add noise, the author introduces a new technique known as velocity prediction parameterization, or v-prediction, for the video diffusion model. This method is summarized by the prediction formula $$v\equiv\alpha_t\epsilon-\sigma_tx$$, leading to $$\hat{x}=\alpha_tz_t-\sigma_t\hat{v}_\theta(z_t)$$.
+
+![Vpred]({{ '/assets/images/team3/visualization_vpred.png' | relative_url }})
+{: style=" width: 600px;max-width: 100%;"}
+Fig 6: Visualization of reparameterizing the diffusion process in terms of and $$v$$ and $$v_\phi$$.\
+Let's delve into the derivation of the first equation. Remember the noise addition equation in DDPM:
+
+$$
+x_t=\sqrt{\bar{a}_t}x_0+\sqrt{1-\bar{a}_t}\epsilon \hspace{1cm}
+(1)
 
 
-<!--more-->
-{: class="table-of-content"}
-* TOC
-{:toc}
+$$
 
-## Main Content
-Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
+where the sum of the squares of the coefficients of $$x_0$$ and $$\epsilon$$ equals 1. This allows for a substitution using sine and cosine. The paper adopts the noise addition equation
 
-## Basic Syntax
-### Image
-Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
+$$
+z_t=\alpha_tx+\sigma_t\epsilon \hspace{1cm}(2)
+$$
 
-You can add an image to your survey like this:
-![YOLO]({{ '/assets/images/team3/test.jpeg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 1. YOLO: An object detection method in computer vision* [1].
+Before proceeding with the derivation, it's important to align our symbols: in equation (1), $$x$$ represents $$x_0$$, while $$\alpha_t$$ and $$\sigma_t$$ correspond to $$\sqrt{\bar{a}_t}$$ and $$\sqrt{1-\bar{a}_t}$$, respectively. Also, $$z_t$$ in equation (2) represents $$x_t$$ in equation (1).
 
-Please cite the image if it is taken from other people's work.
+Defining $$\alpha_\alpha=\cos(\phi)$$ and $$\sigma_\alpha=\sin(\phi)$$, we obtain $$z_{\phi} =\cos(\phi)x+\sin(\phi)\epsilon$$. Taking the derivative of $$z$$ with respect to $$\phi$$, we find the velocity equation:
 
+$$
+v_{\phi} =\frac{d z_{\phi}}{d\phi}=\frac{d\cos(\phi)}{d\phi}x+\frac{d\sin(\phi)}{d\phi}\epsilon=\cos(\phi)\epsilon-\sin(\phi)x
+=\alpha_{\phi}\epsilon-\sigma_{\phi}x \hspace{1cm} (3)
+$$
+
+Next, we apply $$\alpha_t$$ to both sides of equation (2) and $$\sigma_t$$ to both sides of equation (3), resulting in: $$\sigma v=\alpha \sigma \epsilon- \sigma^2 x$$, and $$\alpha z=\alpha^2 x+\alpha \sigma \epsilon$$. Subtracting these two equations cancels the term $$\alpha \sigma \epsilon$$, yielding: $$\sigma v-\alpha z=-\sigma^2 x-\alpha^2 x= -(\sigma^2+\alpha^2)x$$. Given that the sum of the squares of these two terms equals 1, we conclude with $$\hat{x}=\alpha_tz_t-\sigma_t\hat{v}_\theta(z_t)$$.
+
+Remark: Similar to $$\epsilon$$-prediction, v-prediction introduces noise to the samples during the training process. However, when calculating the MSE loss function, velocity is used in place of $$\epsilon$$.
+
+In the context of video diffusion model training, the author highlights the following advantages of v-prediction:
+
+- It significantly enhances numerical stability throughout the diffusion process, facilitating progressive distillation.
+- It prevents the temporal color shifting often observed in models using $\epsilon$-prediction.
+
+![Vep]({{ '/assets/images/team3/v_ep_comp.png' | relative_url }})
+{: style=" max-width: 100%;"}
+_Fig 6: Comparison between $$\epsilon$$-prediction (middle row) and v-prediction (bottom row) for a
+8×80×48→8×320×192 spatial super-resolution architecture at 200k training steps. The frames
+from the $$\epsilon$$-prediction model are generally worse, suffering from unnatural global color shifts across
+frames. The frames from the v-prediction model do not and are more consistent._
+
+```
+if self.config.prediction_type == "epsilon":
+    pred_original_sample = (sample - beta_prod_t ** (0.5) * model_output) / alpha_prod_t ** (0.5)
+    pred_epsilon = model_output
+elif self.config.prediction_type == "sample":
+    pred_original_sample = model_output
+    pred_epsilon = (sample - alpha_prod_t ** (0.5) * pred_original_sample) / beta_prod_t ** (0.5)
+elif self.config.prediction_type == "v_prediction":
+    pred_original_sample = (alpha_prod_t**0.5) * sample - (beta_prod_t**0.5) * model_output
+    pred_epsilon = (alpha_prod_t**0.5) * model_output + (beta_prod_t**0.5) * sample
+```
 
 ### Table
+
 Here is an example for creating tables, including alignment syntax.
 
-|             | column 1    |  column 2     |
-| :---        |    :----:   |          ---: |
-| row1        | Text        | Text          |
-| row2        | Text        | Text          |
-
-
+|      | column 1 | column 2 |
+| :--- | :------: | -------: |
+| row1 |   Text   |     Text |
+| row2 |   Text   |     Text |
 
 ### Code Block
+
 ```
 # This is a sample code block
 import torch
 print (torch.__version__)
 ```
 
-
 ### Formula
+
 Please use latex to generate formulas, such as:
 
 $$
@@ -58,11 +177,13 @@ $$
 or you can write in-text formula $$y = wx + b$$.
 
 ### More Markdown Syntax
+
 You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/).
 
 ## Reference
+
 Please make sure to cite properly in your work, for example:
 
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
+[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
 
 ---
