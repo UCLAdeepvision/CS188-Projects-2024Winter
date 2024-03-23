@@ -114,21 +114,103 @@ Another key observation was made relative to the latent space: in understanding 
 
 Overall, this methodology proposes a novel solution to generating predictions based on global interactions via a relative-distance pooling method, allowing the network to learn social norms of agent-movement by training against a discriminator. In directly imposing a variety loss with said pooling layers, this allowed training of a network that could produce multiple viable probabilistic solutions to trajectory predictions given diverse samples.
 
+---
+
 # Comparing Social LSTM and Social GAN
 
 Social LSTM and Social GAN are two methods of trajectory prediction that focus on socially accetable trajectories. They can both be applied to street pedestrian-esque problems, and thus can be effectively compared using this kind of scenario.
 
-We decided to evaluate and compare Social LSTM and Social GAN using the [TrajNet++ Framework](https://github.com/vita-epfl/trajnetplusplusbaselines) that is based on [3].
+We decided to evaluate and compare Social LSTM and Social GAN using the [TrajNet++ Framework](https://github.com/vita-epfl/trajnetplusplusbaselines) that is based on [3]. Setup of all framework was completed using the following [resource](https://thedebugger811.github.io/posts/2020/03/intro_trajnetpp/). This platform uses Python, specifically PyTorch for model implementations and `torch-geometric` for data representation and loading.
 
+#### Dataset
 
+Optical Reciprocal Collision Avoidance (ORCA) is a process for generating collision-free motion with agents. TrajNet++ is compatible with the [RVO2 Library](https://gamma.cs.unc.edu/RVO2/) implementation of ORCA, and we use this to generate data of agent trajectories. Note that these trajectories are most similar to pedestrian movement and are not restricted to roads like cars are. Our data includes 1000 scenarios of 5 pedestrians at a circular crossing. The simulator generates ground truths of the trajectories of the pedestrians for each scenario. A train, test, validation split is performed.
+
+Using the TrajNet++ framework, data could be generated using python and the command line. The call we used to generate was as follows:
+
+    python -m trajnetdataset.controlled_data --simulator 'orca' --num_ped 5 --num_scenes 1000
+
+We then process the data scenes to include scenes where interactions happen:
+
+    python -m trajnetdataset.convert --linear_threshold 0.3 --acceptance 0 0 1.0 0 --synthetic
+
+An example of an interaction between the agents is shown here:
+
+![Example Interaction]({{ '/assets/images/team10/interactionexample.png' | relative_url }})
+{: style="width: 100%; max-width: 100%; text-align: center;"}
+*Paths for 5 different agents.*
+
+#### Model Training
+
+Models were TrajNet++ implementation of Social LSTM and Social GAN based on the papers. Their implementations can be found [here](https://github.com/vita-epfl/trajnetplusplusbaselines/tree/master/trajnetbaselines).
+
+The following was used to initialize the baseline Social LSTM model and train it:
+
+    python -m trajnetbaselines.lstm.trainer --type social --augment --n 16 --embedding_arch two_layer --layer_dims 1024
+
+The following was used to initialize the baseline Social GAN model and train it:
+
+    python -m trajnetbaselines.sgan.trainer --type directional --augment
+
+> All models were trained for 25 epochs using PyTorch Adam optimizer with `lr=1e-3`, `weight_decay=1e-4`. Learning rate was annealed using the following schedule:
+>
+> ![Example Interaction]({{ '/assets/images/team10/lrannealingschedule.png' | relative_url }})
+> {: style="width: 100%; max-width: 100%; text-align: center;"}
+
+**Training Loss Curves**
+
+Social LSTM
+
+![Example Interaction]({{ '/assets/images/team10/sociallstmtrainloss.png' | relative_url }})
+{: style="width: 100%; max-width: 100%; text-align: center;"}
+
+Social GAN
+
+![Example Interaction]({{ '/assets/images/team10/socialgantrainloss.png' | relative_url }})
+{: style="width: 100%; max-width: 100%; text-align: center;"}
+
+#### Results
+
+**Evaluation**
+
+TrajNet++ has ample evaluation scripts that capture relevant trajectory prediction metrics. The following was used to evaluate the trained models:
+
+    python -m trajnetbaselines.lstm.trajnet_evaluator --output OUTPUT_BLOCK/synth_data/lstm_social_None.pkl --path synth_data
+    python -m trajnetbaselines.sgan.trajnet_evaluator --output OUTPUT_BLOCK/synth_data/sgan_directional_None.pkl --path synth_data
+
+**Metrics**
+>
+> **Average Displacement Error (ADE)**: Average L2 distance between the ground truth and prediction of the primary pedestrian over all predicted time steps. Lower is better.
+>
+> **Final Displacement Error (FDE)**: The L2 distance between the final ground truth coordinates and the final prediction coordinates of the primary pedestrian. Lower is better
+> 
+> **Prediction Collision (Col-I)**: Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The model prediction of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+>
+> **Ground Truth Collision (Col-II)**: Calculates the percentage of collisions of primary pedestrian with neighbouring pedestrians in the scene. The ground truth of neighbouring pedestrians is used to check the occurrence of collisions. Lower is better.
+
+**Social LSTM**
+
+![Social LSTM Results]({{ '/assets/images/team10/sociallstmresults.png' | relative_url }})
+{: style="width: 100%; max-width: 100%; text-align: center;"}
+
+**Social GAN**
+
+![Social GAN Results]({{ '/assets/images/team10/socialganresults.png' | relative_url }})
+{: style="width: 100%; max-width: 100%; text-align: center;"}
+
+#### Discussion
+
+Based on the results, we can observe that in these scenarios, the Social LSTM had lower displacement errors for the final predicted trajectories. However, the Social GAN was able to better decrease the occurence of unwanted collisions in accordance with the ground truth (Col-II). The former can be attributed to the generational nature of the GAN not modeling the data as effectively as the LSTM. The latter could be a result of the newer and more complex GAN method being able to handle socially-acceptable trajectories and avoid collisions better.
+
+---
 
 # VectorNet
 
-## Introduction 
+#### Introduction 
 There are more real world applications for human trajectory forecasting including evacuation analysis, more efficient public transportation, to how crowds behave during chaotic events. Early approaches to this used handcrafted representations based on domain knowledge to predict where people (agents) in a crowd would go. However, social interactions in the crows are diverse and subtle, making these predictions difficult to capture manually. 
 Due to the recent advantages of deep learning - large models are able to accurately predict and outperform handcrafted approaches. VectorNet by Waymo, a self-driving car company backed by Alphabet, is a state-of-the-art deep learning model for trajectory prediction. Its main novel advantages include using vector representations to model spatial agent interactions and employing deep sets architecture to reason about interacting agents. To test the performance of Vector Net, this group uses TrajNet++, a large-scale benchmark tailored for evaluating interaction forecasting. 
 
-## Architecture
+#### Architecture
 The architecture of VectorNet has two primary novel strengths. The first being its use of vectors to encode data, whether it be agents, lanes, crosswalks, etc. Vector representation naturally captures the spatial relationships and geometry between agents, which is crucial information about interactions in trajectory prediction tasks. The vector representation also allows for the second main advantage of vector net, GNNs. Conventional neural networks employ a layer-wise architecture, where each layer performs linear transformations followed by non-linear activations to learn relevant patterns from the input data. However, graph neural networks (GNNs) adopt a distinct approach by utilizing neighborhood-based aggregations to generate representations that evolve over iterations.
 The primary advantage of GNNs lies in their ability to handle tasks that are beyond the scope of traditional Convolutional Neural Networks (CNNs). While CNNs excel at tasks such as object detection, image classification, and pattern recognition, they achieve this through the use of convolutional layers and pooling operations tailored for grid-structured data.
 
@@ -137,14 +219,14 @@ There are two fundamental limitations that hinder the application of CNNs to gra
 Convolutional Neural Networks have demonstrated remarkable success in tackling problems where the underlying data representation exhibits a grid-like structure, such as image classification. These architectures leverage their learnable filters efficiently by applying them to all input positions, thereby reusing local patterns. However, many compelling tasks involve data that cannot be represented in a grid-like format and instead resides in an irregular domain. Examples of such data include 3D meshes, social networks, telecommunication networks, biological networks, and brain connectomes, all of which can be naturally represented as graphs.
 In GNNs, nodes embed information with regards to an object or entity. This could include positional data or attributes of the object. Edges could represent the relationship between a node and how embeddings update.
 
-For the vector net paper, they set $v_i = [d_i^s, d_i^e, a_i, j]$. Where each polyline P with nodes $\{v_1, v_2, …, v_P\}$ defines our subgraph GNN layer as: 
+For the vector net paper, they set $$v_i = [d_i^s, d_i^e, a_i, j]$$. Where each polyline P with nodes $$\{v_1, v_2, …, v_P\}$$ defines our subgraph GNN layer as: 
 
-$ v_i^{l+1} = \phi_{rel} (g_{enc}(v_i^{(l)}), \phi_{agg}(\{g_{enc}(v_i^{(l)})\})) $,
+$$ v_i^{l+1} = \phi_{rel} (g_{enc}(v_i^{(l)}), \phi_{agg}(\{g_{enc}(v_i^{(l)})\})) $$,
 
-where $\phi_{agg}(.)$ is max-pooling, $\phi_{rel}(.)$ is concatenation. 
+where $$\phi_{agg}(.)$$ is max-pooling, $$\phi_{rel}(.)$$ is concatenation. 
 	A few other primary equations that Vector Net uses is its loss function: 
 $$L = L_{traj} + \alpha * L_{node}$$
-Where $L_{traj}$ is NLL for trajectory prediction, $L_{node}$ is loss from graph completion task, and $\alpha$ is the scaling factor.  Metrics that can evaluate its performance is the average displacement error (ADE), and the displacement error at t, or the displacement error in meters at time $t = 1, 2, 3$
+Where $$L_{traj}$$ is NLL for trajectory prediction, $$L_{node}$$ is loss from graph completion task, and $$\alpha$$ is the scaling factor.  Metrics that can evaluate its performance is the average displacement error (ADE), and the displacement error at t, or the displacement error in meters at time $$t = 1, 2, 3$$
 
 <!-- 
 ## Main Content
