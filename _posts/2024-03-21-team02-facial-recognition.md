@@ -138,12 +138,42 @@ CNNs have a wide set of benefits over traditional methods and have transformed f
 Existing approaches require training multiple models or additional components like segmentation or bounding-box regression. DDFD, on the other hand, proposes a better, more efficient solution, using a single deep convolutional neural network (CNN). The proposed method achieves comparable or better performance to state-of-the-art methods without the need for complex annotations.
 
 #### Architecture
+Foundationally, DDFD is an AlexNet fine tuned for face detection. AlexNet is an influential and innovative model for image classification leveraging 5 convolution layers for extracting features followed by 3 fully connected layers for classification. DDFD modifies this architecture by converting the final 3 fully connected layers to convolutional ones. This enables the network to process images of any size, liberating it form the constraints of fixed-size input images. Further, because the fully connected layers have been replaced by convolutional once, the network instead outputs a heatmap representing probability of a face at a given location. 
 
-#### Loss Mechanism
+Following these convolution layers DDFD employs non-maximal suppression (NMS) to refine the detection process and localize faces. NMS ensures each detected face corresponds to a single precise location by merging overlapping regions. NMS iteratively selects the highest confidence detection and suppresses all nearby detections that significantly overlap.
+
+One strategic choice that sets apart DDFD from other models is its use of a sliding window approach. Most models use a traditional region based approach where regions of interest are predicted before detecting objects within them. Region based approaches are computationally intensive and may miss faces that don’t fit predefined criteria. Instead DDFD leverages a sliding window approach. In this strategy a window slides across the image assessing each window for a face. This drastically reduces complexity and improves detection speed while directly analyzing all areas of an image without the need for any preliminary region proposals.
+
+NMS and the sliding window approach are coupled with a scaling algorithm that enables DDFD to accurately localize faces of different sizes and orientations. DDFD resizes the input image in discrete steps, three times per octave (an octave being a doubling of the image dimension) enabling the detector to scan for faces that could otherwise be missed if they are too small or too large for the default window size. Coupled with NMS and sliding window, the scaling approach contributes significantly to accurate localization of faces. Scaling adjusts the lens to detect faces of all sizes while NMS sharpens the focus, allowing the model to pinpoint the exact location of a face among the expanded search regions. The result is an incredibly robust system which can detect faces in a variety of orientations with high accuracy.
+
+#### Training Process
+DDFD was fine-tuned on the AFLW dataset with 21K images containing 24K face annotations. During training data augmentation was employed through random cropping and flipping, resulting in 200,000 positive and 20M negative examples. The model was trained using 50K iterations with a batch size of 128, including 32 positive and 96 negative examples per batch.
 
 #### Evaluation Results
+DDFD was benchmarked on a variety of datasets including PASCAL Face, AFW, and FDDB datasets showing competitive perofrmance across varied face orientations and occlusions.
+
+![DDFD Eval]({{ 'assets/images/2/DDFD/eval.png' | relative_url }})
+Fig 4. Evaluation of Models on PASCAL Face Dataset [2].
+{: style="width: 400px; max-width: 100%; margin: auto;"}
+
+When evaluated on the PASCAL Face Dataset, DDFD demonstrated superior performance compared to R-CNN, especially in handling faces without bounding-box regression or selective search. DDFD achieved this performance by focusing on high recall and precise localization. 
 
 #### Pros and Cons
+
+The Deep Dense Face Detector (DDFD) has emerged as a robust solution in the domain of facial detection, leveraging the strength of CNNs to enhance the efficiency and effectiveness of this process. The benefits of this technology are many, starting with its single-model efficiency. By utilizing a deep convolutional network for both classification and feature extraction, DDFD consolidates the face detection process into a single model. This approach translates to a simplified architecture that negates the need for additional components such as selective search, bounding-box regression, or SVM classifiers, which are traditionally employed in other detection systems. Such a model not only reduces the computational burden but also simplifies the training and implementation phases, resulting in a system that's both agile and robust.
+
+Another significant advantage of DDFD is its scale invariance. By scaling images up or down in specific increments, DDFD exhibits an ability to detect faces of varying sizes within a single image. This adaptability ensures that the detector does not exhibit any size bias, making it competent in identifying faces regardless of their scale in the image. Coupled with its impressive performance on benchmark datasets such as PASCAL Face, AFW, and FDDB, DDFD has proven its mettle by outperforming some of the existing detection systems, especially in challenging scenarios that do not lend themselves well to bounding-box regression or selective search.
+
+Furthermore, DDFD demonstrates considerable robustness in the detection of faces across a range of orientations and even in partially occluded conditions. This trait is particularly advantageous over many conventional methods, which typically struggle when faced with varying angles and obstructive elements. The ability to detect faces without the necessity for pose or landmark annotations underscores the advanced pattern recognition capabilities of DDFD, positioning it as a highly adaptable and useful tool in the evolving field of facial recognition technology.
+
+However, with these strengths come certain challenges and shortcomings that DDFD must navigate. A notable concern is the model's dependency on the training data. The performance of DDFD is closely tied to the variety and distribution of positive examples in its training set. A skew towards upright faces could inadvertently lead to a bias, which implies that a balanced and diverse set of training data is crucial for achieving optimal detector performance.
+
+Moreover, the current data augmentation procedures employed by DDFD may not represent the full nature of complexity needed to accurately represent faces in more niche orientations or occlusions. This limitation points to the potential for further improving the performance of DDFD by adopting more sophisticated data augmentation techniques and better sampling strategies. Such enhancements would enable the model to build a more comprehensive understanding of the myriad ways in which faces can present themselves.
+
+DDFD also faces challenges with complex annotations. Although the model does not rely on detailed annotations such as different poses or facial landmarks, it is conceivable that incorporating such data could refine its performance. This area presents a paradoxical duality where the simplicity of the current training methodology, which is one of DDFD's strengths, also forms a limitation that may be worth exploring in future research efforts.
+
+Lastly, occlusion handling remains an area of improvement for DDFD. While the detector has some capability to manage occlusions, it can struggle with faces that are heavily obscured. This is partly due to the lack of representation of such faces in the training set. Moving forward, it will be imperative to enrich the training data with a broader array of occluded examples to enhance the model's robustness in practical scenarios, where occlusions are a common occurrence.
+
 
 ### FaceNet <a id="facenet"></a>
 
