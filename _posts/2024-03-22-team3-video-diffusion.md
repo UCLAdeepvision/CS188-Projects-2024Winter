@@ -48,6 +48,20 @@ In this innovative training method, individual images are treated as single-fram
 
 The outcome of joint training is the knowledge transfer from images to videos. Specifically, while training exclusively on natural video data allows the model to understand dynamics within natural environments, incorporating images into the training process enables it to learn about various image styles, including sketches, paintings, and more.
 
+#### Examples of Video Diffusion
+
+<div style="display: flex; justify-content: center;">
+    <div style="flex: 33.33%; padding: 5px;">
+        <img src="https://video-diffusion.github.io/assets/001.webp" alt="Image 1" style="width: 100%;">
+    </div>
+    <div style="flex: 33.33%; padding: 5px;">
+        <img src="https://video-diffusion.github.io/assets/026.webp" alt="Image 2" style="width: 100%;">
+    </div>
+    <div style="flex: 33.33%; padding: 5px;">
+        <img src="https://video-diffusion.github.io/assets/000.webp" alt="Image 3" style="width: 100%;">
+    </div>
+</div>
+
 ## Imagen Video
 
 Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames. We will now be discussing the architecture of Imagen Video.
@@ -170,12 +184,26 @@ elif self.config.prediction_type == "v_prediction":
 
 ## Experiments
 
-We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below.
+We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below. All of the images use the same prompt, duration, and number of frames.
 
-|      | column 1 | column 2 | column 3 |
-| :--- | :------: | -------: | :------: |
-| row1 |   Text   |     Text |   Text   |
-| row2 |   Text   |     Text |   Text   |
+The prompt is 'A futuristic cityscape at dusk, with flying cars weaving between neon-lit skyscrapers'.
+
+<div style="display: flex; justify-content: center;">
+    <div style="flex: 33.33%; padding: 5px;">
+        <p>5 Steps </p>
+        <video src="assets/images/team3/5steps.mp4" alt="Image 1" style="width: 100%;" type="video/mp4" controls />
+    </div>
+    <div style="flex: 33.33%; padding: 5px;">
+        <p>25 Steps </p>
+        <video src="assets/images/team3/25steps.mp4" alt="Image 2" style="width: 100%;" type="video/mp4" controls />
+    </div>
+    <div style="flex: 33.33%; padding: 5px;">
+        <p>50 Steps </p>
+        <video src="assets/images/team3/50steps.mp4" alt="Image 3" style="width: 100%;" type="video/mp4" controls />
+    </div>
+</div>
+
+We see from these results that a higher number of inference steps leads to an image that more accurately reflects the prompt. With 5 steps, the video hardly reflects the prompt. With 25 steps, a resemblance is shown but the image is largely. With 50 steps, the image accurately shows the prompt.
 
 ### Table
 
