@@ -32,11 +32,11 @@ Paired datasets are easier to train on, but they maybe hard to collect, especial
 
 Generative adversarial network (GAN) are generative deep learning frameworks that rely on a generator $$G$$ and a discriminator $$D$$. Cycle GAN builds on GAN by introducing **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
--![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [1].
+-![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [4].
 
 The goal of CycleGAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the idea is that our translated image will preserve most of its semanics besides the style change.
 
--![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [1].
+-![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [4].
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a image similar to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term (the cycle consistency loss) on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
 
@@ -178,7 +178,7 @@ While the conventional diffusion model achieves satisfying results by generating
 
 ### Latend Diffusion Model
 
-Instead of sampling from the pixel space, the Latent Diffusion Model samples from the latent space of a powerful pretrained autoencoder [2]. The autoencoder is universal, and is trained only once in order to apply multiple LDM trainings. The autoencoder is trained by combination of a perceptual loss and a patch-based adversarial objective [2] such that the reconstruction are confined to the image manifold and avoids blurriness if solely relying on pixel space losses.
+Instead of sampling from the pixel space, the Latent Diffusion Model samples from the latent space of a powerful pretrained autoencoder [5]. The autoencoder is universal, and is trained only once in order to apply multiple LDM trainings. The autoencoder is trained by combination of a perceptual loss and a patch-based adversarial objective [5] such that the reconstruction are confined to the image manifold and avoids blurriness if solely relying on pixel space losses.
 
 More formally, the encoder $$\mathcal{E}$$ encodes the image $$x \in \mathbb{R}^{H \times W \times 3}$$ into $$z = \mathcal{E}(x) \in \mathbb{R}^{h \times w \times c}$$, where $$f = H/h = W/w$$ is the downsampling factor and is typically an integer power of 2. The decoder $$\mathcal{D}$$ decodes input from the latent space back to the dimension of a regular input image: $$\tilde{x} = \mathcal{D}(z) = \mathcal{D}(\mathcal{E}(x))$$. After training of the autoencoder is completed, we wrap the whole diffusion process in between the encoder and decoder, so that the diffusion model operates entirely in the latent space.
 
@@ -196,7 +196,7 @@ The versatility of LDM allows us to incorporate other conditioning mechanisms, b
 
 ![LDM]({{ '/assets/images/team26/latent-diffusion-arch.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
-*Fig 1. LDM architecture with conditioning* [2].
+*Fig 1. LDM architecture with conditioning* [5].
 
 For example, we can add a caption to the LDM to describe the output image, allowing more control over the generated result. In order to account for the multimodal input (such as text captioning), a domain specific encoder $$\tau_{\theta}$$ is introduced to project the multimodal input $$y$$ to map to the intermediate layers of the UNet via cross-attention layer. The cross-attention layer implements
 
@@ -338,7 +338,11 @@ We fine-tuned for 1000 epochs and 3000 epochs. We indeed saw improvement after f
 
 ### FID Score
 
-We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. 
+We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. FID score measures the similarity between two datasets of images. 
+
+$$\text{FID}(\mathcal{N}(\mu_1, \Sigma_1), \mathcal{N}(\mu_2, \Sigma_2)) = ||\mu_1 - \mu_2||^2_2 + Tr(\Sigma_1+\Sigma_2-(\Sigma_1\Sigma_2)^{\frac{1}{2}})$$
+
+FID score is calculated by finding the statistics of samples activation at the last layer of a image classifier (usually InceptionV3). The lower the FID score, the more similar the two datasets are. Interestingly, the FID score of the generated paintings by Stable Diffusion was a bit higher than the FID score of the generated paintings by CycleGAN. This may cause by loss of the geometric information when converting the image to text then to image. 
 
 ```bash
 base_datasets=("/home/zichunl/others/cs188_proj/monet2photo/testA")
@@ -551,9 +555,39 @@ CycleGAN's inference speed if faster than Stable Diffusion model since the image
 
 In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only trained to transfer between specific domains, which mean we need to retrain the model for each new style. Stable Diffusion, however, offers greater flexibility due to its ability to interpret and apply styles based on textual description.
 
+![real_1]({{ '/assets/images/team26/sample1-real.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+![real_2]({{ '/assets/images/team26/sample2-real.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 8. Two real images we used for style transfer*
+
+![sample_CycleGAN1]({{ '/assets/images/team26/sample1-cyclegan.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+![sample_CycleGAN2]({{ '/assets/images/team26/sample2-cyclegan.png' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 9. output from CycleGAN*
+
+![sample_Diffusion_pre_1]({{ '/assets/images/team26/sample1-sd-pretrained.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+![sample_Diffusion_pre_2]({{ '/assets/images/team26/sample2-sd-pretrained.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 10. output from pretrained Stable Diffusion Model*
+
+![sample_Diffusion_1000_1]({{ '/assets/images/team26/sample1-sd-1000.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+![sample_Diffusion_1000_2]({{ '/assets/images/team26/sample2-sd-1000.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 11. output from finetuned Stable Diffusion Model (1000 epoches)*
+
+![sample_Diffusion_3000_1]({{ '/assets/images/team26/sample1-sd-3000.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+![sample_Diffusion_3000_2]({{ '/assets/images/team26/sample2-sd-3000.jpg' | relative_url }})
+{: style="width: 400px; max-width: 100%;"}
+*Fig 12. output from finetuned Stable Diffusion Model (3000 epoches)*
+
 ## Reference
 
-[1] Ho, J., Jain, A. N., & Abbeel, P. (2020). Denoising diffusion probabilistic models. _arXiv (Cornell University)_.
+[1] Ho, J., Jain, A. N., & Abbeel, P. "Denoising diffusion probabilistic models." _arXiv (Cornell University)_. 2020.
 
 [2] Kumar, Ankur. "The Illustrated Image Captioning using transformers." _ankur3107.github.io_. 2022.
 
