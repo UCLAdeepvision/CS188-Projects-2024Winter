@@ -75,7 +75,132 @@ IMAGE --> -->
 
 # Models
 
-## XYZ Based Model
+## Viewpoints and Keypoints
+
+The paper "3D Bounding Box Estimation Using Deep Learning and Geomtry" underscores the significances of pose estimation as it provides some critial information about the object's orientation and position, by understanding the object's pose, we can preceisely determine its locaition, orientation relative to the observer. Another related work on pose estimation in particualr is mainly introduced by the paper "Viewpoins and Keypoints", it mainly characterizes the problem of pose estimation for rigid objects by separating it into two tasks - determining the viewpoint to capture the coarse overall pose, and predicting keypoints to capture the finer local details of the object's configuration. It presents convolutional neural network (CNN) based architectures to address both these tasks in two different settings. The first is a constrained setting where the bounding boxes around objects are provided, while the second is a more challenging detection setting where the goal is to simultaneously detect objects and estimate their pose correctly.
+
+![kv1]({{ '/assets/images/32/kv1.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+
+### Method
+#### 1. Viewpoint Prediction
+The authors formulate viewpoint prediction as a classification problem where the goal is to predict the three Euler angles (azimuth, elevation, and cyclorotation) corresponding to the object instance's orientation. This is treated as a multi-class classification problem, where the potential angles is divided into bins, and a CNN is trained to classify each instance into one of these bins for each of the three angle types. The CNN architecture used is based on popular ImageNet models like AlexNet and VGGNet back in 2015, where they then applied transfer learning with the final layers reformulated for this multi-class angle classification task. 
+
+The key idea is that the hierarchical convolutional layers can implicitly capture and aggregate local visual evidence across the image to predict these global orientation angles in an end-to-end fashion, without having to explicitly model part appearances or spatial relationships.
+
+#### 2. Keypoint Prediction 
+##### 2.1 Multiscale Convolutional Response Maps
+For predicting keypoints like the positions of wheels, headlights etc., the authors propose modeling the local appearance of these parts using a fully convolutional CNN architecture. The network is trained such that the output feature maps correspond to spatial log-likelihood maps for the different keypoint locations. Specifically, the CNN contains convolutional layers borrowed from standard ImageNet architectures (follow similar approach as viewpoint prediction), followed by a final convolutional layer whose channels correspond one-to-one to the different keypoints being predicted across all object categories. During training, the target outputs are constructed as Gaussian response maps centered at the annotated keypoint locations.  
+
+To benefit from reasoning at multiple scales, the authors train two parallel CNNs - one at a higher 384x384 resolution capturing finer details, and another at a lower 192x192 resolution capturing some more context around each part. 
+
+<!-- The coarse and fine scale predictions are upsampled/downsampled as required and combined in a linear manner to produce the final multi-scale keypoint log-likelihood maps. -->
+
+##### 2.2 Viewpoint Conditioned Keypoint Likelihood  
+In addtion, while modeling local appearance is important for accurate keypoint localization, the global viewpoint context is also crucial to resolve ambiguities and predict likely keypoint configurations. For example, for a left-facing car, we expect the left wheel to be visible but not the right wheel based on the overall pose.
+
+To incorporate this global viewpoint reasoning, they propose a non-parametric mixture model that represents the conditional probability distribution of each keypoint's location given the predicted viewpoint. Specifically, for a test instance with predicted viewpoint R, they first retrieve all training instances whose viewpoint is within π/6 radians of R. Then the conditional keypoint likelihood is modeled as a mixture of Gaussians centered at the keypoint annotations from these retrieved instances.
+
+![kv3]({{ '/assets/images/32/kv3.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+
+This viewpoint conditional likelihood is combined with the multi-scale appearance likelihood maps through a simple sum of log-likelihood scores, to produce the final keypoint location predictions as shown below.
+
+![kv2]({{ '/assets/images/32/kv2.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+
+### Experiments and Results
+<!-- The authors evaluate their approach on two main tasks: -->
+
+#### 1. Viewpoint Estimation
+
+
+They first analyze viewpoint estimation performance in a constrained setting where ground-truth bounding boxes are provided. The metrics used are:
+
+1) Median Geodesic Error: This measures the median geodesic distance between predicted and ground-truth rotation matrices across instances. It is robust to outliers.
+
+2) Accuracy at θ threshold (Accθ): This measures the percentage of instances whose predicted viewpoint is within θ radians of the ground-truth. 
+
+Their CNN-based approach achieves a Mean Accπ/6 of 0.81 and Median Error of 13.6° across categories, significantly outperforming baseline methods that use linear classifiers on CNN features or explicit part modeling with deformable part models.
+
+For the more challenging detection setting where bounding boxes are not provided, they use object proposals from selective search or region proposal networks. They evaluate using three metrics:
+
+1) AVP: Originally proposed metric computing mAP for azimuth angle prediction only, within correct detections.
+
+2) AVPθ: Their proposed metric extending AVP to compute mAP with a angle threshold θ. 
+
+3) ARPθ: Similar to AVPθ but accounts for errors in all three Euler angles.
+
+Their method achieves an ARPπ/6 of 46.5%, significantly better than the previous state-of-the-art of 17.3%. 
+
+![kv4]({{ '/assets/images/32/kv4.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+
+#### 2. Keypoint Prediction
+<!-- For the keypoint prediction task, they evaluate on two setups: -->
+
+##### Keypoint Localization 
+<!-- In this setting, ground-truth bounding boxes are provided and the goal is to localize keypoints within the visible object instances. They use the PCK (Percentage of Correct Keypoints) metric which deems a prediction correct if it lies within a threshold of αmax(W,H) pixels of the ground-truth, where W,H are the instance's width and height.
+
+Their full method combining multi-scale appearance and viewpoint conditioning achieves a PCK of 68.8% at α=0.1, significantly better than the baseline pure appearance method (61.5%) and the previous state-of-the-art by Long et al. (48.5%).  Qualitative examples show the benefits of incorporating viewpoint context. -->
+In this setting, with ground-truth bounding boxes provided, the goal is to localize keypoints within visible object instances. They use the PCK metric, achieving a PCK of 68.8% at α=0.1.
+
+##### Keypoint Detection
+<!-- This is a more challenging setting where bounding boxes are not provided, and accurate keypoint prediction has to happen jointly with localizing the object instance itself. Akin to the object detection task, predictions are scored using precision-recall curves, with the area under the curve (APK) used as the metric. 
+
+This is the first analysis of keypoint detection performance for generic rigid objects on PASCAL VOC. Their method achieves a mean APK of 33.2% at α=0.1 threshold across categories - a promising initial result on this challenging task. Again, viewpoint conditioning provides consistent gains over using appearance alone.
+
+To showcase the generality of their multi-scale convolutional approach, they also evaluate on the task of articulated human pose estimation on PASCAL and achieve an APK of 0.22, outperforming the specialized state-of-the-art of 0.15. -->
+
+In this more challenging setting without bounding boxes, predictions are scored using precision-recall curves, with APK used as the metric. Their method achieves a mean APK of 33.2% at α=0.1 threshold across categories.
+
+They also evaluate on articulated human pose estimation, achieving an APK of 0.22 on PASCAL, outperforming specialized state-of-the-art methods.
+
+
+![kv5]({{ '/assets/images/32/kv5.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+
+<!-- ### Analysis  -->
+<!-- The authors present a thorough analysis of their method's behavior across multiple dimensions: -->
+
+<!-- #### Effect of Object Characteristics
+They analyze viewpoint and keypoint prediction performance across different subsets:
+
+- Occluded Objects: Both viewpoint prediction accuracy (0.65) and keypoint PCK (55.3%) drop significantly on occluded instances compared to non-occluded ones.
+
+- Small Objects: Viewpoint prediction (Acc 0.75) and keypoint localization (PCK 60.9%) are noticeably worse for small objects compared to large objects (Acc 0.87, PCK 72.8%). The authors note that larger context is beneficial for reasoning.
+
+#### Error Modes for Viewpoint
+To better understand viewpoint failures, they analyze the error modes for predicted azimuth angles. Apart from reasonably accurate predictions, the main errors are:
+
+- π rotation errors: The prediction is off by 180° from ground-truth. 
+- Lateral reflections: The object's left-right orientation is flipped compared to ground-truth.   
+
+Only around 3% of instances have errors unexplained by these two modes. -->
+
+<!-- ### Pros
+The key strengths of the proposed method are:
+
+1. It achieves significant performance improvements over prior state-of-the-art methods across all the pose estimation tasks of viewpoint prediction, keypoint localization, and keypoint detection on the challenging PASCAL 3D dataset.
+
+2. By using an end-to-end trained convolutional architecture, it avoids the need for explicit modeling of part appearances or deformations, letting the CNN implicitly learn the relevant representations.
+
+3. It presents a principled approach to combine local appearance cues with global viewpoint context for improving keypoint predictions.
+
+4. The extensive analysis of performance factors like object characteristics and error modes provides valuable insights to guide future work in this area.
+
+### Cons
+Some potential limitations of the work are:
+
+1. While avoiding explicit part modeling is a strength, the proposed method still relies on the discriminative power of the CNN architecture. It lacks explicit 3D geometric reasoning which could be beneficial.
+
+2. The experiments and analysis are restricted to rigid object categories like vehicles, furniture etc. The applicability to non-rigid or highly articulated objects like animals is not evaluated.  
+
+3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases.
+
+4. While incorporating viewpoint improves over pure appearance models, precise localization of keypoints with high accuracy remains a challenge based on the PCK/APK numbers reported. -->
+
+
 
 ## Intermediate Geometric Representation Based Method
 
@@ -254,5 +379,7 @@ Please make sure to cite properly in your work, for example:
 [1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
 
 [2] Shichao Li and Zengqiang Yan and Hongyang Li and Kwang-Ting Cheng,  et al. "Exploring intermediate representation for monocular vehicle pose estimation" *CVPR*. 2021.
+
+[3] S. Tulsiani and J. Malik. Viewpoints and keypoints. In CVPR, 2015.
 
 ---
