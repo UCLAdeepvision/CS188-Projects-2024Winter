@@ -223,14 +223,6 @@ To translate the image, we first generated the captions of the input using image
 
 ```python
 # generate
-import os
-from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
-from diffusers import StableDiffusionPipeline
-from PIL import Image
-import torch
-import pandas as pd
-from tqdm import tqdm
-
 def generate_caption(image, feature_extractor, tokenizer, model):
     pixel_values = feature_extractor(images=image, return_tensors="pt").pixel_values
     pixel_values = pixel_values.to(device)
@@ -267,13 +259,6 @@ We fine-tuned the t2i stable diffusion model on Monet dataset. We first generate
 
 ```python
 # captioning
-import os
-from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer
-from PIL import Image
-import torch
-import pandas as pd
-from tqdm import tqdm
-
 def generate_caption(image, feature_extractor, tokenizer, model):
     pixel_values = feature_extractor(images=image, return_tensors="pt").pixel_values
     pixel_values = pixel_values.to(device)
@@ -374,98 +359,6 @@ done
 ```
 
 ```python
-"""Calculates the Frechet Inception Distance (FID) to evalulate GANs
-
-The FID metric calculates the distance between two distributions of images.
-Typically, we have summary statistics (mean & covariance matrix) of one
-of these distributions, while the 2nd distribution is given by a GAN.
-
-When run as a stand-alone program, it compares the distribution of
-images that are stored as PNG/JPEG at a specified location with a
-distribution given by summary statistics (in pickle format).
-
-The FID is calculated by assuming that X_1 and X_2 are the activations of
-the pool_3 layer of the inception net for generated samples and real world
-samples respectively.
-
-See --help to see further details.
-
-Code apapted from https://github.com/bioinf-jku/TTUR to use PyTorch instead
-of Tensorflow
-
-Copyright 2018 Institute of Bioinformatics, JKU Linz
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-import os
-import pathlib
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-
-import numpy as np
-import torch
-import torchvision.transforms as TF
-from PIL import Image
-from scipy import linalg
-from torch.nn.functional import adaptive_avg_pool2d
-
-try:
-    from tqdm import tqdm
-except ImportError:
-    # If tqdm is not available, provide a mock version of it
-    def tqdm(x):
-        return x
-
-from inception import InceptionV3
-
-parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('--batch-size', type=int, default=50,
-                    help='Batch size to use')
-parser.add_argument('--num-workers', type=int,
-                    help=('Number of processes to use for data loading. '
-                          'Defaults to `min(8, num_cpus)`'))
-parser.add_argument('--device', type=str, default=None,
-                    help='Device to use. Like cuda, cuda:0 or cpu')
-parser.add_argument('--dims', type=int, default=2048,
-                    choices=list(InceptionV3.BLOCK_INDEX_BY_DIM),
-                    help=('Dimensionality of Inception features to use. '
-                          'By default, uses pool3 features'))
-parser.add_argument('--save-stats', action='store_true',
-                    help=('Generate an npz archive from a directory of samples. '
-                          'The first path is used as input and the second as output.'))
-parser.add_argument('path', type=str, nargs=2,
-                    help=('Paths to the generated images or '
-                          'to .npz statistic files'))
-
-IMAGE_EXTENSIONS = {'bmp', 'jpg', 'jpeg', 'pgm', 'png', 'ppm',
-                    'tif', 'tiff', 'webp', 'JPEG'}
-
-
-class ImagePathDataset(torch.utils.data.Dataset):
-    def __init__(self, files, transforms=None):
-        self.files = files
-        self.transforms = transforms
-
-    def __len__(self):
-        return len(self.files)
-
-    def __getitem__(self, i):
-        path = self.files[i]
-        img = Image.open(path).convert('RGB') #.resize((512, 512))
-        if self.transforms is not None:
-            img = self.transforms(img)
-        return img
-
-
 def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
                     num_workers=1):
     """Calculates the activations of the pool_3 layer for all images.
@@ -531,7 +424,6 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
 
     return pred_arr
 
-
 def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-4):
     """Numpy implementation of the Frechet Distance.
     The Frechet distance between two multivariate Gaussians X_1 ~ N(mu_1, C_1)
@@ -588,7 +480,6 @@ def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-4):
     return (diff.dot(diff) + np.trace(sigma1)
             + np.trace(sigma2) - 2 * tr_covmean)
 
-
 def calculate_activation_statistics(files, model, batch_size=50, dims=2048,
                                     device='cpu', num_workers=1):
     """Calculation of the statistics used by the FID.
@@ -627,82 +518,6 @@ def compute_statistics_of_path(path, model, batch_size, dims, device,
                                                dims, device, num_workers)
 
     return m, s
-
-
-def calculate_fid_given_paths(paths, batch_size, device, dims, num_workers=1):
-    """Calculates the FID of two paths"""
-    for p in paths:
-        if not os.path.exists(p):
-            raise RuntimeError('Invalid path: %s' % p)
-
-    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
-
-    model = InceptionV3([block_idx]).to(device)
-
-    m1, s1 = compute_statistics_of_path(paths[0], model, batch_size,
-                                        dims, device, num_workers)
-    m2, s2 = compute_statistics_of_path(paths[1], model, batch_size,
-                                        dims, device, num_workers)
-    fid_value = calculate_frechet_distance(m1, s1, m2, s2)
-
-    return fid_value
-
-
-def save_fid_stats(paths, batch_size, device, dims, num_workers=1):
-    """Calculates the FID of two paths"""
-    if not os.path.exists(paths[0]):
-        raise RuntimeError('Invalid path: %s' % paths[0])
-
-    if os.path.exists(paths[1]):
-        raise RuntimeError('Existing output file: %s' % paths[1])
-
-    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
-
-    model = InceptionV3([block_idx]).to(device)
-
-    print(f"Saving statistics for {paths[0]}")
-
-    m1, s1 = compute_statistics_of_path(paths[0], model, batch_size,
-                                        dims, device, num_workers)
-
-    np.savez_compressed(paths[1], mu=m1, sigma=s1)
-
-
-def main():
-    args = parser.parse_args()
-
-    if args.device is None:
-        device = torch.device('cuda' if (torch.cuda.is_available()) else 'cpu')
-    else:
-        device = torch.device(args.device)
-
-    if args.num_workers is None:
-        try:
-            num_cpus = len(os.sched_getaffinity(0))
-        except AttributeError:
-            # os.sched_getaffinity is not available under Windows, use
-            # os.cpu_count instead (which may not return the *available* number
-            # of CPUs).
-            num_cpus = os.cpu_count()
-
-        num_workers = min(num_cpus, 8) if num_cpus is not None else 0
-    else:
-        num_workers = args.num_workers
-
-    if args.save_stats:
-        save_fid_stats(args.path, args.batch_size, device, args.dims, num_workers)
-        return
-    sum_fid, total = 0, 0
-    path = args.path
-    fid_value = calculate_fid_given_paths(args.path,
-                                          args.batch_size,
-                                          device,
-                                          args.dims,
-                                          num_workers)
-    print('FID: ', fid_value)
-
-if __name__ == '__main__':
-    main()
 ```
 
 ## Discussion
