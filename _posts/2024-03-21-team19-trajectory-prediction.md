@@ -16,7 +16,7 @@ date: 2024-03-21
 {:toc}
 
 ## Introduction
-Trajectory prediction is the process of predicting the future positions of agents over time. Specifically, given a series of $$t$$ previous frames, each containing the locations of $$n$$ actors, the goal of a trajectory prediction algorithm should be able to predict the locations of all agents for frame $$t+1$$. For Autonomous Vehicles, having an accurate trajectory prediction algorithm is incredibly important as it allows AVs to predict the movement of road-agents (i.e. other vehicles, pedestrians, etc.), and adjust its route accordingly to avoid accidents. Trajectory prediction is difficult because it often requires a holistic understanding of the scene, and driver behavior can be unpredictable. 
+Trajectory prediction is the process of predicting the future positions of agents over time. Specifically, given a series of $$t$$ previous frames, each containing the locations and classes of $$n$$ actors, the goal of a trajectory prediction algorithm is to be able to predict the locations of all agents for frame $$t+1$$. For Autonomous Vehicles, having an accurate trajectory prediction algorithm is incredibly important as it allows AVs to predict the movement of road-agents (i.e. other vehicles, pedestrians, etc.), and adjust its route accordingly to avoid accidents. Trajectory prediction is difficult because it often requires a holistic understanding of the scene and its actor interactions. 
 
 ## ConvNet
 
@@ -26,7 +26,7 @@ A common way to tackle the problem is to encode the scene as a rasterized HD sem
 {: style="width: 800px; max-width: 100%;"}
 *Fig 1. A deep learning-based approach to trajectory prediction* [1].
 
-Instead of class predictions, the model returns $$n$$ pairs of values, where each pair represents the predicted future (x,y) location of a target, and $n$ represents the number of future frames to predict. The loss is simply calculated to be the Mean Squared Error (MSE) between the locations of the predicted and actual values of agents:
+Instead of class predictions, the model returns $$n$$ pairs of values, where each pair represents the predicted future (x,y) location of a target, and $$n$$ represents the number of future frames to predict. The loss is simply calculated to be the Mean Squared Error (MSE) between the locations of the predicted and actual values of agents:
 
 $$
 L(x, x_p) = \frac{1}{n} \sum_{i}^{n} (x - x_p)^2
@@ -89,22 +89,22 @@ One drawback that CNN-based architectures have is their relatively high memory a
 
 VectorNet is a hierarchical GNN (graph neural network) that processes environment and agent dynamics through two main stages. It uses Local Graphs to process individual road components, such as lanes and traffic lights, as well as agents like pedestrians and other cars. It uses a Global Interaction Graph to model higher-order interactions among all of these smaller agents such as how pedestrians and cars might interact, or how cars would interact with each other at a 4-way stop.
 
-## Vectorized Representation
+### Vectorized Representation
 
 The architecture of VectorNet is unique in how it takes in input and transforms it into something very efficient for a machine learning model to use. VectorNet takes in high-definition maps as input. Where other previous architectures have taken these HD maps and interpreted them using color-coded agent extraction where they then feed them into CNNs, VectorNet takes a different approach. Researchers at Waymo understood that interpreting HD maps in that way caused a limited receptive field, so they decided to learn a meaningful context representation directly from the well-structured HD maps. Using points, polygons, and curves in geographic coordinates, they represented all sorts of agents as geometric polyline defined by multiple control points. 
 
 The reason VectorNet uses polylines to represent the input is because remapping the input (a set of pixels with colors and brighnesses) as vectorized lines prevents any sort of information loss about direction and speed of agents all the while making sure that the input is fed in a very computationally efficient way. 
 
-## Local Graphs
+### Local Graphs
 
 Then, each polyline representing road elements or agents on the road is processed in a local graph to capture spatial structure and attributes. The way the researchers in VectorNet do is is by using multi-layer perceptrons (MLPs) to encode each vector (which represents a node in this local graph) within a polyline. Then, they use max pooling to aggregate information within these polylines. In doing so, they are able to capture local context and relationships between points belonging to the same polyline.
 
-## Global Interaction Graph
+### Global Interaction Graph
 
 Now that they have finished encoding local information within the polyline, VectorNet then constructs this novel architecture element called a global interaction graph. A global interaction graph is a graph where each node is an entire polyline and the edges between nodes are the interactions between polylines. In doing so, researchers are able to capture the high-order interactions among all the road elements and agents represented by polylines. This graph is a fully connected graph ans employs the self-attention mechanism in order to model all the complex interactions between nodes. The output features of this graph are then used for downstream tasks like trajectory prediction.
 
 
-## Auxiliary Task for Contextual Learning
+### Auxiliary Task for Contextual Learning
 
 An auxiliary task that is mentioned in the VectorNet paper is the use of masking. This auxiliary task is where researchers randomly mask parts of the input data (whether it is map features or agent trajectories) and attempt to recover these items while training. This is a form of self-supervised learning and encourages the model to learn richer context representations. During training, a subset of the input node features, which could represent elements of the HD maps (e.g., lanes, traffic signs) or dynamic elements like agent trajectories, are randomly selected and masked out. The masking is implemented by setting the features of these selected nodes to zero or replacing them with a special token that indicates missing information. Thus, the final objective function of the model is:
 
@@ -114,14 +114,14 @@ $$
 
 Where $$L_{\text{traj}}$$ represents the negative Gaussian log-likelihood for the predicted trajectories, and $$L_{\text{node}}$$ represents the Huber loss for predicting masked node features.
 
-## Performance
+### Performance
 
 ![Vectornet performance]({{ 'assets/images/19/performance.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 *Fig 4. Trajectory prediction performance on the Argoverse Forecasting test set [4]*.
 
 
-The trajectory prediction capabilities of autonomous vehicle (AV) systems are benchmarked against metrics that reflect their precision and efficiency in real-world scenarios. VectorNet stands out in this domain, as illustrated by both its ADE and DE@3s metrics, which demonstrate its exceptional ability to predict the future positions of on-road agents. It boasts an ADE of 1.81 meters, showcasing superior average accuracy across time steps, and a DE@3s of 4.01 meters, highlighting its precision in short-term trajectory forecasting. This performance surpasses traditional approaches like constant velocity models and LSTM-based architectures, which were once standard.
+The trajectory prediction capabilities of autonomous vehicle (AV) systems are benchmarked against metrics that reflect their precision and efficiency in real-world scenarios. VectorNet stands out in this domain, as illustrated by both its ADE (Average Displacement Error) and DE@3s metrics, which demonstrate its exceptional ability to predict the future positions of on-road agents. It boasts an ADE of 1.81 meters, showcasing superior average accuracy across time steps, and a DE@3s of 4.01 meters, highlighting its precision in short-term trajectory forecasting. This performance surpasses traditional approaches like constant velocity models and LSTM-based architectures, which were once standard.
 
 ![Vectornet efficiency]({{ 'assets/images/19/performance.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
