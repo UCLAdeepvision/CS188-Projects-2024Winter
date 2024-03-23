@@ -19,11 +19,11 @@ date: 2024-03-22
 
 Ever since the breakthrough success of AlexNet in 2012, computer vision has experienced a surge in innovation and progress. Across countless fields, almost any task that can incorporate computer vision has benefitted tremendously from this development. As with all computer vision problems, the performance of human pose estimation has risen to incredible heights. Given the value of recognizing and interacting with humans, understanding what human pose estimation is, and how it works, is quite important.
 
-### Introduction
+## Introduction
 
 Human Pose Estimation—occasionally shortened to just Pose Estimation—is the process of predicting and labeling the pose of a human body from a 2D image or video. In essence, the algorithm produces a model—the pose—of the person or people it observes. Pose is typically represented as several keypoints joined by a skeleton. These keypoints are usually joints and important facial features, however many alternatives to keypoints exist, such as contour models and volumetric models. This highlights a difficulty in covering pose estimation in its entirety: the problem is both broad enough and important enough that many variations of this problem exist. Variations include using volumetric models instead of keypoints, using 3D inputs such as Lidar maps instead of traditional image data, and even dropping the “human” part of human pose estimation and predicting the orientation of objects. In general, however, Pose estimation can be broken into two primary categories—2D estimation and 3D estimation—with the difference being that 2D estimation creates an estimated human model drawn in 2 dimensions, whereas the 3D estimation generates a 3D model representing the human. The rest of this post focuses on keypoint-predicting 2D Pose Estimation, due to a particular wealth of research dedicated to this problem, and the fact that this forms a key basis for most other pose estimation variants.
 
-## Formalization
+### Formalization
 
 To formalize the problem: the pose estimation model must minimize overall loss in predicting keypoint locations. Regardless of the exact loss calculation, this means the model should predict the keypoints as accurately as possible. There are two principal methods for finding these keypoints: coordinate regression and heatmap regression.
 
@@ -31,7 +31,7 @@ Coordinate regression is simply a regression task. Each input image is labeled w
 
 Heatmap regression is more common in modern implementations, both due to its performance advantages and the growing size of datasets which support this method. Here, images are labeled with keypoint heatmaps, rather than exact coordinates. These heatmaps reflect the likelihood of a keypoint being in a particular area, which makes the task more lenient on the model, as well as representing the reality that a keypoint’s exact location is not tied to a single pixel. Just as the label coordinates were converted to heatmaps, the model must now predict heatmaps instead of coordinates. A heatmap is predicted for each keypoint, with loss usually being MSE calculated with respect to each pixel. This method is notably more robust to occluded keypoints, due to the ability of heatmaps to reflect uncertainty. This method is not flawless, however; a notable difficulty with heatmap-based methods is sub-pixel accuracy. In most heatmap-based pose estimators, input images are typically downsampled significantly, such that the resulting resolution is quite low when initial heatmap predictions are made. This means significant information lies between pixels and isn’t immediately encoded into the image. When upsampling back to the original resolution, this information may be lost, even when interpolating, leading to inaccuracies. This downsample/upsample process can’t be avoided—heatmap regression is much more computationally intensive than coordinate regression, since mean squared error is calculated for each pixel in the predicted heatmap, rather than a single coordinate pair. Despite this, heatmap regression has grown popular enough to be considered the standard method in modern pose estimation.
 
-## Evaluation Metrics
+### Evaluation Metrics
 
 Unlike loss calculation, evaluation metrics are significantly more diverse for pose estimation. Some of the more common metrics include the following:
 * Percentage of Correct Parts (PCP): A limb is considered detected if the distance between the limb’s true keypoints and the limb’s predicted keypoints is at most half the limb length.
@@ -39,7 +39,7 @@ Unlike loss calculation, evaluation metrics are significantly more diverse for p
 * Object Keypoint Similarity (OKS): This score is the average keypoint similarity of the predicted pose: iKSi*(vi>0)i(vi>0), KSi is the keypoint similarity for the ith keypoint, and δ(vi > 0) is 1 for any labeled keypoint.
 * Keypoint similarity is calculated by passing L2 distance through an unnormalized Gaussian distribution: KSi=(-di2/2s2ki2), where d is the L2 distance from the true keypoint, and ski is the standard deviation for the Gaussian. s2 is the segmented area of the detected person, while ki is a constant associated with each keypoint—this constant is often manually tuned for each keypoint.
 
-## Datasets
+### Datasets
 
 Just as many evaluation metrics exist, even more datasets exist. Major factors in considering what dataset to use include the types of poses, if the dataset is single-person or multi-person—an example of a multi person image is in the bottom right—if the data is images or videos, how many joints are labeled, and, of course, how large the dataset is. Some of the most popular and influential datasets are listed below:
 * Leeds Sports Pose (LSP), is one of the oldest pose datasets that remains in use—it came out in 2010. The original dataset had roughly 2000 single-person images, though an extended version (LSP-extended) was later released with 10,000 images. This dataset is well-established enough that it is often used as a benchmark for pose estimation.
@@ -47,13 +47,13 @@ Just as many evaluation metrics exist, even more datasets exist. Major factors i
 * MPII Human Pose is noteworthy due to its large size—over 40,000 images—the fact that it included a mixture of pose types (upper-body poses as well as full-body poses), and the introduction of a small selection (roughly 5,500) multi-person images.
 * Common Objects in Context (COCO) is a massively popular image dataset. It has over 80,000 images, a dedicated validation set, multi-person images, varied poses, and 17 labeled keypoints—more than any of the aforementioned datasets. Due to the massive selection of images and information provided, COCO has become perhaps the most popular model for human pose estimation.
 
-## Challenges
+### Challenges
 
 Sub-pixel estimation and keypoint occlusion have already been mentioned as notable challenges earlier, and represent a common trend in pose estimation challenges: the model must often use contextual information to estimate a mostly or completely hidden keypoint. For example, small keypoints have few pixels associated with them, and can be difficult to estimate, even more so when occluded. These issues are compounded by the fact that keypoints can often occupy very different positions relative to one another, which can cause significant variations in the contextual information a model might use to estimate occluded keypoints. Images with high articulation—images with highly contorted poses—tend to exemplify all of these problems. In addition to these problems unique to pose estimation, the standard challenges in image-recognition also can hinder performance. Highly variable backgrounds, brightness changes, scale, position, and rotation variances can all significantly worsen a model’s performance. All this should be taken into account when considering the three pose algorithms discussed below.
 
 
 
-### DeepPose
+## DeepPose
 DeepPose was one of the first models to attempt to be “holistic.” [1] Prior to it, parts based models had been the main tool used to estimate poses. DeepPose considered the entire subject by passing the whole image through a 7 layer convolutional neural network and predicting a pose vector. It became the earliest model to embrace deeper learning for the problem of pose estimation, and generalized very well, outperforming the previous best models in almost every task. 
 
 More specifically, this model architecture has the following sizes for its learnable layers, where C represents a convolutional layer, P represents a pooling layer, F is a fully connected layer, and LRN symbolizes a local response normalization layer. 
@@ -95,7 +95,7 @@ The results were quite impressive. In previous studies, certain joints tended to
 
 At the time, DeepPose was a strong achievement, however, it still had its challenges. The model is small by today’s standards, and had some common failure cases, such as flipping the left and right side of predictions when the image subject was photographed from behind. DeepPose clearly did not “solve” pose estimation, and evolution was still very necessary.
 
-### MultiPose
+## MultiPose
 Although DeepPose was remarkable for its significant improvement to pose estimation, it was designed to estimate the pose of a single person per-image. The next logical step was to devise an algorithm to estimate the poses of multiple individuals in a single image. One such model was developed by G Papandreou et al [2]; since the model lacks a name, it will simply be referred to as MultiPose. MultiPose was developed in response to a number of factors, including the success of deep neural networks in pose estimation, the release of the COCO person keypoints dataset, which, as previously mentioned, included a large number of multi-person scenes, and the developments in fast object detection, specifically Faster RCNN.
 
 MultiPose was developed as a two-stage algorithm: first, Faster RCNN would be used to form bounding boxes around people in the image. This effectively was a direct reuse of Faster RCNN for object detection, with only one object class (people) being detected. The second stage was where the primary advancements were made. Given each person bounding box from the first stage, key points were estimated by a joint classification and regression algorithm. The classification aspect classified each point in the cropped region as being within some radius $R$ of one of the 17 keypoints, and this association was called a heatmap in the paper. The regression was not, in fact, a direct regression to the keypoint locations. Rather, each pixel, in addition to receiving a classification, estimated the vector from its location to the keypoint it was associated with. This sort of pose estimation was known as a top-down approach, where a person was detected before pose was estimated. At the time, this was notably less common than its alternative: the bottom-up approach. This method estimated pose via part detectors, then used inference to group the keypoints into people.
@@ -134,7 +134,7 @@ MultiPose took full advantage of the recent release of COCO, training the model 
 
 Not only was MultiPose competitive, it outperformed the prior models in nearly all categories, with the one exception being AP .5. While there were still more advancements to come, MultiPose demonstrated several important techniques and methods in pose estimation—particularly the heatmap estimation—which would be refined by future work.
 
-### DARK
+## DARK
 _Distribution-Aware Coordinate Representation for Human Pose Estimation_ (DARK) proposes a new method for key point prediction that increases validation on existing heatmap based pose models as DARK is model-agnostic and can be easily integrated with such architectures [3]. DARK utilizes heatmaps for key point prediction by predicting heatmaps around the predicted key points and using the heatmaps to find the best pixel for the key point. The proposed heat map based models follows a simple architecture: 
 1. crop and resize the input image around the detected human 
 1. significantly reduce the resolution of the image (to improve computational efficiency)
