@@ -172,7 +172,7 @@ Moreover, the current data augmentation procedures employed by DDFD may not repr
 
 DDFD also faces challenges with complex annotations. Although the model does not rely on detailed annotations such as different poses or facial landmarks, it is conceivable that incorporating such data could refine its performance. This area presents a paradoxical duality where the simplicity of the current training methodology, which is one of DDFD's strengths, also forms a limitation that may be worth exploring in future research efforts.
 
-Lastly, occlusion handling remains an area of improvement for DDFD. While the detector has some capability to manage occlusions, it can struggle with faces that are heavily obscured. This is partly due to the lack of representation of such faces in the training set. Moving forward, it will be imperative to enrich the training data with a broader array of occluded examples to enhance the model's robustness in practical scenarios, where occlusions are a common occurrence.
+Lastly, occlusion handling remains an area of improvement for DDFD. While the detector has some capability to manage occlusions, it can struggle with faces that are heavily obscured. This is partly due to the lack of datapoints representing such faces in the training set. Moving forward, it will be crucial to evolve the training data with a wider array of occluded examples to improve the model's robustness in practical scenarios, where occlusions are a common occurrence.
 
 
 ### FaceNet <a id="facenet"></a>
