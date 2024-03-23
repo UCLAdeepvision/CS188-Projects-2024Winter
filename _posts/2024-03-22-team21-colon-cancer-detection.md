@@ -10,7 +10,7 @@ To segment colons, CT scans are used to image the colon area during colonoscopy.
 
 *Figure 1: Different Possible Polyps In Need of Segmentation [1].*
 
-# Approach 1: Meta
+# Approach 1: [Meta](https://ieeexplore.ieee.org/document/10179485)
 
 ### Motivation
 
@@ -44,7 +44,7 @@ The experimental results demonstrate the effectiveness of the Meta approach in p
 
 In conclusion, the Meta approach, META-Unet, presents a novel solution for polyp segmentation in medical imaging. By integrating a multi-scale efficient transformer attention mechanism into the Unet architecture, the method achieves high accuracy and efficiency, addressing the challenges of fine-detailed feature modeling, computational cost, and real-time requirements. The results suggest the potential clinical impact of the Meta approach in improving the diagnosis and treatment of colorectal cancer through more accurate and efficient polyp segmentation.
 
-# Approach 2: RaBit
+# Approach 2: [RaBit](https://arxiv.org/abs/2307.06420)
 
 ### Motivation
 
