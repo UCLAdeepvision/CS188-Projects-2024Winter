@@ -205,6 +205,8 @@ WHAM was much, much quicker, only taking 10 minutes to generate the video. Addit
 1. WHAM: Reconstructing World-grounded Humans with Accurate 3D Motion; [arXiv:2312.07531](https://arxiv.org/abs/2312.07531) [cs.CV]
 2. Beyond Static Features for Temporally Consistent 3D Human Pose and Shape from a Video; [arXiv:2011.08627](https://arxiv.org/abs/2011.08627) [cs.CV]
 3. Decoupling Human and Camera Motion from Videos in the Wild; [arXiv:2302.12827](https://arxiv.org/abs/2302.12827) [cs.CV]
+4. A survey on real-time 3D scene reconstruction with SLAM methods in embedded systems; [arXiv:2309.05349](https://arxiv.org/abs/2309.05349) [cs.RO]
+
 
 ### Colab Notebooks
 [SLAHMR](https://colab.research.google.com/drive/1dCT-y9zPfKc3vKAv8_-cWeb2_zjIi5PE?usp=sharing)
