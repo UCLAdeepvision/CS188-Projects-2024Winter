@@ -426,8 +426,10 @@ Validation and training were split by whether the last digit of the id
 ended in 9. This resulted in 10% of the data being reserved for
 validation. 
 
-# Results
 
+# Discussion
+
+### Temporal and Stereo infusion results
 
 After training for a variable number of epochs, we obtained the results below
 
@@ -462,8 +464,6 @@ Finally, it's worth noting that our baseline model has roughly the
 same angle deviation as seen in the paper, which is a good indication
 these results stem purely from architecture, and not choice of
 optimizer or hyperparameters.
-
-# Discussion
 
 
 ### Deep3dBox
