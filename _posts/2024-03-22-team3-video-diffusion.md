@@ -30,11 +30,23 @@ Text to video generation is a computer vision task that uses deep learning to cr
     Your browser does not support the video tag.
   </video>
   <p style="text-align: center;">
-    Fig 1. Prompt: The camera directly faces colorful buildings in Burano Italy. An adorable dalmatian looks through a window on a building on the ground floor. Many people are walking and cycling along the canal streets in front of the buildings. [1].
+    Fig 1. Prompt: The camera directly faces colorful buildings in Burano Italy. An adorable dalmatian looks through a window on a building on the ground floor. Many people are walking and cycling along the canal streets in front of the buildings. [1]
   </p>
 </div>
 
 ## Diffusion
+
+$$
+\mathcal{L}(\mathbf{x}) = \mathbb{E}_{\mathbf{\epsilon} \sim \mathcal{N}(0,\mathbf{I}), t \sim \mathcal{U}(0,1)} \left[ \| \hat{\mathbf{\epsilon}}_{\theta}(\mathbf{z}_t, \lambda_t) - \mathbf{\epsilon} \|_2^2 \right]
+$$
+
+$$
+q(\mathbf{z}_t|\mathbf{z}_s) = \mathcal{N}(\mathbf{z}_t; (\alpha_t/\alpha_s)\mathbf{z}_s, \sigma^2_{t|s}\mathbf{I})
+$$
+
+$$
+\mathbb{E}_{\epsilon, t} [ w(\lambda_t) \| \hat{x}_\theta (z_t) - x \|_2^2 ]
+$$
 
 ## Video Diffusion Models
 
@@ -78,7 +90,7 @@ Cascaded Diffusion Models, introduced by Ho et al. in 2022, have emerged as a po
 _Figure 2: The cascaded sampling pipeline starting from a text prompt input to generating a 5.3-
 second, 1280×768 video at 24fps. “SSR” and “TSR” denote spatial and temporal super-resolution
 respectively, and videos are labeled as frames×width×height. In practice, the text embeddings are
-injected into all models, not just the base model._ [1].
+injected into all models, not just the base model._ [2].
 
 The figure above summarizes the entire cascading pipeline of Imagen Video:
 
@@ -97,7 +109,7 @@ The SSR (Super-Resolution via Repeated Refinement) and TSR blocks implement a me
 
 ![Algorithm1]({{ '/assets/images/team3/algorithm1.png' | relative_url }})
 {: style=" width:600px; max-width: 100%;"}
-_Fig 3: Algorithm for diffusion._
+_Fig 3: Algorithm for diffusion._[3]
 
 <p style="font-size: 14px">Remark: The meaning of the loss function here is to make the difference between the noise output by the model and the randomly sampled Gaussian noise as small as possible.</p>
 
@@ -113,7 +125,7 @@ The process begins with a low-resolution image x and a noisy image y<sub>t</sub>
 {: style=" max-width: 100%;"}
 _Fig 5: Description of the U-Net architecture with skip connections. The low resolution input image x is interpolated to the target
 high resolution, and concatenated with the noisy high resolution image yt. We show the activation dimensions for the example task of
-16×16 → 128×128 super resolution._
+16×16 → 128×128 super resolution._[4]
 
 Spatial Super-Resolution:
 
@@ -129,7 +141,8 @@ Instead of using conventional $$\epsilon$$-prediction to add noise, the author i
 
 ![Vpred]({{ '/assets/images/team3/visualization_vpred.png' | relative_url }})
 {: style=" width: 600px;max-width: 100%;"}
-Fig 6: Visualization of reparameterizing the diffusion process in terms of and $$v$$ and $$v_\phi$$.\
+Fig 6: Visualization of reparameterizing the diffusion process in terms of and $$v$$ and $$v_\phi$$.\[4]
+
 Let's delve into the derivation of the first equation. Remember the noise addition equation in DDPM:
 
 $$
@@ -168,7 +181,7 @@ In the context of video diffusion model training, the author highlights the foll
 _Fig 6: Comparison between $$\epsilon$$-prediction (middle row) and v-prediction (bottom row) for a
 8×80×48→8×320×192 spatial super-resolution architecture at 200k training steps. The frames
 from the $$\epsilon$$-prediction model are generally worse, suffering from unnatural global color shifts across
-frames. The frames from the v-prediction model do not and are more consistent._
+frames. The frames from the v-prediction model do not and are more consistent._[2]
 
 ```
 if self.config.prediction_type == "epsilon":
@@ -182,6 +195,17 @@ elif self.config.prediction_type == "v_prediction":
     pred_epsilon = (alpha_prod_t**0.5) * model_output + (beta_prod_t**0.5) * sample
 ```
 
+Sample results from Imagen
+
+<div style="display: flex; justify-content: center;">
+    <div style="flex: 50%; padding: 5px;">
+        <video src="assets/images/team3/panda_car.mp4" alt="Image 1" style="width: 100%;" type="video/mp4" controls />
+    </div>
+    <div style="flex: 50%; padding: 5px;">
+        <video src="assets/images/team3/bear.mp4" alt="Image 2" style="width: 100%;" type="video/mp4" controls />
+    </div>
+</div>
+
 ## Experiments
 
 We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below. All of the images use the same prompt, duration, and number of frames.
@@ -190,15 +214,12 @@ The prompt is 'A futuristic cityscape at dusk, with flying cars weaving between 
 
 <div style="display: flex; justify-content: center;">
     <div style="flex: 33.33%; padding: 5px;">
-        <p>5 Steps </p>
         <video src="assets/images/team3/5steps.mp4" alt="Image 1" style="width: 100%;" type="video/mp4" controls />
     </div>
     <div style="flex: 33.33%; padding: 5px;">
-        <p>25 Steps </p>
         <video src="assets/images/team3/25steps.mp4" alt="Image 2" style="width: 100%;" type="video/mp4" controls />
     </div>
     <div style="flex: 33.33%; padding: 5px;">
-        <p>50 Steps </p>
         <video src="assets/images/team3/50steps.mp4" alt="Image 3" style="width: 100%;" type="video/mp4" controls />
     </div>
 </div>
@@ -238,9 +259,16 @@ You can find more Markdown syntax at [this page](https://www.markdownguide.org/b
 
 ## Reference
 
-Please make sure to cite properly in your work, for example:
-
-
 [1] Ho, Jonathan, et al. "Video diffusion models." arXiv:2204.03458 2022.
+
 [2] Ho, Jonathan, et al. "Imagen Video: High Definition Video Generation with Diffusion Models" arXiv:2210.02303 2022.
+
+[3] Tim Salimans and Jonathan Ho. Progressive Distillation for Fast Sampling of Diffusion Models. In ICLR, 2022.
+
+[4] Chitwan Saharia, Jonathan Ho, William Chan, Tim Salimans, David J Fleet, and Mohammad
+Norouzi. Image super-resolution via iterative refinement. IEEE Transactions on Pattern Analysis
+and Machine Intelligence, 2022c.
+
+[5] Brooks, Peebles, et al. Video generation models as world simulators, OpenAI, 2024
+
 ---
