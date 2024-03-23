@@ -27,7 +27,7 @@ Human Pose Estimation—occasionally shortened to just Pose Estimation—is the 
 
 To formalize the problem: the pose estimation model must minimize overall loss in predicting keypoint locations. Regardless of the exact loss calculation, this means the model should predict the keypoints as accurately as possible. There are two principal methods for finding these keypoints: coordinate regression and heatmap regression.
 
-Coordinate regression is simply a regression task. Each input image is labeled with ground truth keypoint coordinates, and the loss is the distance between the predicted keypoint and the exact keypoint. Any distance calculation works, but the L2 norm is perhaps the most common, and is used in calculating the mean squared error (MSE). Coordinate regression enjoyed greater popularity in early pose estimators. A notable factor for their gradual decrease in popularity comes from a difficulty in isolating hidden keypoints. This eventually led to the rise of heatmap regression.
+Coordinate regression is simply a regression task. Each input image is labeled with ground truth keypoint coordinates, and the loss is the distance between the predicted keypoint and the exact keypoint. Any distance calculation works, but the $$L_{2}$$ norm is perhaps the most common, and is used in calculating the mean squared error: $$\text{MSE}(\mathbf{y}, \hat{\mathbf{y}}) =\frac{1}{n} \|\mathbf{y} - \hat{\mathbf{y}}\|_2^2$$. Coordinate regression enjoyed greater popularity in early pose estimators. A notable factor for their gradual decrease in popularity comes from a difficulty in isolating hidden keypoints. This eventually led to the rise of heatmap regression.
 
 Heatmap regression is more common in modern implementations, both due to its performance advantages and the growing size of datasets which support this method. Here, images are labeled with keypoint heatmaps, rather than exact coordinates. These heatmaps reflect the likelihood of a keypoint being in a particular area, which makes the task more lenient on the model, as well as representing the reality that a keypoint’s exact location is not tied to a single pixel. Just as the label coordinates were converted to heatmaps, the model must now predict heatmaps instead of coordinates. A heatmap is predicted for each keypoint, with loss usually being MSE calculated with respect to each pixel. This method is notably more robust to occluded keypoints, due to the ability of heatmaps to reflect uncertainty. This method is not flawless, however; a notable difficulty with heatmap-based methods is sub-pixel accuracy. In most heatmap-based pose estimators, input images are typically downsampled significantly, such that the resulting resolution is quite low when initial heatmap predictions are made. This means significant information lies between pixels and isn’t immediately encoded into the image. When upsampling back to the original resolution, this information may be lost, even when interpolating, leading to inaccuracies. This downsample/upsample process can’t be avoided—heatmap regression is much more computationally intensive than coordinate regression, since mean squared error is calculated for each pixel in the predicted heatmap, rather than a single coordinate pair. Despite this, heatmap regression has grown popular enough to be considered the standard method in modern pose estimation.
 
@@ -36,8 +36,8 @@ Heatmap regression is more common in modern implementations, both due to its per
 Unlike loss calculation, evaluation metrics are significantly more diverse for pose estimation. Some of the more common metrics include the following:
 * Percentage of Correct Parts (PCP): A limb is considered detected if the distance between the limb’s true keypoints and the limb’s predicted keypoints is at most half the limb length.
 * Percentage of Correct Keypoints (PCK): A joint is considered detected if the distance between the true keypoint and the predicted keypoint is within some fraction of the torso diameter (PCK) or some fraction of the head bone length (PCKh)
-* Object Keypoint Similarity (OKS): This score is the average keypoint similarity of the predicted pose: iKSi*(vi>0)i(vi>0), KSi is the keypoint similarity for the ith keypoint, and δ(vi > 0) is 1 for any labeled keypoint.
-* Keypoint similarity is calculated by passing L2 distance through an unnormalized Gaussian distribution: KSi=(-di2/2s2ki2), where d is the L2 distance from the true keypoint, and ski is the standard deviation for the Gaussian. s2 is the segmented area of the detected person, while ki is a constant associated with each keypoint—this constant is often manually tuned for each keypoint.
+* Object Keypoint Similarity (OKS): This score is the average keypoint similarity of the predicted pose: $$\frac{\sum_i KS_i \ast \delta(v_i > 0)}{\sum_i \delta(v_i > 0)}$$, $$KS_i$$ is the keypoint similarity for keypoint $$i$$, and $$δ(v_i > 0) = 1$$ for any labeled keypoint.
+* Keypoint similarity is calculated by passing $$L_{2}$$ distance through an unnormalized Gaussian distribution: $$KS_i = \exp\left(-\frac{d_i^2}{2s^2 k_i^2}\right)$$, where $$d$$ is the $$L_{2}$$ distance from the true keypoint, and $$sk_i$$ is the standard deviation for the Gaussian. $$s^2$$ is the segmented area of the detected person, while $$k_i$$ is a constant associated with each keypoint—this constant is often manually tuned for each keypoint.
 
 ### Datasets
 
@@ -66,10 +66,8 @@ Dropout regularization is performed in the F layers, at p=0.6
 As an aside, LRNs were layers that were introduced in AlexNet, and are modeled after a neural phenomena known as lateral inhibition (excited neurons “downregulate” neighboring neurons). They do this by normalizing around local parts of the input sequence. LRNs are very rare now.
 
 In order to work within the fixed input size, the input images and the ground truth pose vectors are normalized with respect to a bounding box that is obtained by running a person detector on the images. This normalization is applied to both the images as well as the ground truth pose vectors. The images are cropped to a fixed size of 220x220.The cropped input images are regressed to a normalized pose vector, in
-$$
-\mathbb{R}^{2k} \tag{1}
-$$
-The loss then is calculated as the L2 loss between the ground truth normalized pose vector and this prediction. It thus aims to optimize:
+$$\mathbb{R}^{2k} \tag{1}$$
+The loss then is calculated as the $$L_{2}$$ loss between the ground truth normalized pose vector and this prediction. It thus aims to optimize:
 
 $$
 \arg\min_{\theta} \sum_{(x,y) \in D_N} \sum_{i=1}^{k} \left\lVert y_i - \psi_i(x; \theta) \right\rVert_2^2 \tag{2}
@@ -118,13 +116,15 @@ $$
 L_o(\theta) = \sum \limits_{k=1:K} \sum \limits_{i:\|l_k-x_i\|\leq R} H(\| F_k(x_i) - (l_k - x_i) \|) \tag{5}
 $$
 
-where $$H(u)$$ is the Huber robust loss ($$\frac{u^2}{2}$$ for $$|u|\leq\delta$$ and $$\delta (|u| - \frac{\delta}{2})$$ otherwise, for some $$\delta$$), $$l_k$$ is the k-th keypoint location. Loss for offsets is only calculated for positions actually within the radius $$R$$ of the keypoint. The final loss, then was
+where H(u) is the Huber robust loss: ($$u^2$$/2 for $$abs(u)$$ ≤ δ and δ($$abs(u)$$ - δ / 2) otherwise, for some δ)
+
+$$l_k$$ is the k-th keypoint location. Loss for offsets is only calculated for positions actually within the radius $$R$$ of the keypoint. The final loss, then was
 
 $$
 L(\theta) = \lambda_h L_h(\theta) \lambda_o L_o(\theta) \tag{6}
 $$
 
-where $\lambda_h$ and $\lambda_o$ were scaling factors for balance—the values used in MultiPose were $\lambda_h = 4$ and $\lambda_o = 1$. This loss was complicated when considering other people’s keypoints may appear in the background of a bounding box in crowded circumstances. For this circumstance, the heatmap loss only considered the keypoints associated with the person in the foreground.
+where $$\lambda_h$$ and $$\lambda_o$$ were scaling factors for balance—the values used in MultiPose were $$\lambda_h = 4$$ and $$\lambda_o = 1$$. This loss was complicated when considering other people’s keypoints may appear in the background of a bounding box in crowded circumstances. For this circumstance, the heatmap loss only considered the keypoints associated with the person in the foreground.
 
 Two final features of MultiPose relate back to the use of the person detector, with the fist being an alternative method of pose scoring. Instead of relying on the base model of Faster RCNN for drawing bounding boxes, a new score was developed. This score was calculated as the average maximal activation for each keypoint:
 
@@ -156,13 +156,13 @@ If testing:
 4. calculate the key points from the predicted heatmaps 
 To train the model by calculating the loss between ground truth heatmaps, the model requires that all ground truth images are converted from key point predicted images to heatmaps around the key point positions. 
 
-Dark addresses the standard coordinate decoding method (i.e. deriving the key point position from a heat map) which takes a heat map and identifies the coordinates of the maximal ($m$) and second maximal ($s$) activation. It then uses the following formula to produce the coordinate of the point:
+Dark addresses the standard coordinate decoding method (i.e. deriving the key point position from a heat map) which takes a heat map and identifies the coordinates of the maximal ($$m$$) and second maximal ($$s$$) activation. It then uses the following formula to produce the coordinate of the point:
 
 $$
 \mathbf{p} = \mathbf{m} + 0.25\frac{\mathbf{s}-\mathbf{m}}{\|\mathbf{s}-\mathbf{m}\|_2} \tag{8}
 $$
 
-This equation produces a key point at the maximal heat map pixel location shifted by ¼ toward the second maximal position. The final position in the original image is produced by the following equation where $\lambda$ is the resolution reduction ratio. 
+This equation produces a key point at the maximal heat map pixel location shifted by ¼ toward the second maximal position. The final position in the original image is produced by the following equation where $$\lambda$$ is the resolution reduction ratio. 
 
 $$
 \mathbf{\hat{p}} = \lambda \mathbf{p} \tag{9}
@@ -170,7 +170,7 @@ $$
 
 DARK claims that this standard coordinate prediction system is flawed because the maximum activation in the predicted heatmap is not the actual position of the key point but rather merely a coarse location of it. 
 
-To overcome this, DARK’s coordinate decoding method utilizes the predicted heat map’s distribution structure to discover the maximum activation position. DARK assumes that both the predicted and ground truth heat map follow a 2D gaussian distribution. Using this assumption, they model the heat map with the following two equations (10 being the generic equation and 11 being an equivalent yet simplified version) and use the second one (11) to predict $\mu$, the corresponding key point position: 
+To overcome this, DARK’s coordinate decoding method utilizes the predicted heat map’s distribution structure to discover the maximum activation position. DARK assumes that both the predicted and ground truth heat map follow a 2D gaussian distribution. Using this assumption, they model the heat map with the following two equations (10 being the generic equation and 11 being an equivalent yet simplified version) and use the second one (11) to predict $$\mu$$, the corresponding key point position: 
 
 $$
 \mathcal{G}(\mathbf{x};\mathbf{\mu},\Sigma) = \dfrac{1}{(2\pi)|\Sigma|^{\frac{1}{2}}}\exp(-\frac{1}{2} (\mathbf{x}-\mathbf{\mu})^T \Sigma^{-1} (\mathbf{x}-\mathbf{\mu})) \tag{10}
@@ -180,13 +180,13 @@ $$
 \mathcal{P}(\mathbf{x};\mathbf{\mu},\Sigma) = \ln(\mathcal{G}) = -\ln(2\pi) - \frac{1}{2}\ln(|\Sigma|) - \frac{1}{2}(\mathbf{x}-\mathbf{\mu})^T \Sigma^{-1} (\mathbf{x}-\mathbf{\mu}) \tag{11}
 $$
 
-To solve for $\mu$ they utilize the underlying distribution’s structure as $\mu$ is an extreme point in the distribution, thus the first derivative at $\mu$ is trivially: 
+To solve for $$\mu$$ they utilize the underlying distribution’s structure as $$\mu$$ is an extreme point in the distribution, thus the first derivative at $$\mu$$ is trivially: 
 
 $$
 \left. \mathcal{D}'(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = \left. \frac{\partial\mathcal{P}^T}{\partial \mathbf{x}} \right|_{\mathbf{x}=\mathbf{\mu}} = \left. -\Sigma^{-1}(\mathbf{x}-\mathbf{\mu}) \right|_{\mathbf{x}=\mathbf{\mu}} = 0 \tag{12}
 $$
 
-Using the first derivative as well as the second derivative defined below (13) they compute $\mu$ using the following equation (14): 
+Using the first derivative as well as the second derivative defined below (13) they compute $$\mu$$ using the following equation (14): 
 
 $$
 \mathcal{D}''(\mathbf{m}) = \left. \mathcal{D}''(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = -\Sigma^{-1} \tag{13}
@@ -196,15 +196,15 @@ $$
 \mathbf{\mu} = \mathbf{m} - (\mathcal{D}''(\mathbf{m}))^{-1}\mathcal{D}'(\mathbf{m}) \tag{14}
 $$
 
-Once obtaining $\mu$ they also apply equation (9) from above to predict the coordinate in the original image space. DARK’s method determines the underlying maximum more accurately by exploring the heat map’s statistics in its entirety. Furthermore, it is computationally efficient as it only computes the first and second derivative with respect to one pixel per heat map. 
+Once obtaining $$\mu$$ they also apply equation (9) from above to predict the coordinate in the original image space. DARK’s method determines the underlying maximum more accurately by exploring the heat map’s statistics in its entirety. Furthermore, it is computationally efficient as it only computes the first and second derivative with respect to one pixel per heat map. 
 
-DARK’s proposed algorithm relies on a crucial assumption: the predicted heatmaps follow a gaussian distribution. However, most of the time heatmaps predicted by models do not possess a well distributed gaussian structure compared to the training heatmap data. To overcome this, DARK suggests modulating the heatmap distribution by using a gaussian kernel K with the same variation as the training data to smooth out multiple peaks in the heatmap $h$ by using the following equation where ⊛ denotes the convolution operation. 
+DARK’s proposed algorithm relies on a crucial assumption: the predicted heatmaps follow a gaussian distribution. However, most of the time heatmaps predicted by models do not possess a well distributed gaussian structure compared to the training heatmap data. To overcome this, DARK suggests modulating the heatmap distribution by using a gaussian kernel K with the same variation as the training data to smooth out multiple peaks in the heatmap $$h$$ by using the following equation where ⊛ denotes the convolution operation. 
 
 $$
 \mathbf{h}' = K ⊛ h \tag{15}
 $$
 
-To preserve the magnitude of the original heatmap $h$, simply scale $h'$ so that its maximal activation is the same as $h$’s using: 
+To preserve the magnitude of the original heatmap $$h$$, simply scale $$h'$$ so that its maximal activation is the same as $$h$$’s using: 
 
 $$
 \mathbf{h}' = \dfrac{\mathbf{h}' - \min(\mathbf{h}')}{\max(\mathbf{h}') - \min(\mathbf{h}')} * \max(\mathbf{h}) \tag{16}
@@ -224,7 +224,9 @@ DARK was tested on two popular datasets, COCO and MPII, where they saw significa
 ### References
 
 [1] A. Toshev and C. Szegedy, "DeepPose: Human Pose Estimation via Deep Neural Networks." in 2014 IEEE Conference on Computer Vision and Pattern Recognition, 2014.
+
 [2] Papandreou et al. "Toward Accurate Multi-person Pose Estimation in the Wild." (2017).
+
 [3] Zhang et al. "Distribution-Aware Coordinate Representation for Human Pose Estimation." (2019).
 
 ---
