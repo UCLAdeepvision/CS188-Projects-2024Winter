@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title: 3d Bounding Box Estimation Using Deep Learning and Geometry
-author: UCLAdeepvision
+author: Sean Tang, James Shiffer, Steve Zang, Alex Walburg
 date: 2024-03-18
 ---
 
