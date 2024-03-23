@@ -128,7 +128,7 @@ This modification helped guide the bounding boxes to provide more valuable conte
 
 MultiPose took full advantage of the recent release of COCO, training the model both on the base COCO dataset, as well as a dataset supplemented by in-house data. The results were competitive with prior state-of-the-art results for COCO, such as CMU-Pose and Mask-RCNN, for both the supplemented dataset and the original COCO dataset.
 
-[MultiPoseTables]({{ '/assets/images/team38/multiPoseTable.png' | relative_url }})
+![MultiPoseTables]({{ '/assets/images/team38/multiPoseTable.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 2. MultiPose: Results of MultiPose vs Contemporary State-of-the-Art Multi-person Pose Estimators* [2].
 
@@ -192,7 +192,7 @@ By using this distribution modulation, DARK’s experiments validated further pe
 
 One final change DARK makes to the traditional heatmap based models is a change in the coordinate encoding process. The standard method leads to inaccurate and biased heatmap generation which they overcome by placing their heatmaps’ center at a non-quantised location which represents the accurate ground-truth coordinate.
 
-[DARKTable]({{ '/assets/images/team38/DARKTable.png' | relative_url }})
+![DARKTable]({{ '/assets/images/team38/DARKTable.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 3. DARK: Results of DARK vs Contemporary Pose Estimators* [3].
 
