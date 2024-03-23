@@ -185,6 +185,18 @@ Some potential limitations of the work are:
 <!-- 3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases. -->
 
 
+### Comparison
+
+#### Applicability and Generalization
+
+"Viewpoints and Keypoints":
+The method is primarily evaluated on rigid objects like vehicles and furniture.
+It may face limitations in generalizing to non-rigid or highly articulated objects due to its focus on specific object categories and tasks.
+
+"3D Bounding Box Estimation Using Deep Learning and Geometry":
+The approach is applicable to a wide range of objects, including both rigid and non-rigid objects.
+It offers potential advantages in scenarios where accurate geometric models are crucial for accurate 3D bounding box estimation.
+
 
 ## Intermediate Geometric Representation Based Method: Ego-Net
 
