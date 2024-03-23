@@ -146,7 +146,7 @@ We can reduce the dimensionality with minimal loss of information! This makes tr
 Before diving into Stable Diffusion, we start by discussing the fundamental diffusion model. The diffusion model is a parameterized Markov chain trained using variational inference to produce samples matching the data after finite time [1]. The process it divided into two parts: the forward process which adds noise to the original image, and the backward process which gradually denoise the noisy input to get an image.
 
 ![Diffusion]({{ '/assets/images/team26/diffusion.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
+{: style="width: 800px; max-width: 100%;"}
 *Fig 1. The diffusion and reverse illustrated as a directed graphical model* [1].
 
 In the forward pass, we add noise to the input image following a variance schedule $$\beta_1, ..., \beta_T$$. The approximate posterior (_diffusion process_) is defined as:
@@ -185,9 +185,29 @@ Instead of sampling from the pixel space, the Latent Diffusion Model samples fro
 
 More formally, the encoder $$\mathcal{E}$$ encodes the image $$x \in \mathbb{R}^{H \times W \times 3}$$ into $$z = \mathcal{E}(x) \in \mathbb{R}^{h \times w \times c}$$, where $$f = H/h = W/w$$ is the downsampling factor and is typically an integer power of 2. The decoder $$\mathcal{D}$$ decodes input from the latent space back to the dimension of a regular input image: $$\tilde{x} = \mathcal{D}(z) = \mathcal{D}(\mathcal{E}(x))$$. After training of the autoencoder is completed, we wrap the whole diffusion process in between the encoder and decoder, so that the diffusion model operates entirely in the latent space.
 
-### Training
+#### Training
 
-A good latent space of lower dimension preserves the most important data of the input image while occupying less space. 
+A good latent space of lower dimension preserves the most important data of the input image while occupying less space. We define our new objective function for the LDM as follows:
+
+$$
+L_{LDM} := \mathbb{E}_{\mathcal{E}(x), \epsilon \sim \mathcal{N}(0, 1), t}[||\epsilon - \epsilon_{\theta}(z_t, t)||_2^2]
+$$
+
+where the neural backbone $$\epsilon_{\theta}(z_t, t); t = 1...T$$ is an equally weighted sequence of denoising autoencoders. One of the realizations of it is through a time-conditional UNet.
+
+The versatility of LDM allows us to incorporate other conditioning mechanisms, by augmenting the underlying UNet with cross-attention mechanism.
+
+![LDM]({{ '/assets/images/team26/latent-diffusion-arch.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Fig 1. LDM architecture with conditioning* [2].
+
+For example, we can add a caption to the LDM to describe the output image, allowing more control over the generated result. In order to account for the multimodal input (such as text captioning), a domain specific encoder $$\tau_{\theta}$$ is introduced to project the multimodal input $$y$$ to map to the intermediate layers of the UNet via cross-attention layer. The cross-attention layer implements
+
+$$
+Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d}})\cdot V
+$$
+
+where $$Q$$ is obtained using the flattened intermediate representation of the UNet implementing $$\epsilon_{\theta}$$, and $$K, V$$ obtained via $$\tau_{\theta}(y)$$. The new denoising autoencoder now takes an additional input and is expressed as $$\epsilon_{\theta}(z_t, t, \tau_{\theta}(y))$$.
 
 ### Image Captioning with Transformers
 
