@@ -30,29 +30,33 @@ Text to video generation is a computer vision task that uses deep learning to cr
     Your browser does not support the video tag.
   </video>
   <p style="text-align: center;">
-    Fig 1. Prompt: The camera directly faces colorful buildings in Burano Italy. An adorable dalmatian looks through a window on a building on the ground floor. Many people are walking and cycling along the canal streets in front of the buildings. [1]
+    Fig 1. Prompt: The camera directly faces colorful buildings in Burano Italy. An adorable dalmatian looks through a window on a building on the ground floor. Many people are walking and cycling along the canal streets in front of the buildings. [5]
   </p>
 </div>
 
 ## Diffusion
 
-$$
-\mathcal{L}(\mathbf{x}) = \mathbb{E}_{\mathbf{\epsilon} \sim \mathcal{N}(0,\mathbf{I}), t \sim \mathcal{U}(0,1)} \left[ \| \hat{\mathbf{\epsilon}}_{\theta}(\mathbf{z}_t, \lambda_t) - \mathbf{\epsilon} \|_2^2 \right]
-$$
+### Forward Diffusion Process
+
+In diffusion, the forward process entails the adding of noise to the datapoint. Diffusion models usually sample this noise from a Gaussian distribution according to a noise schedule, but other distributions are possible. Diffusion models usually have a Markov Chain structure (meaning that future events only depend on the current state). By the end of the process, the datapoint should resemble the Gaussian noise, while maintaining key features of the image, allowing for the backward process to detect and utilize those features to reconstruct the whole image.It is typical to use a cosine noise schedule which has this Markov structure: 
 
 $$
 q(\mathbf{z}_t|\mathbf{z}_s) = \mathcal{N}(\mathbf{z}_t; (\alpha_t/\alpha_s)\mathbf{z}_s, \sigma^2_{t|s}\mathbf{I})
 $$
 
-$$
-\mathbb{E}_{\epsilon, t} [ w(\lambda_t) \| \hat{x}_\theta (z_t) - x \|_2^2 ]
-$$
+
+### Backward Diffusion Process
 
 ## Video Diffusion Models
 
 ### 3D U-Net
 
 ### Factorized Space-Time Attention
+
+The denoising model is trained using a weighted mean squared error loss function where \( \hat{x}_\theta(z_t) \) represents is the estimate of the denoised data provided by the model with parameters.
+$$
+\mathbb{E}_{\epsilon, t} [ w(\lambda_t) \| \hat{x}_\theta (z_t) - x \|_2^2 ]
+$$
 
 ### Video-Image Joint Training:
 
@@ -76,10 +80,16 @@ The outcome of joint training is the knowledge transfer from images to videos. S
 
 ## Imagen Video
 
-Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames. We will now be discussing the architecture of Imagen Video.
-
+Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames.
 <!--
 ## Diffusion Models -->
+
+## Loss Function
+
+This model is trained using the below loss function
+$$
+\mathcal{L}(\mathbf{x}) = \mathbb{E}_{\mathbf{\epsilon} \sim \mathcal{N}(0,\mathbf{I}), t \sim \mathcal{U}(0,1)} \left[ \| \hat{\mathbf{\epsilon}}_{\theta}(\mathbf{z}_t, \lambda_t) - \mathbf{\epsilon} \|_2^2 \right]
+$$
 
 ### Cascaded Architecture:
 
@@ -225,37 +235,6 @@ The prompt is 'A futuristic cityscape at dusk, with flying cars weaving between 
 </div>
 
 We see from these results that a higher number of inference steps leads to an image that more accurately reflects the prompt. With 5 steps, the video hardly reflects the prompt. With 25 steps, a resemblance is shown but the image is largely. With 50 steps, the image accurately shows the prompt.
-
-### Table
-
-Here is an example for creating tables, including alignment syntax.
-
-|      | column 1 | column 2 |
-| :--- | :------: | -------: |
-| row1 |   Text   |     Text |
-| row2 |   Text   |     Text |
-
-### Code Block
-
-```
-# This is a sample code block
-import torch
-print (torch.__version__)
-```
-
-### Formula
-
-Please use latex to generate formulas, such as:
-
-$$
-\tilde{\mathbf{z}}^{(t)}_i = \frac{\alpha \tilde{\mathbf{z}}^{(t-1)}_i + (1-\alpha) \mathbf{z}_i}{1-\alpha^t}
-$$
-
-or you can write in-text formula $$y = wx + b$$.
-
-### More Markdown Syntax
-
-You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/).
 
 ## Reference
 
