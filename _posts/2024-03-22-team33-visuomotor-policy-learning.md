@@ -172,10 +172,11 @@ For more details, check out the original paper [10].
 
 <!-- ![]({{ '/assets/images/team33/test_e2e_det_track.avi' | relative_url }})
 {: style="max-width: 100%;"} -->
-<video width="320" height="240" controls>
-  <source src="/assets/images/team33/test_e2e_det_track.avi" type="video/mp4">
-</video>
-
+<div class="row-container">
+  <iframe width="100%" height="480"
+  src="https://www.youtube.com/embed/8_nU9qt8v6k">
+  </iframe>
+</div>
 <!-- ![]({{ '/assets/images/team33/test_e2e_det_track.avi' | relative_url }}) -->
 
 _Fig 11. Object detection and tracking with TrackFormer. Video generated on GCP based on_ [6].
@@ -200,9 +201,11 @@ For more implementation details, please consult the original paper [7].
 
 ### MotionFormer
 
-<video width="320" height="240" controls>
-  <source src="/assets/images/team33/test_e2e_traj_pred.avi" type="video/mp4">
-</video>
+<div class="row-container">
+  <iframe width="100%" height="480"
+  src="https://www.youtube.com/embed/RMqYjNNp0EE">
+  </iframe>
+</div>
 
 _Fig 14. Trajectory Prediction with MotionFormer. Video generated on GCP based on_ [6].
 
@@ -228,7 +231,7 @@ Note that everything is computed for $$K$$ different modalities (to support mult
 
 ![]({{ '/assets/images/team33/motionformer_arch.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 15. MotionFormer architecture [7], with annotations by me_.
+_Fig 15. MotionFormer architecture [6], with annotations by me_.
 
 ### OccFormer
 
@@ -238,13 +241,15 @@ According to the authors, a cross-attention mask based on agent and scene featur
 
 ![]({{ '/assets/images/team33/occformer_arch.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 16. OccFormer architecture_. [7]
+_Fig 16. OccFormer architecture_. [6]
 
 ### Planner
 
-<video width="320" height="240" controls>
-  <source src="/assets/images/team33/test_e2e_planning.avi" type="video/mp4">
-</video>
+<div class="row-container">
+  <iframe width="100%" height="480"
+  src="https://www.youtube.com/embed/ljZstFRZBMs">
+  </iframe>
+</div>
 
 _Fig 17. Planning with Planner. Video generated on GCP based on_ [6].
 
@@ -252,25 +257,25 @@ Similar to OccFormer, planner takes in BEV features and agent features from Trac
 
 ![]({{ '/assets/images/team33/planner_arch.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 18. Planner architecture_. [7]
+_Fig 18. Planner architecture_. [6]
 
 The authors further avoids collisions by adding a collision avoidance loss onto the regular imitiation loss, and appends a collision optimizer based on the occupancy prediction map.
 
 ![]({{ '/assets/images/team33/planner_loss.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 19. Planner loss_. [7]
+_Fig 19. Planner loss_. [6]
 
 The final trajectory is the trajectory $$\tau$$ (optimized using Newton's method) that minimizes $$f$$:
 
 ![]({{ '/assets/images/team33/collision_optimizer_loss.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 20. Collision Optimizer Objective_. [7]
+_Fig 20. Collision Optimizer Objective_. [6]
 
 While both precautions make the system safer, it also causes false positive avoidance scenarios, as shown in failure cases at the end of the paper, where an incoming vehicle from the opposite direction gets too close to the ego vehicle:
 
 ![]({{ '/assets/images/team33/failure_case.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 21. False positive avoidance_. [7]
+_Fig 21. False positive avoidance_. [6]
 
 ### Results
 
@@ -278,13 +283,13 @@ UniAD achieves remarkable performance in motion forecasting and planning:
 
 ![]({{ '/assets/images/team33/motion_results.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 22. Motion forecasting results_. [7]
+_Fig 22. Motion forecasting results_. [6]
 
 It even mostly outperforms LiDAR methods:
 
 ![]({{ '/assets/images/team33/planning_results.png' | relative_url }})
 {: style="max-width: 100%;"}
-_Fig 23. Planning results_. [7]
+_Fig 23. Planning results_. [6]
 
 ## References
 
@@ -300,7 +305,7 @@ _Fig 23. Planning results_. [7]
 
 [6] Hu, Yihan, et al. "Planning-oriented Autonomous Driving." _Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)_. 2023.
 
-[7] Li, Zhiqi, et al. "Panoptic segformer: Delving deeper into panoptic segmentation with transformers." _Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)_. 2022.
+[7] Li, Zhiqi, et al. "Panoptic SegFormer: Delving Deeper into Panoptic Segmentation with Transformers." _Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)_. 2022.
 
 [8] Zhu, Xizhou, et al. "Deformable DETR: Deformable Transformers for End-to-End Object Detection." _arXiv_. 2020.
 
