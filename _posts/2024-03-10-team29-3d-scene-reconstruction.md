@@ -194,7 +194,7 @@ The approach described above cannot be directly compared performance-wise to the
 The two datasets used for benchmarking are Google Scanned Objects, which consists of high-quality scaned household items, and RTMV, consisting of complex scenes of 20 random objects. Furthermore, scenes in RTMV are out-of-distribution from Objaverse data used for fine-tuning the model. Despite that, Zero-1-to-3 still achieves high results, outperforming DietNERF on both benchmarks.
 
 ## 3D Gaussian Splatting
-After the emergence of Neural Radiance Fields, Gaussian Splatting in 2023 was introduced at SIGGRAPH to also take on the daunting task of 3D scene rendering. In the following, we will be giving a high-level overview of this technique, beginning with the Gaussian Splatting pipeline.
+After the emergence of Neural Radiance Fields, [Gaussian Splatting](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/3d_gaussian_splatting_high.pdf) in 2023 was introduced at SIGGRAPH to also take on the daunting task of 3D scene rendering. In the following, we will be giving a high-level overview of this technique, beginning with the Gaussian Splatting pipeline.
 
 <img src="../../../assets/images/Team29/GaussianPipeline.png" alt="GSPipeline" width="600"/> <br>
 *Figure 14: Gaussian Splatting Pipeline*
@@ -281,10 +281,32 @@ The above figure is quite explanatory as to the purpose of density control. For 
 
 As you can see with GS, over several iterations (less than that of NeRF), we can do drastically better on the criterion of accuracy and clarity. In others where an aspect is blurry, GS steps up to overcome this.
 
+## Actual Results From Few-Shot Gaussian Splatting
+The main application that we were hoping to achieve was to 3D reconstruct and render a scene around a Nike Shoe, whereby if you are shopping online, given the sparse images shown per product, GS could render a shoe for you. This is what leads us to [Few-Shot Gaussian Splatting](https://arxiv.org/abs/2312.00451). I won't detail any further as we thought FSGS would be a good depiction of Gaussian Splatting at its best. So here are a couple of results of our scene from the NeRF dataset for horns.
+
+The first is at 500 iterations and the next is at 995. The reason behind these checkpoints is that whenever it hit 1000 iterations on GCE, the process would get killed so I had to use this loophole to get results. If the below videos don't work, please just download from assets.
+
+<video src="../../../assets/images/Team29/500.mp4" controls>
+  500 its
+</video>
+
+<video src="../../../assets/images/Team29/995.mp4" controls>
+  500 its
+</video>
+
 ## Conclusion
 This was a broad overview of some of the bigger topics talked about in this day and age regarding 3D Reconstruction and 3D Rendering, but there's always bigger and better and more niche technology coming in this field that we all need to be on the look out for. Hopefully this was an insightful read of the history and background to viewing the world through a computer. So, with that being said, Go Computer Vision!!
 
 ## Code Repositories
+1. Few-Shot Gaussian Splatting
+@misc{zhu2023FSGS, 
+title={FSGS: Real-Time Few-Shot View Synthesis using Gaussian Splatting}, 
+author={Zehao Zhu and Zhiwen Fan and Yifan Jiang and Zhangyang Wang}, 
+year={2023},
+eprint={2312.00451},
+archivePrefix={arXiv},
+primaryClass={cs.CV} 
+}
 
 ## References
 
@@ -305,5 +327,9 @@ This was a broad overview of some of the bigger topics talked about in this day 
 [8] Wang, H., Du, X., Li, J., Yeh, R. A., & Shakhnarovich, G. (2022). Score Jacobian Chaining: Lifting Pretrained 2D Diffusion Models for 3D Generation. Retrieved from [https://arxiv.org/abs/2212.00774](https://arxiv.org/abs/2212.00774)
 
 [9] Jain, A., Tancik, M., & Abbeel, P. (2021). Putting NeRF on a Diet: Semantically Consistent Few-Shot View Synthesis. CoRR, abs/2104.00677. Retrieved from [https://arxiv.org/abs/2104.00677](https://arxiv.org/abs/2104.00677)
+
+[10] 
+
+[11] Zhu, Zehao, et al. “FSGS: Real-Time Few-Shot View Synthesis Using Gaussian Splatting.” ArXiv.org, 1 Dec. 2023, arxiv.org/abs/2312.00451. Accessed 23 Jan. 2024.
 
 ---
