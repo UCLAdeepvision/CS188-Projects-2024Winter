@@ -17,7 +17,7 @@ date: 2024-03-22
 
 ## Introduction to Trajectory Prediction
 
-Alan inserts his introduction to the problem here. Can base off of past ones. Talk about pedestrian problem and social acceptability of certain trajectories. Wwant to avoid collisions!
+Estimating the future positions of people or objects (agents) is a crucial capability that can serve diverse applications. These include self-driving cars, as being pursued by Waymo and Tesla, to Hawkeye that can determine an out or not call in tennis, to analyzing crowd behavior to ensure no human-crush occurs. Knowing the past, present, and most importantly, future trajectory of agents is clearly an important tool. The following approaches all try to solve the central problem: given the current state, and other environment variables, where would the agent be in the next state. 
 
 ## Papers and Approaches
 
