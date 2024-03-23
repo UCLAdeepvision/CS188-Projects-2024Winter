@@ -15,7 +15,7 @@ Table of Contents
 {:toc}
 ---
 
-Introduction to Zero-Shot Learning, Previous Methods, and Their Shortfalls
+## Introduction to Zero-Shot Learning, Previous Methods, and Their Shortfalls
 What exactly is zero-shot classification? Zero-shot classification models have the ability to classify data that hasn't been seen during training. Consider a model trained to differentiate all mammals from Africa; if it can classify mammals from other parts of the world without being trained on those specific animals, then it possesses zero-shot capabilities for this newly extended class set. Furthermore, a model is said to have n-shot classification capabilities if it maintains a certain accuracy on unseen classes, after being trained with n instances per class.
 
 The essence here is the attempt to generalize models to learn from the relationships between classes to predict the characteristics of new classes. Previously, conventional computer vision was rooted in a fixed-class framework where classification was limited to a predefined set of classes, and accuracy was derived from this constraint. Now, machine learning scientists aim to generalize these potent methods to adeptly classify unseen data as well. So, what's the hitch with this approach?
