@@ -46,7 +46,9 @@ $$
 
 ### Backward Diffusion Process
 
-The backward process can be understood as running the forward diffusion process in the other direction. Starting with a very noisy image, the idea to sample noise from a Gaussian distribution and progressively remove this noise from the image until the original image has been reconstructed. The reverse process aims to learn the conditional distribution $$ p*\theta (\mathbf{x}*{t-1} | \mathbf{x}\_t) $$ which represents the noise we need to subtract from the order at time t in order to obtain the image at time t-1.
+The backward process can be understood as running the forward diffusion process in the other direction. Starting with a very noisy image, the idea to sample noise from a Gaussian distribution and progressively remove this noise from the image until the original image has been reconstructed. The reverse process aims to learn the conditional distribution
+$$p*\theta (\mathbf{x}*{t-1} | \mathbf{x}\_t)$$
+which represents the noise we need to subtract from the order at time t in order to obtain the image at time t-1.
 
 ## Video Diffusion Models
 
