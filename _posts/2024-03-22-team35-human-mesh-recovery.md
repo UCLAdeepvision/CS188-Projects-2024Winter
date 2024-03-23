@@ -199,11 +199,17 @@ The following is the output from WHAM:
 ![]({{ '/assets/images/team35/wham.gif' | relative_url }})
 {: style="width: 600px; max-width: 80%; margin-left: auto; margin-right: auto;"}
 
-WHAM was much, much quicker, only taking 10 minutes to generate the video. Additionally, all 19 seconds of the video were generated. Due to the simplicity of movements, there was not much difference between the two models. Low contrast in the video between the walls and person made some limbs inaccurate, but they stayed on the human subject well for the most part. One key part where WHAM performed better was the foot liftoff, where the heel would noticeably leave the ground when taking steps around the room.
+WHAM was much, much quicker, only taking 10 minutes to generate the video. Additionally, all 19 seconds of the video were generated. Due to the simplicity of movements, there was not much difference between the two models. Low contrast in the video between the walls and person made some limbs inaccurate, but they stayed on the human subject well for the most part. One key part where WHAM performed better was the foot liftoff, where the heel would noticeably leave the ground when taking steps around the room. Compared to SLAHMR, in which the feet would glide slightly with the walking, WHAM looks noticeably better anchored and realistic looking. 
 
 ## References
 1. WHAM: Reconstructing World-grounded Humans with Accurate 3D Motion; [arXiv:2312.07531](https://arxiv.org/abs/2312.07531) [cs.CV]
 2. Beyond Static Features for Temporally Consistent 3D Human Pose and Shape from a Video; [arXiv:2011.08627](https://arxiv.org/abs/2011.08627) [cs.CV]
 3. Decoupling Human and Camera Motion from Videos in the Wild; [arXiv:2302.12827](https://arxiv.org/abs/2302.12827) [cs.CV]
+
+### Colab Notebooks
+[SLAHMR](https://colab.research.google.com/drive/1dCT-y9zPfKc3vKAv8_-cWeb2_zjIi5PE?usp=sharing)
+[WHAM](https://colab.research.google.com/drive/1PvFIRk5OtUKFwF8sIcYcOE29OAkxw51z)
+
+
 
 ---
