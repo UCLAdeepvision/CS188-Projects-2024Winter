@@ -223,6 +223,61 @@ print(f"CLIP Zero-Shot Accuracy on MNIST: {accuracy * 100:.2f}%")
 
 The resulting performance difference is drastic: Our simple fine-tuned Resnet baseline achieves a test accuracy of 99.18% in 5 epochs, whereas the zero-shot CLIP only has 52.50%. This difference is greater than the reported result in the original CLIP paper, and upon investigating, many people experienced similar issues. Regardless, it demonstrates how CLIP can have very mediocre performance on even simple datasets.
 
+As a comparison, we also evaluate on the CIFAR10 dataset. Due to the similarity with common web data, we expect a closer performance.
+
+```
+clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+
+cifar_transform = transforms.Compose([
+    transforms.Resize((224, 224)),  # Resize to match CLIP's input dimensions
+    transforms.ToTensor(),
+])
+
+testset = datasets.CIFAR10(root='./data', train=False, download=True, transform=cifar_transform)
+testloader = DataLoader(testset, batch_size=32)
+
+classes = [
+    'airplane',
+    'automobile',
+    'bird',
+    'cat',
+    'deer',
+    'dog',
+    'frog',
+    'horse',
+    'ship',
+    'truck',
+]
+
+prompts = [f'a photo of a {i}.' for i in classes]
+
+def predict_clip_zero_shot(model, processor, images, text_prompts):
+    inputs = processor(text=text_prompts, images=images, return_tensors="pt", padding=True)
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits_per_image = outputs.logits_per_image # shape: (num_images, num_texts)
+        probs = logits_per_image.softmax(dim=1) # Softmax over the texts dimension
+
+    return probs.argmax(dim=1)
+
+
+total_correct = 0
+total_images = 0
+
+for images, labels in tqdm(testloader, desc="Evaluating", leave=True):
+    images_pil = [transforms.ToPILImage()(image) for image in images]
+    predictions = predict_clip_zero_shot(clip_model, clip_processor, images_pil, prompts)
+    total_correct += (predictions == labels).sum().item()
+    total_images += labels.size(0)
+
+accuracy = total_correct / total_images
+print(f"CLIP Zero-Shot Accuracy on MNIST: {accuracy * 100:.2f}%")
+```
+
+The evaluation on CIFAR-10 using CLIP gives a test accuracy of 85.16%. Our Resnet-50 result is 89.22%, which confirms our hypothesis.
+
 ## Beyond CLIP: Challenges with Fine-Grained Alignment
 
 The issue of CLIP is not unique to itself but also with models derived from it and large vision-language models in general. For example, one work, DesCo [3], that build on the GLIP model we introduced pointed out issues in models like GLIP when the input contains rich language descriptions. They found that the models often ignore the contextual information in language descriptions and takes shortcuts by only recognizing certain keywords without considering their semantic relationships. Models also hallucinate by identifying objects that don't exist. They pointed out the multi-fold nature of the problem. The relatively obvious yet still hard to resolve cause is the lack of fine-grained descriptions in image-caption data that used in training current vision-language models. This resembles the reporting bias phenomenon: when writing captions for images, humans tend to directly mention the entities rather than give a detailed description. The more challenging issue is that even provided with data rich in descriptions, models often lack the incentive to leverage these descriptions effectively. This requires careful setup of the contrastive training goal and robust design of negative samples. Figure 4 shows an overview of their work by comparing prior methods which struggle in said scenarios vs. their improvements.
