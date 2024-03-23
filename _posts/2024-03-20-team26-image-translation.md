@@ -34,7 +34,7 @@ Generative adversarial network (GAN) are generative deep learning frameworks tha
 
 -![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [4].
 
-The goal of CycleGAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the idea is that our translated image will preserve most of its semanics besides the style change.
+The goal of CycleGAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the idea is that our translated image will preserve most of its semantics besides the style change.
 
 -![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [4].
 
@@ -50,7 +50,7 @@ Now, in the actual style transfer process, we can use $$G$$ to translate from st
 
 ### Architecture
 
-The generators $$G$$ and $$F$$ can be any architecture that can map an image from one domain to another. The [implmentation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net (see [4]) or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations). The discriminators $$D_X$$ and $$D_Y$$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
+The generators $$G$$ and $$F$$ can be any architecture that can map an image from one domain to another. The [implementation](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/master) provided by the CycleGAN paper uses either U-Net (see [4]) or Resnet-based generator (6 or 9 Resnet blocks combined with downsampling/upsampling operations). The discriminators $$D_X$$ and $$D_Y$$ are either 70x70 PatchGANs, which classify whether 70x70 overlapping image patches are real or fake, or 1x1 PixelGAN, which classifies whether each pixel is real or fake.
 
 Detailed implementation of Resnet-based generator:
 
@@ -120,7 +120,7 @@ $$
 
 The idea is that for $$x \in X$$ and $$y \in Y$$, we want $$F(G(x))$$ to be similar to $$x$$ and $$G(F(y))$$ to be similar to $$y$$.
 
-The overall obejctive function is then:
+The overall objective function is then:
 
 $$
 \mathcal{L}(G, F, D_X, D_Y) = \mathcal{L}(G, D_Y, X, Y) + \mathcal{L}(F, D_X, Y, X) + \lambda \mathcal{L}_{\text{cyc}}(G, F)
@@ -179,7 +179,7 @@ During the backward process, instead of directly denoising the image, predicting
 
 While the conventional diffusion model achieves satisfying results by generating high quality images, it directly operates in pixel space, making the training process expensive in terms of computational resources. The sequential evaluation for inference also made the model slow. In order to train on limited computational resources while sacrificing little loss in generated image quality and flexibility, we turn to the Latent Diffusion Model (LDM).
 
-### Latend Diffusion Model
+### Latent Diffusion Model
 
 Instead of sampling from the pixel space, the Latent Diffusion Model samples from the latent space of a powerful pretrained autoencoder [5]. The autoencoder is universal, and is trained only once in order to apply multiple LDM trainings. The autoencoder is trained by combination of a perceptual loss and a patch-based adversarial objective [5] such that the reconstruction are confined to the image manifold and avoids blurriness if solely relying on pixel space losses.
 
@@ -371,7 +371,7 @@ target_datasets=("/home/zichunl/others/cs188_proj/monet2photo/generated_pretrain
 base_names=("true_monet")
 target_names=("sd_pretrained" "sd_1000" "sd_3000" "cyclegan")
 
-npzs_path="/localhome/zichunl/fid"
+npzs_path="/home/zichunl/fid"
 
 for i in ${!base_datasets[@]}; do
     data=${base_datasets[i]}
