@@ -228,94 +228,101 @@ _Figure 13: Zero-1-to-3, Performance comparison, RTMV_
 The two datasets used for benchmarking are Google Scanned Objects, which consists of high-quality scaned household items, and RTMV, consisting of complex scenes of 20 random objects. Furthermore, scenes in RTMV are out-of-distribution from Objaverse data used for fine-tuning the model. Despite that, Zero-1-to-3 still achieves high results, outperforming DietNERF on both benchmarks.
 
 ## 3D Gaussian Splatting
+
 After the emergence of Neural Radiance Fields, Gaussian Splatting in 2023 was introduced at SIGGRAPH to also take on the daunting task of 3D scene rendering. In the following, we will be giving a high-level overview of this technique, beginning with the Gaussian Splatting pipeline.
 
-<img src="../../../assets/images/Team29/GaussianPipeline.png" alt="GSPipeline" width="600"/> <br>
-*Figure 14: Gaussian Splatting Pipeline*
+<img src="../assets/images/Team29/GaussianPipeline.png" alt="GSPipeline" width="100%"/> <br>
+_Figure 14: Gaussian Splatting Pipeline_
 
 ### Sfm and Initialization of Gaussians
+
 As spoken about before, Sfm is quite important to this process as it is the root of our initialization process of these Gaussians. Running images through Sfm, a point cloud is generated, from which a set of Gaussians can be derived. Contexually, 3D Gaussians are defined as a position (mean position), covariance matrix, and an opacity α. From our point cloud, groups of three neighbors will average their positions to form a mean position of the Gaussian. The covariance matrix of the Gaussian would simply be the covariances of the distances w.r.t. to x, y, and z between the 3 points.
 
-<img src="../../../assets/images/Team29/GaussianFormula.png" alt="GSFormula" width="600"/> <br>
-*Figure 15: 3D Gaussian Distribution*
+<img src="../assets/images/Team29/GaussianFormula.png" alt="GSFormula" width="100%"/> <br>
+_Figure 15: 3D Gaussian Distribution_
 
 From this process, we have a achieved an initial set of Gaussians to represent our scene/object in our image set.
 
 ### 3D-to-2D GS Projections
-Now that we have our Gaussians, we want a method of deriving perspectives of these Gaussians that match our images', similar to the "ray-tracing" in NeRF. 
 
-<img src="../../../assets/images/Team29/Example.png" alt="GS Example" width="600"/> <br>
-*Figure 16: Example of 2D Projection of Gaussians that we want to achieve, as this was the angle the original image was shot from.*
+Now that we have our Gaussians, we want a method of deriving perspectives of these Gaussians that match our images', similar to the "ray-tracing" in NeRF.
+
+<img src="../assets/images/Team29/Example.png" alt="GS Example" width="100%"/> <br>
+_Figure 16: Example of 2D Projection of Gaussians that we want to achieve, as this was the angle the original image was shot from._
 
 In the figure above, we have projected our 3D Gaussians to some perspective given by W (viewing transformations) and J (Jacobian of affine transformations), both of which comes from the intrinsics and extrinsics of the camera that took the original shot of the bike (not GS). We can achieve this type of project using:
 
-<img src="../../../assets/images/Team29/NewCovJac.png" alt="NewCovJac" width="600"/> <br>
-*Figure 17: New Covariance for 2D Projection of 3D Gaussians.*
+<img src="../assets/images/Team29/NewCovJac.png" alt="NewCovJac" width="100%"/> <br>
+_Figure 17: New Covariance for 2D Projection of 3D Gaussians._
 
-After some plug-and-chug, we are able to achieve this new covariance that is supposed to accomplish  the job of 2D projection. However, as spoken about in the paper, a covariance matrix is only valid for physical representation if positive semi-definite. The running issue is if this matrix somehow becomes corrupt or the gradient updates to this matrix are skewed/wrong, the Gaussian that this matrix represents will be "rendered" (haha pun :D) useless.
+After some plug-and-chug, we are able to achieve this new covariance that is supposed to accomplish the job of 2D projection. However, as spoken about in the paper, a covariance matrix is only valid for physical representation if positive semi-definite. The running issue is if this matrix somehow becomes corrupt or the gradient updates to this matrix are skewed/wrong, the Gaussian that this matrix represents will be "rendered" (haha pun :D) useless.
 
-<img src="../../../assets/images/Team29/PosSemiDef.png" alt="PosSemiDef" width="600"/> <br>
-*Figure 18: Definition of Positive Semi-Definite.*
+<img src="../assets/images/Team29/PosSemiDef.png" alt="PosSemiDef" width="100%"/> <br>
+_Figure 18: Definition of Positive Semi-Definite._
 
 To fix this issue, the authors of 3DGS decided to instead represent the covariance matrix to these Gaussians as Ellipsoidal covariances, thus not only resolving the issue of positive semi-definite-ness, but also making the Gaussian much more flexible, as it is now an ellipsoid, represented by some rotation and scaling.
 
-<img src="../../../assets/images/Team29/EllipsoidCov.png" alt="EllipCov" width="600"/> <br>
-*Figure 19: Representation of an Ellipsoid.*
+<img src="../assets/images/Team29/EllipsoidCov.png" alt="EllipCov" width="100%"/> <br>
+_Figure 19: Representation of an Ellipsoid._
 
 From here everything can be plugged back into Fig. 15 and that would be our group of projected Gaussians.
 
 ### The Rasterizer.
-Now we have those sets of Gaussians, but they are projected to some viewing perspective, like that of the bike, and now we have to render our image. 
 
-<img src="../../../assets/images/Team29/Frustum.jpg" alt="Frustum" width="600"/> <br>
-*Figure 20: The Viewing Frustum*
+Now we have those sets of Gaussians, but they are projected to some viewing perspective, like that of the bike, and now we have to render our image.
+
+<img src="../assets/images/Team29/Frustum.jpg" alt="Frustum" width="100%"/> <br>
+_Figure 20: The Viewing Frustum_
 
 With the given figure above, the image that is directly infront of the camera is the image that we want to render. On that note, as you may have realized from the previous section that we almost have this image already; we just have to do some tinkering to actually get the the colors and what not, as what we have currently are not pixel values, but rather full Gaussians that we need to extract those densities from.
 
-To accomplish this task, we first "cull" those Gaussians that are not within screen view (we don't want to render what we cannot see) and split the screen into 16x16 tiles. We run through each Gaussian defining Key, Value pairs whereby the 
+To accomplish this task, we first "cull" those Gaussians that are not within screen view (we don't want to render what we cannot see) and split the screen into 16x16 tiles. We run through each Gaussian defining Key, Value pairs whereby the
 
 1. Key = (Depth of Gaussian + TileID)
-2. Value = the 3D Gaussian. 
+2. Value = the 3D Gaussian.
 
 We can then run a GPU Radix Sort so that as a result, we know for each tile, and thus each pixel in each tile, the Gaussians behind that pixel. From this, we create a list per tile of depth-sorted Gaussians.
 
-<img src="../../../assets/images/Team29/NeRFGS.png" alt="NeRFGS" width="600"/> <br>
-*Figure 20: NeRF vs. GS Each ray is going through a pixel and there are Gaussians behind those rays.*
+<img src="../assets/images/Team29/NeRFGS.png" alt="NeRFGS" width="100%"/> <br>
+_Figure 20: NeRF vs. GS Each ray is going through a pixel and there are Gaussians behind those rays._
 
 From there, for each tile, we run a GPU Thread Block (each block tends to have a vast number of threads) to parallelize amongst the 16x16 tiles of the screen. For each pixel in the tile, we then accumulate, like we do in NeRF, colors and opacities along the ray. Of course, if the opacity has reached a certain threshold then we stop, as the colors are so dense we wouldn't see the objects behind it (optimization purposes). After these steps, an image is generated!
 
 ### The Backward Pass
+
 The entire process of Gaussian Splatting is fully differentiable, and with that, there is this loss function.
 
-<img src="../../../assets/images/Team29/LossFunc.png" alt="LossFunc" width="600"/> <br>
-*Figure 21: Loss Function*
+<img src="../assets/images/Team29/LossFunc.png" alt="LossFunc" width="100%"/> <br>
+_Figure 21: Loss Function_
 
 L1 simply represents "L1 Loss", which is simply pixel2pixel difference. L_D-SSIM is loss due to image similarity.
 
-<img src="../../../assets/images/Team29/DSSIM.png" alt="DSSIM" width="600"/> <br>
-*Figure 22: D-SSIM*
+<img src="../assets/images/Team29/DSSIM.png" alt="DSSIM" width="100%"/> <br>
+_Figure 22: D-SSIM_
 
 As you can see, each of the un-original images have some amount of pixelated difference relative to the original sloth photo. L_D-SSIM handles this image similarity correlation. Of course, the two images in question are the original shot photo (for example, like the bike) and the rendered image (after the rasterization process). The gradient that is computed here then flows through the projection process of GS but also the GS Adaptive Density Control.
 
 ### Adaptive Density Control
+
 One of the novelties of 3DGS is its ability to shift where these Gaussians are to fill vacant space or simply overpopulated space. The main two issues are
 
 1. Over-Reconstruction
-2. Under-Reconstruction 
+2. Under-Reconstruction
 
-<img src="../../../assets/images/Team29/AdaptiveDensity.png" alt="AdaptiveDensity" width="600"/> <br>
-*Figure 22: Example of Adaptive Density Control*
+<img src="../assets/images/Team29/AdaptiveDensity.png" alt="AdaptiveDensity" width="100%"/> <br>
+_Figure 22: Example of Adaptive Density Control_
 
 The above figure is quite explanatory as to the purpose of density control. For under-reconstruction, this is when we have too much vacant white space that in our rendered scene there is absolutely nothing. To solve this issue, we clone an existing nearby Gaussian to help fill this space. After many timesteps, we are able to achieve a nice spread of the environment. For over-reconstruction, this is when we have an over-generalized Gaussian overshadowing a significant part of the scene so we need to partition it. As a result, we divide this specific Gaussian into tinier ones to improve accuracy in our render. Furthermore in ADC, we also get rid of those Gaussians that have no opacity at all (in essence just whitespace to reduce complexity).
 
 ### Results
 
-<img src="../../../assets/images/Team29/Results.png" alt="Results" width="600"/> <br>
-*Figure 22: Some Results*
+<img src="../assets/images/Team29/Results.png" alt="Results" width="100%"/> <br>
+_Figure 22: Some Results_
 
 As you can see with GS, over several iterations (less than that of NeRF), we can do drastically better on the criterion of accuracy and clarity. In others where an aspect is blurry, GS steps up to overcome this.
 
 ## Conclusion
+
 This was a broad overview of some of the bigger topics talked about in this day and age regarding 3D Reconstruction and 3D Rendering, but there's always bigger and better and more niche technology coming in this field that we all need to be on the look out for. Hopefully this was an insightful read of the history and background to viewing the world through a computer. So, with that being said, Go Computer Vision!!
 
 ## Code Repositories
