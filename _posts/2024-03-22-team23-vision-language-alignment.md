@@ -278,6 +278,10 @@ print(f"CLIP Zero-Shot Accuracy on MNIST: {accuracy * 100:.2f}%")
 
 The evaluation on CIFAR-10 using CLIP gives a test accuracy of 85.16%. Our Resnet-50 result is 89.22%, which confirms our hypothesis.
 
+Here are some examples where CLIP fails:
+
+![Examples from CLIP on CIFAR-10]({{ '/assets/images/23/s1.png' | relative_url }})
+
 ## Beyond CLIP: Challenges with Fine-Grained Alignment
 
 The issue of CLIP is not unique to itself but also with models derived from it and large vision-language models in general. For example, one work, DesCo [3], that build on the GLIP model we introduced pointed out issues in models like GLIP when the input contains rich language descriptions. They found that the models often ignore the contextual information in language descriptions and takes shortcuts by only recognizing certain keywords without considering their semantic relationships. Models also hallucinate by identifying objects that don't exist. They pointed out the multi-fold nature of the problem. The relatively obvious yet still hard to resolve cause is the lack of fine-grained descriptions in image-caption data that used in training current vision-language models. This resembles the reporting bias phenomenon: when writing captions for images, humans tend to directly mention the entities rather than give a detailed description. The more challenging issue is that even provided with data rich in descriptions, models often lack the incentive to leverage these descriptions effectively. This requires careful setup of the contrastive training goal and robust design of negative samples. Figure 4 shows an overview of their work by comparing prior methods which struggle in said scenarios vs. their improvements.
@@ -287,7 +291,7 @@ The issue of CLIP is not unique to itself but also with models derived from it a
 
 Even in larger models, we can see traces of such issues. A recent benchmark ConTextual [8] reveals the significant limitations that current large multimodel models have in terms of text-rich visual reasoning in complex tasks involving joint reasoning over text and visual content in the image (e.g., navigating maps in public places). Even the best-performing LMM on the benchmark, GPT-4V, has a significant performance gap of 30.8% compared with the human counterpart. For example, some LMMs often cannot correctly identify the time from a picture of the clock and often produces a fixed result. They also struggle on abstract tasks requiring systematic steps and back-and-forth reasoning between the image and the text prompts. Figure 5 shows some examples.
 
-![Examples from ConTextual]({{ '/assets/images/23/desco_summary.png' | relative_url }})
+![Examples from ConTextual]({{ '/assets/images/23/contextual_qual_eval.png' | relative_url }})
 *Fig 5. Examples from the ConTextual benchmark* [8].
 
 The issues identified can be summarized into two core aspects: (1) getting data with rich, fine-grained details and (2) leveraging such data by formulating a better contrastive pre-training setup. DesCo [3] attempted to resolve the problem in both directions. Specifically, it aims to leverage rich description on the *text* side by generating detailed text information. Similarly, it would be interesting to explore leveraging image generation models to enrich the training data on the image side for better vision-language alignment. For example, controlled manipulation through models like ControlNet [8] and FreeControl [5] can be potentially useful in constructing contrastive samples for better vision-language alignment.
