@@ -356,7 +356,7 @@ FID score is calculated by finding the statistics of samples activation at the l
 
 *Table 1. FID score of generated paintings by each model.*
 
-Interestingly, the FID score of the generated paintings by Stable Diffusion was a bit higher than the FID score of the generated paintings by CycleGAN. This may cause by loss of the geometric information when converting the image to text then to image.
+Interestingly, the FID score of the generated paintings by Stable Diffusion was a bit higher than the FID score of the generated paintings by CycleGAN. This may cause by loss of the geometric information when converting the image to text then to image. As expected, after fine-tuning, the FID score of standard diffusion decreased. 
 
 Code for calculating FID score:
 
