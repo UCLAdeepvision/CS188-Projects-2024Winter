@@ -75,6 +75,10 @@ To implement this, random independent image frames are concatenated to the end o
 {: style=" width: 600px ; max-width: 100%;"}
 _Fig 3: showcases results from an experiment on text-conditioned videos (16x64x64), where training included an additional 0, 4, or 8 independent image frames per video. The data reveal significant enhancements in quality metrics for both video and image samples as the number of added frames increases. Adding these frames reduces gradient variance, introducing a slight bias in the video modeling objective but effectively optimizing memory use by allowing more independent examples per batch._
 
+### Autoregressive Video Extension for Longer Sequences
+
+The Video Diffusion Models paper also introduces a method for generating extended video sequences using an autoregressive process. This approach enables the model to predict subsequent frames based on previously generated ones. This allows the model to effectively create videos of arbitrary lengths. To improve the temporal coherence between frames in extended videos, the paper proposes reconstruction-guided sampling. The method demonstrates significant improvements over previous techniques for generating extended length videos.
+
 #### Examples of Video Diffusion
 
 <div style="display: flex; justify-content: center;">
