@@ -7,7 +7,7 @@ date: 2024-03-22
 ---
 
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+> Estimating the future positions of people or objects (agents) is a crucial capability that can serve diverse applications. These include self-driving cars, as being pursued by Waymo and Tesla, to Hawkeye that can determine an out or not call in tennis, to analyzing crowd behavior to ensure no human-crush occurs. Knowing the past, present, and most importantly, future trajectory of agents is clearly an important tool.
 
 
 <!--more-->
@@ -108,7 +108,7 @@ This loss considers only the best trajectory, pushing the network to cover the s
 {: style="width: 100%; max-width: 100%; text-align: center;"}
 <em>Social Pooling (red-grid) vs. Social GAN Pooling Mechanism (distance metric comparison). [2]</em>
 
-### Discussion 
+#### Discussion 
 Using the LSTMs, the authors were able to determine the hidden states with respect to each individual agent, but this additionally requires a mechanism to share information across LSTMs (i.e. between individuals). This is directly enabled with the pooling module in computing a resultant hidden state using the hidden states of all LSTMs for each agent; the module handles primary issues when scaling to variable numbers of people across a large crowd and handling human-to-human interactions that may be significantly more scarce environment (where agents further away may still impact one another, albeit to a lesser degree). With other social pooling mechanisms, they fundamentally work by employing a grid-based pooling scheme which fails to capture global extent as it only considers within the grid whereas the Pooling Module computes relative positions between each agent and all other agents which are concatenated with the person’s hidden state and processed independently via MLP. This allows the final pooled vector $$P_i$$ to summarize all the information a person needs to make a decision to ‘move’. 
 
 When removing the pooling, we observe that agents fail to consider the paths of others, which in turn may result in convergent pathways (which are realistically infeasible when considering walking scenarios). Pooling via relative distance enforces a global understanding of other agents and what is technically feasible with respect to the current state of agents and the ‘conformity to social norms’ and practices when referring to movement. Observe the following image where we have agents without the pooling mechanism (SGAN) versus agents with the pooling mechanism (SGAN-P).
@@ -245,52 +245,6 @@ where $$\phi_{agg}(.)$$ is max-pooling, $$\phi_{rel}(.)$$ is concatenation.
 	A few other primary equations that Vector Net uses is its loss function: 
 $$L = L_{traj} + \alpha * L_{node}$$
 Where $$L_{traj}$$ is NLL for trajectory prediction, $$L_{node}$$ is loss from graph completion task, and $$\alpha$$ is the scaling factor.  Metrics that can evaluate its performance is the average displacement error (ADE), and the displacement error at t, or the displacement error in meters at time $$t = 1, 2, 3$$
-
-<!-- 
-## Main Content
-Your survey starts here. You can refer to the [source code](https://github.com/lilianweng/lil-log/tree/master/_posts) of [lil's blogs](https://lilianweng.github.io/lil-log/) for article structure ideas or Markdown syntax. We've provided a [sample post](https://ucladeepvision.github.io/CS188-Projects-2022Winter/2017/06/21/an-overview-of-deep-learning.html) from Lilian Weng and you can find the source code [here](https://raw.githubusercontent.com/UCLAdeepvision/CS188-Projects-2022Winter/main/_posts/2017-06-21-an-overview-of-deep-learning.md)
-
-## Basic Syntax
-### Image
-Please create a folder with the name of your team id under /assets/images/, put all your images into the folder and reference the images in your main content.
-
-You can add an image to your survey like this:
-![YOLO]({{ '/assets/images/UCLAdeepvision/object_detection.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 1. YOLO: An object detection method in computer vision* [1].
-
-Please cite the image if it is taken from other people's work.
-
-
-### Table
-Here is an example for creating tables, including alignment syntax.
-
-|             | column 1    |  column 2     |
-| :---        |    :----:   |          ---: |
-| row1        | Text        | Text          |
-| row2        | Text        | Text          |
-
-
-
-### Code Block
-```
-# This is a sample code block
-import torch
-print (torch.__version__)
-```
-
-
-### Formula
-Please use latex to generate formulas, such as:
-
-$$
-\tilde{\mathbf{z}}^{(t)}_i = \frac{\alpha \tilde{\mathbf{z}}^{(t-1)}_i + (1-\alpha) \mathbf{z}_i}{1-\alpha^t}
-$$
-
-or you can write in-text formula $$y = wx + b$$.
-
-### More Markdown Syntax
-You can find more Markdown syntax at [this page](https://www.markdownguide.org/basic-syntax/). -->
 
 ## Reference
 Please make sure to cite properly in your work, for example:
