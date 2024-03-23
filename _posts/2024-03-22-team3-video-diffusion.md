@@ -6,9 +6,14 @@ author: Shan Jiang, Brandon Vuong, Seth Carlson, Joseph Yu
 date: 2024-03-21
 ---
 
-> In this paper, we conduct a comparative analysis of text-conditional video generation models, with an emphasis on Imagen Video. We will do a deep dive into the architecture and design of Imagen Video and follow it with a comparison to other modern video generation models such as VideoGPT and Sora. Each model presents unique approaches to tackling the challenge of generating high-quality videos based on textual prompts. Through this paper, we aim to provide a brief overview of video generation methods through the exploration of some of the most advanced models today.
+> In this paper, we will discuss diffusion-based video generation models. We will first do a preliminary exploration of diffusion, then extend it to video generation by examining Video Diffusion Models by Jonathon Ho, et al. We will then follow this with a refinement of video diffusion models by conducting a deep dive into Imagen Video, a high definition video generation model developed by researchers at Google. Through this paper, we aim to provide an overview of diffusion-based video generation, as well as rigorously cover a high definition refinement of the basic video diffusion model.
 
 - [Introduction](#introduction)
+- [Diffusion](#diffusion)
+- [Video Diffusion Models](#video-diffusion-models)
+  - [3D U-Net](#3d-u-net)
+  - [Factorized Space-Time Attention](#factorized-space-time-attention)
+  - [Video-Image Joint Training](#video-image-joint-training)
 - [Imagen Video](#imagen-video)
   - [Cascaded Architecture](#cascaded-architecture)
   - [SR3: Mechanism of Super-Resolution Block](#sr3-mechanism-of-super-resolution-block)
@@ -29,6 +34,20 @@ Text to video generation is a computer vision task that uses deep learning to cr
   </p>
 </div>
 
+## Diffusion
+
+## Video Diffusion Models
+
+### 3D U-Net
+
+### Factorized Space-Time Attention
+
+### Video-Image Joint Training:
+
+In this innovative training method, individual images are treated as single-frame videos. This is achieved by organizing standalone images into sequences that mimic the length of a video. The approach cleverly bypasses certain video-specific computations and attention mechanisms by employing masking techniques. This strategy enables the training of video models on extensive and diverse image-text datasets.
+
+The outcome of joint training is the knowledge transfer from images to videos. Specifically, while training exclusively on natural video data allows the model to understand dynamics within natural environments, incorporating images into the training process enables it to learn about various image styles, including sketches, paintings, and more.
+
 ## Imagen Video
 
 Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames. We will now be discussing the architecture of Imagen Video.
@@ -36,7 +55,7 @@ Imagen Video is a video-generation system based on a cascade of video diffusion 
 <!--
 ## Diffusion Models -->
 
-## Cascaded Architecture:
+### Cascaded Architecture:
 
 Cascaded Diffusion Models, introduced by Ho et al. in 2022, have emerged as a powerful technique for generating high-resolution outputs from diffusion models, achieving remarkable success in diverse applications such as class-conditional ImageNet generation and text-to-image creation. These models operate by initially generating an image or video at a low resolution and then progressively enhancing the resolution through a sequence of super-resolution diffusion models. This approach allows Cascaded Diffusion Models to tackle highly complex, high-dimensional problems while maintaining simplicity in each sub-model.
 
@@ -54,7 +73,7 @@ The figure above summarizes the entire cascading pipeline of Imagen Video:
 - SSR\*3 (spatial super-resolution): increase spatial resolution for all video frames
 - TSR\*3 (temporal super-resolution): increase temporal resolution by filling in intermediate frames between video frames
 
-## SR3: Mechanism of Super-Resolution Block:
+### SR3: Mechanism of Super-Resolution Block:
 
 The SSR (Super-Resolution via Repeated Refinement) and TSR blocks implement a mechanism for conditional image generation known as SR3. This method revolves around training on sets that comprise pairs of low-resolution (LR) and high-resolution (HR) images. The inputs for training include:
 
@@ -90,7 +109,7 @@ Temporal Super-Resolution:
 
 Upsample a low frame number video (such as 32 x 320 x 192) to a high frame number video (such as 64 x 320 x 192) x by inserting blank frames or repeated frames. Then concatenate x with the noisy high-frame video y<sub>t</sub> in the channel dimension as the input data of U-Net.
 
-## V-Prediction
+### V-Prediction
 
 Instead of using conventional $$\epsilon$$-prediction to add noise, the author introduces a new technique known as velocity prediction parameterization, or v-prediction, for the video diffusion model. This method is summarized by the prediction formula $$v\equiv\alpha_t\epsilon-\sigma_tx$$, leading to $$\hat{x}=\alpha_tz_t-\sigma_t\hat{v}_\theta(z_t)$$.
 
@@ -148,6 +167,15 @@ elif self.config.prediction_type == "v_prediction":
     pred_original_sample = (alpha_prod_t**0.5) * sample - (beta_prod_t**0.5) * model_output
     pred_epsilon = (alpha_prod_t**0.5) * model_output + (beta_prod_t**0.5) * sample
 ```
+
+## Experiments
+
+We experimented with a video diffusion models using this [diffusion model](https://huggingface.co/multimodalart/diffusers_text_to_video/blob/main/Text_to_Video_with_Diffusers.ipynb). We examine results when changing the number of inference steps below.
+
+|      | column 1 | column 2 | column 3 |
+| :--- | :------: | -------: | :------: |
+| row1 |   Text   |     Text |   Text   |
+| row2 |   Text   |     Text |   Text   |
 
 ### Table
 
