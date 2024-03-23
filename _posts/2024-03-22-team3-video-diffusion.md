@@ -39,18 +39,19 @@ Text to video generation is a computer vision task that uses deep learning to cr
 
 ### Forward Diffusion Process
 
-In diffusion, the forward process entails the adding of noise to the datapoint. Diffusion models usually sample this noise from a Gaussian distribution according to a noise schedule, but other distributions are possible. Diffusion models usually have a Markov Chain structure (meaning that future events only depend on the current state). By the end of the process, the datapoint should resemble the Gaussian noise, while maintaining key features of the image, allowing for the backward process to detect and utilize those features to reconstruct the whole image.It is typical to use a cosine noise schedule which has this Markov structure: 
+In diffusion, the forward process entails the adding of noise to the datapoint. Diffusion models usually sample this noise from a Gaussian distribution according to a noise schedule, but other distributions are possible. Diffusion models usually have a Markov Chain structure (meaning that future events only depend on the current state). By the end of the process, the datapoint should resemble the Gaussian noise, while maintaining key features of the image, allowing for the backward process to detect and utilize those features to reconstruct the whole image.It is typical to use a cosine noise schedule which has this Markov structure:
 
 $$
 q(\mathbf{z}_t|\mathbf{z}_s) = \mathcal{N}(\mathbf{z}_t; (\alpha_t/\alpha_s)\mathbf{z}_s, \sigma^2_{t|s}\mathbf{I})
 $$
-
 
 ### Backward Diffusion Process
 
 ## Video Diffusion Models
 
 ### 3D U-Net
+
+This architecture modifies the original U-Net by substituting the 2D convolution with a space-only 3D convolution. Specifically, a conventional 3x3 convolution is replaced by a 1x3x3 convolution. Here, the first dimension represents the video frame (i.e., the time dimension), while the second and third dimensions correspond to the frame height and width, respectively (i.e., the spatial dimensions). Given that the first dimension is set to 1, it does not affect the temporal aspect but solely impacts the spatial dimensions. The architecture retains the spatial attention block, where attention is exclusively applied to the spatial dimensions, effectively treating the time dimension as part of the batch dimension. Following each spatial attention block, a new temporal attention block is introduced. This block focuses on the time dimension for attention, merging the spatial dimensions into the batch dimension for processing.
 
 ![3DUnet]({{ '/assets/images/team3/3d_Unet.png' | relative_url }})
 {: style=" max-width: 100%;"}
@@ -61,11 +62,13 @@ The downsampling/upsampling blocks adjust the spatial input resolution height ×
 of 2 through each of the K blocks. The channel counts are specified using channel multipliers M1,
 M2, ..., MK, and the upsampling pass has concatenation skip connections to the downsampling pass_ [1]
 
-### Factorized Space-Time Attention
+In addition, we use relative position embeddings in each temporal attention block so that the network can distinguish the order of video frames without relying on the specific video frame time. This method of first performing spatial attention and then performing temporal attention can be called factorized space-time attention.
 
 ### Video-Image Joint Training Video Diffusion
 
-To implement the joint training, random independent image frames are concatenated to the end of each video sampled from the dataset. Attention in the temporal attention blocks is masked to prevent the mixing of information across video frames and each individual image frame. These random independent images are selected from various videos within the same dataset.
+One advantage of using factorized space-time attention is that we can implement the video-image joint training.
+
+To implement this, random independent image frames are concatenated to the end of each video sampled from the dataset. Attention in the temporal attention blocks is masked to prevent the mixing of information across video frames and each individual image frame. These random independent images are selected from various videos within the same dataset.
 
 ![table4]({{ '/assets/images/team3/table4.png' | relative_url }})
 {: style=" width: 600px ; max-width: 100%;"}
@@ -89,12 +92,14 @@ _Fig 3. Examples from Video Diffusion Models_ [1]
 ## Imagen Video
 
 Imagen Video is a video-generation system based on a cascade of video diffusion models. It consists of 7 sub-models dedicated to text-conditional video generation, spatial super-resolution, and temporal super-resolution. Imagen video has the capacity to generate high definition videos (1280x768) at 24 frames per second for a total of 128 frames.
+
 <!--
 ## Diffusion Models -->
 
 ## Loss Function
 
 This model is trained using the below loss function
+
 $$
 \mathcal{L}(\mathbf{x}) = \mathbb{E}_{\mathbf{\epsilon} \sim \mathcal{N}(0,\mathbf{I}), t \sim \mathcal{U}(0,1)} \left[ \| \hat{\mathbf{\epsilon}}_{\theta}(\mathbf{z}_t, \lambda_t) - \mathbf{\epsilon} \|_2^2 \right]
 $$
