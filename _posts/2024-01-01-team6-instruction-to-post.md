@@ -191,7 +191,7 @@ Demo: [Colab](https://drive.google.com/file/d/1u_1v48KJ5M6rbBpNRTvqSUl_NMKc-iO_/
 <!-- [1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016. -->
 [1] Zhang, Rao, et al. "Adding Conditional Control to Text-to-Image Diffusion Models." IEEE International Conference on Computer Vision. 2023.
 
-[2] Mo, Mu, et al. "FreeControl: Training-Free Spatial Control of Any Text-to-Image Diffusion Model with Any Condition." 
+[2] Mo, Mu, et al. "FreeControl: Training-Free Spatial Control of Any Text-to-Image Diffusion Model with Any Condition." Computer Vision and Pattern Recognition. 2024.
 
 
 ---
