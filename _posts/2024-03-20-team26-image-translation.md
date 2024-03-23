@@ -338,7 +338,11 @@ We fine-tuned for 1000 epochs and 3000 epochs. We indeed saw improvement after f
 
 ### FID Score
 
-We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. 
+We calculated the FID score for generated paintings by each model. We use the [pytorch-fid](https://github.com/mseitzer/pytorch-fid) as the base code. FID score measures the similarity between two datasets of images. 
+
+$$\text{FID}(\mathcal{N}(\mu_1, \Sigma_1), \mathcal{N}(\mu_2, \Sigma_2)) = ||\mu_1 - \mu_2||^2_2 + Tr(\Sigma_1+\Sigma_2-(\Sigma_1\Sigma_2)^{\frac{1}{2}})$$
+
+FID score is calculated by finding the statistics of samples activation at the last layer of a image classifier (usually InceptionV3). The lower the FID score, the more similar the two datasets are. Interestingly, the FID score of the generated paintings by Stable Diffusion was a bit higher than the FID score of the generated paintings by CycleGAN. This may cause by loss of the geometric information when converting the image to text then to image. 
 
 ```bash
 base_datasets=("/home/zichunl/others/cs188_proj/monet2photo/testA")
