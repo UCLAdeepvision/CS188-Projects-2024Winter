@@ -3,7 +3,7 @@ layout: post
 comments: true
 title: Text-to-Video Generation
 author: Shan Jiang, Brandon Vuong, Seth Carlson, Joseph Yu
-date: 2024-03-21
+date: 2024-03-22
 ---
 
 > In this paper, we will discuss diffusion-based video generation models. We will first do a preliminary exploration of diffusion, then extend it to video generation by examining Video Diffusion Models by Jonathon Ho, et al. We will then follow this with a refinement of video diffusion models by conducting a deep dive into Imagen Video, a high definition video generation model developed by researchers at Google. Through this paper, we aim to provide an overview of diffusion-based video generation, as well as rigorously cover a high definition refinement of the basic video diffusion model.
@@ -265,18 +265,22 @@ We see from these results that a higher number of inference steps leads to an im
 
 ## Comparison
 
+![comptable]({{ '/assets/images/team3/comp_table.png' | relative_url }})
+{: style=" max-width: 100%;"}
+
+![comptable]({{ '/assets/images/team3/legend.png' | relative_url }})
+{: style=" max-width: 100%;"}
+
 ## Reference
 
-[1] Ho, Jonathan, et al. "Video diffusion models." arXiv:2204.03458 2022.
+[1] Ho, Jonathan, et al. "Video diffusion models." arXiv:2204.03458 (2022).
 
-[2] Ho, Jonathan, et al. "Imagen Video: High Definition Video Generation with Diffusion Models" arXiv:2210.02303 2022.
+[2] Ho, Jonathan, et al. "Imagen Video: High Definition Video Generation with Diffusion Models." arXiv:2210.02303 (2022).
 
-[3] Tim Salimans and Jonathan Ho. Progressive Distillation for Fast Sampling of Diffusion Models. In ICLR, 2022.
+[3] Salimans, Tim, and Jonathan Ho. "Progressive Distillation for Fast Sampling of Diffusion Models." In ICLR, 2022.
 
-[4] Chitwan Saharia, Jonathan Ho, William Chan, Tim Salimans, David J Fleet, and Mohammad
-Norouzi. Image super-resolution via iterative refinement. IEEE Transactions on Pattern Analysis
-and Machine Intelligence, 2022c.
+[4] Saharia, Chitwan, et al. "Image super-resolution via iterative refinement." IEEE Transactions on Pattern Analysis and Machine Intelligence (2022).
 
-[5] Brooks, Peebles, et al. Video generation models as world simulators, OpenAI, 2024
+[5] Brooks, Peebles, et al. "Video generation models as world simulators." OpenAI (2024).
 
----
+[6] Anonymous Authors. "Video Diffusion Models - A Survey." Open Review, arXiv:2310.10647 (2023).
