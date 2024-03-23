@@ -280,7 +280,9 @@ The evaluation on CIFAR-10 using CLIP gives a test accuracy of 85.16%. Our Resne
 
 Here are some examples where CLIP fails:
 
-![Examples from CLIP on CIFAR-10]({{ '/assets/images/23/s1.png' | relative_url }})
+| Deer           | Frog    |  Airplane     |
+| :---:        |    :----:   |          :---: |
+| ![Examples from CLIP on CIFAR-10]({{ '/assets/images/23/s1.png' | relative_url }})        | ![Examples from CLIP on CIFAR-10]({{ '/assets/images/23/s2.png' | relative_url }})        | ![Examples from CLIP on CIFAR-10]({{ '/assets/images/23/s3.png' | relative_url }})          |
 
 ## Beyond CLIP: Challenges with Fine-Grained Alignment
 
