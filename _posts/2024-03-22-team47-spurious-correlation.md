@@ -81,35 +81,101 @@ This metric is especially important when considering fairness and bias in machin
 
 ## Causes of Spurious Correlations
 
-There are several factors that cause deep learning models to be susceptible to spurious correlations:
+### Unbalanced Datasets
+Spurious correlations in the realm of image classification can often be traced back to the issue of unbalanced datasets. These datasets are characterized by a skewed distribution of features, where certain patterns are disproportionately represented over others. This imbalance creates a fertile ground for models to latch onto these prevailing patterns, mistaking them for meaningful correlations. The challenge arises because these correlations are not necessarily indicative of an underlying causal relationship; rather, they are by-products of the dataset's composition. For instance, if a dataset for animal recognition contains more images of cats in indoor settings than outdoors, the model might erroneously learn to associate the presence of indoor features with cats, disregarding the animal's characteristics.
 
-Simplicity bias: Gradient descent-based optimization has a tendency to find simple functions that fit the training data before more complex ones [2]. Spuriously correlated features are often easier to learn than the true semantically meaningful features.
-Limited training data: With small datasets, spurious correlations in the training set are more likely to be the most predictive features.
-Imperfect inductive bias: While architectural inductive biases such as convolutions help, current neural network architectures are still not strong enough to ignore spurious features in favor of more generalizable ones.
+### Domain Shift Impact
+The impact of domain shift further exacerbates the problem. When models trained on such skewed datasets are deployed in real-world settings, they are likely to encounter a wide range of variations that were not represented during the training phase. This discrepancy leads to a domain shift, where the model's performance deteriorates because it cannot correctly interpret new or unseen features that differ from the biased training data. The model, therefore, struggles to generalize its learned patterns to broader contexts, leading to misclassifications and reduced reliability.
+
+### Simplicity Bias
+The simplicity bias inherent in many machine learning models plays a significant role in the development of spurious correlations. Given a preference for the path of least resistance, models tend to gravitate towards easily discernible features as discriminative markers. This inclination towards simplicity can result in "shortcut" learning, where the model opts for superficial attributes that are readily available in the skewed dataset instead of striving to understand more complex and relevant patterns. Such shortcuts might prove effective within the limited scope of the training data but often fail to hold up under the varied conditions encountered in practical applications. This simplicity bias, when combined with unbalanced datasets and the threat of domain shift, underscores the critical need for careful dataset curation and model design to mitigate the risks of spurious correlations in image classification.
+
 ## Methods for Mitigating Spurious Correlations
 
-Researchers have proposed various approaches to overcome the problem of spurious correlations. We highlight three notable methods below.
+Researchers have proposed various approaches to overcome the problem of spurious correlations. We highlight three notable, recent methods below.
 
 ### GroupDRO (Labeled Groups)
+[4] proposes using distributionally robust optimization (DRO) to train models that minimize the worst-case loss over a set of pre-defined groups, thereby improving performance on minority groups that may otherwise be overlooked by standard empirical risk minimization (ERM). The key idea is to leverage prior knowledge of potential spurious correlations to define groups in the training data and optimize for the worst-case loss over these groups.
 
-Group Distributionally Robust Optimization (GroupDRO) [3] is a method that assumes access to group labels at training time. The key idea is to optimize for the worst-case test set, by minimizing the maximum loss over predefined groups:
+In the group DRO setting, the training distribution $$P$$ is assumed to be a mixture of $$m$$ groups $$P_g$$ indexed by $$\mathcal{G} = \{1, \ldots, m\}$$. The group DRO objective is to find model parameters $$\theta$$ that minimize the worst-case loss over all groups:
 
-Intuitively, GroupDRO aims to learn a model that performs well on all groups, thus preventing it from relying on spurious correlations that only hold for some groups. The main limitation is that it requires knowledge of the groups at training time.
+$$\hat{\theta}_\text{DRO} := \arg\min_{\theta \in \Theta} \max_{g \in \mathcal{G}} \mathbb{E}_{(x, y) \sim \hat{P}_g}[\ell(\theta; (x, y))]$$
 
+where $$\hat{P}_g$$ is the empirical distribution of group $$g$$. This objective can be rewritten as a min-max optimization problem:
+
+$$\min_{\theta \in \Theta} \max_{q \in \Delta^m} \sum_{g=1}^m q_g \mathbb{E}_{(x, y) \sim P_g}[\ell(\theta; (x, y))]$$
+
+where $$q \in \Delta^m$$ represents the weights assigned to each group.
+
+To efficiently solve this optimization problem, the authors propose a stochastic algorithm that iteratively updates the model parameters $$\theta$$ and the group weights $$q$$. At each iteration $$t$$, the algorithm:
+
+1. Samples a group $$g$$ uniformly at random and a batch of data $$(x, y)$$ from group $$g$$.
+2. Updates the group weights:
+   $$q_g^{(t)} \propto q_g^{(t-1)} \exp(\eta_q \ell(\theta^{(t-1)}; (x, y)))$$
+3. Updates the model parameters:
+   $$\theta^{(t)} = \theta^{(t-1)} - \eta_\theta q_g^{(t)} \nabla \ell(\theta^{(t-1)}; (x, y))$$
+
+The algorithm adjusts the group weights based on the current loss of each group, giving higher weight to groups with higher loss. The model parameters are then updated using a weighted gradient, where the gradient of each example is weighted by the corresponding group weight.
+
+The authors prove that in the convex setting, group DRO can be equivalent to reweighting examples based on their group membership. However, this equivalence breaks down in the non-convex setting, which is more relevant for deep learning.
+
+Empirically, the authors find that naively applying group DRO to overparameterized models fails to improve worst-group performance, as these models can perfectly fit the training data and achieve low loss on all groups. To address this, they propose coupling group DRO with increased regularization, such as a stronger $$\ell_2$$ penalty or early stopping, to prevent overfitting and improve worst-group generalization.
+
+The authors also introduce a technique called "group adjustments" to account for differences in group sizes and generalization gaps. The idea is to upweight the loss on smaller groups, which are more prone to overfitting. The group-adjusted loss for group $$g$$ is:
+
+$$\mathbb{E}_{(x, y) \sim \hat{P}_g}[\ell(\theta; (x, y))] + \frac{C}{\sqrt{n_g}}$$
+
+where $$n_g$$ is the size of group $$g$$ and $$C$$ is a hyperparameter controlling the strength of the adjustment.
+
+Experiments on three datasets (Waterbirds, CelebA, and MultiNLI) demonstrate that regularized group DRO significantly improves worst-group accuracy compared to ERM, while maintaining high average accuracy. Group adjustments further boost performance on minority groups. These results highlight the importance of regularization for worst-group generalization in overparameterized models and showcase the effectiveness of distributionally robust optimization in mitigating performance disparities across groups.
 
 ### GEORGE (Unlabeled Groups)
+[1] proposes GEORGE, a two-step approach to measure and mitigate spurious correlations when subclass labels are unavailable. The key idea behind GEORGE is to identify subclasses by clustering the feature representations of a model trained on the original coarse-grained labels and then use these estimated subclasses to train a new model with a distributionally robust optimization (DRO) objective.
 
-GEORGE (Group Robustness via Clustering) [4] is a method that does not require predefined group labels. The key idea is to:
+GEORGE consists of two main steps:
 
-Train a vanilla ERM model to learn an embedding that can separate the majority groups with the spurious features;
-Cluster the learned embedding to identify the groups;
-Train a robust model using GroupDRO with the inferred groups.
-The intuition is that examples with the same spurious feature (e.g. grassy background) will be close in embedding space even if they belong to different classes, allowing them to be grouped via clustering.
-GEORGE eliminates the need for human-specified group labels, but relies on the quality of the learned embedding to identify meaningful groups.
+1. Subclass Recovery: Train an ERM model on the superclass labels and cluster its feature representations to estimate subclass labels. Specifically, the activations of the penultimate layer are dimensionality-reduced using UMAP and then clustered using a modified k-means algorithm that automatically determines the number of clusters.
 
-Thus, GEORGE essentially performs a similar process to GroupDRO, but it does not use predetermined groups and rather determines groups via unsupervised clustering before performing balanced sampling.
+2. Robust Training: Use the estimated subclass labels as groups in the GDRO objective to train a new model that minimizes the worst-case per-subclass loss:
 
-Using the `spuco` Python package maintained by the authors of [2] and [3], we can implement and evaluate a model trained via GEORGE. In this case, we evaluate the results of training via GEORGE on a simple LeNet. The high-level code to train a LeNet using GEORGE on the SpuCoMNIST dataset (a slight modification of MNIST to be suitable for SpuCo evals) is as follows.
+$$\min_{\theta} \max_{c \in \{1, \ldots, C\}} \frac{1}{n_c} \sum_{i=1}^n \mathbf{1}(\hat{z}_i = c) \ell(f_\theta(x_i), y_i)$$
+
+where $$\hat{z}_i$$ is the estimated subclass label for example $$i$$, $$n_c$$ is the number of examples in subclass $$c$$, and $$f_\theta$$ is the model parameterized by $$\theta$$.
+
+The authors prove that under certain assumptions on the data distribution and quality of the recovered clusters, GEORGE achieves the same asymptotic sample complexity rates as GDRO with true subclass labels. They empirically validate GEORGE on four image classification datasets, demonstrating its ability to both measure and mitigate hidden stratification. Compared to ERM, GEORGE improves worst-case subclass accuracy by up to 22 percentage points without requiring subclass labels. The clusters identified by GEORGE also provide a good approximation of the true robust accuracy, enabling detection of hidden stratification even when subclass labels are unavailable.
+
+
+### SPARE (Unlabeled Groups)
+
+[3] proposes a novel method called Spare (SePArate early and REsample) to identify and mitigate spurious correlations early in the training process. The key idea behind Spare is to leverage the simplicity bias of gradient descent, which causes models to learn simpler features before more complex ones.
+
+The authors theoretically analyze the learning dynamics of a two-layer fully connected neural network and show that the contribution of spurious features to the model's output grows linearly with the amount of spurious correlation in the initial training phase. This allows for the separation of majority and minority groups based on the model's output early in training. Specifically, they prove that for all training iterations $$0 \leq t \leq \nu_1 \cdot \sqrt{\frac{d^{1-\alpha}}{\eta}}$$, the contribution of the spurious feature $$v_s$$ to the network output can be quantified as:
+
+$$f(v_s; W_t, z_t) = \frac{2\eta\zeta_c^2\|v_s\|^2t}{d}(\frac{n_{c,s} - n_{c',s}}{n} \pm O(d^{-\Omega(\alpha)}))$$
+
+where $$n_{c,s}$$ and $$n_{c',s}$$ represent the number of examples with spurious feature $$v_s$$ in class $$c$$ and other classes $$c'$$, respectively, and $$\zeta_c$$ is the expected gradient of the activation function at random initialization. This equation demonstrates that the influence of the spurious feature on the model's output is proportional to the difference in the number of examples with that feature in the target class compared to other classes, scaled by the learning rate $$\eta$$, the magnitude of the spurious feature $$\|v_s\|^2$$, and the expected gradient of the activation function $$\zeta_c^2$$.
+
+Furthermore, the authors show that if the majority group is sufficiently large, the model's output on the majority of examples in the class will be almost exclusively determined by the spurious feature and will remain mostly invariant to the core feature. This occurs when the noise-to-signal ratio of the spurious feature is lower than that of the core feature, as expressed in the following equation:
+
+$$|f(v_c; W_T, z_T)| \leq \frac{\sqrt{2}R_s}{R_c} + O(n^{-\gamma} + d^{-\Omega(\alpha)})$$
+
+where $$R_s$$ and $$R_c$$ are the noise-to-signal ratios of the spurious and core features, respectively. This equation indicates that the contribution of the core feature $$v_c$$ to the model's output at time $$T$$ is bounded by the ratio of the noise-to-signal ratios of the spurious and core features, plus a term that depends on the size of the minority groups $$n^{-\gamma}$$ and the input dimensionality $$d^{-\Omega(\alpha)}$$.
+
+Based on the theoretical insights, Spare implements a two-stage algorithm to mitigate spurious correlations. In the first stage, Spare identifies the majority and minority groups by clustering the model's output early in training. The clustering is performed on the model's output $$f(x_i; W_t, z_t)$$ for each example $$x_i$$ at a specific epoch $$t$$, which is determined by maximizing the recall of Spare's clusters against the validation set groups. The number of clusters is determined via silhouette analysis, which assesses the cohesion and separation of clusters.
+
+In the second stage, Spare applies importance sampling to balance the groups and mitigate the spurious correlations. Each example $$i$$ in cluster $$V_{c,j}$$ is assigned a weight $$w_i = \frac{1}{\vert V_{c,j} \vert} $$, where $$ \vert V_{c,j} \vert$$ is the size of the cluster. The examples are then sampled in each mini-batch with probabilities proportional to $$p_i = \frac{w_i^\lambda}{\sum_i w_i^\lambda}$$, where $$\lambda$$ is determined based on the average silhouette score of the clusters in each class. This importance sampling method effectively upweights examples in smaller clusters (minority groups) and downweights examples in larger clusters (majority groups), thereby balancing the impact of spurious correlations during training.
+
+The Spare algorithm can be summarized as follows:
+
+1. Train the model for $$T_{init}$$ epochs.
+2. For each class $$c$$, cluster the examples $$V_c$$ into $$k$$ clusters $$\{V_{c,j}\}_{j=1}^k$$ based on the model's output $$f(x_i; W_t, z_t)$$.
+3. Assign weights $$w_i = \frac{1}{\vert V_{c,j} \vert}$$ to each example $$i$$ in cluster $$V_{c,j}$$.
+4. Train the model for $$T_N$$ epochs, sampling mini-batches with probabilities $$p_i = \frac{w_i^\lambda}{\sum_i w_i^\lambda}$$.
+
+By clustering the model's output early in training and applying importance sampling based on the cluster sizes, Spare effectively identifies and mitigates spurious correlations, leading to improved worst-group accuracy and robustness to dataset biases.
+## Experiments 
+
+We ran experiments checking the effectivness of GEORGE. Using the `spuco` Python package maintained by the authors of [2] and [3], we can implement and evaluate a model trained via GEORGE. In this case, we evaluate the results of training via GEORGE on a simple LeNet. The high-level code to train a LeNet using GEORGE on the SpuCoMNIST dataset (a slight modification of MNIST to be suitable for SpuCo evals) is as follows.
 
 First, initiallize the SpuCoMNIST dataset splits:
 
@@ -280,46 +346,60 @@ balanced_evaluator.evaluate()
 ```
 The evaluation yields a lower overall average accuracy of 93.85%, but a much better (considering the lightweight training run) worst group accuracy of 8.585%.
 
-### SPARE (Unlabeled Groups)
 
-SPARE (Mitigating Spurious Correlations by Resampling) [5] is another method that does not require group labels. The key observations are:
-
-Due to the simplicity bias, spurious features are learned very early in training before the semantic features;
-The model will be overly confident for examples containing majority group spurious features.
-Based on these observations, SPARE:
-
-Trains the model for only a few epochs and clusters the model predictions within each class to identify majority/minority groups;
-Upweights minority groups and downweights majority groups during retraining, to prevent the model from relying on spurious features.
-Like GEORGE, SPARE infers groups in a data-driven way. However, it does so very early in training to capture spurious features before semantic ones. It also directly reweights examples to avoid spurious features rather than relying on the worst-case loss.
 
 ## Tradeoffs when Dealing with Spurious Correlations
 
-There are several key tradeoffs to consider when dealing with spurious correlations:
+When dealing with spurious correlations in machine learning models, there are several key considerations and tradeoffs that must be balanced. The choice of approach depends on factors such as the nature of the spurious correlations, the availability of group labels, and the specific requirements of the application.
 
-Robustness vs accuracy: Methods that improve worst-group performance often do so at the cost of average performance. This is because the model is forced to use more complex features rather than relying on simplistic spurious correlations. The right balance depends on the application - for high-stakes applications like medicine, robustness may be prioritized over accuracy.
-Labeled vs unlabeled groups: Methods like GroupDRO require the groups to be predefined, which provides stronger control over the model's behavior. However, manually specifying groups can be challenging and time-consuming. Methods like GEORGE and SPARE infer the groups automatically, but may identify groups that don't perfectly align with the spurious features.
-Early vs late intervention: SPARE intervenes very early in training to identify and mitigate spurious features. This prevents the model from overfitting to spurious features in the first place. In contrast, GEORGE allows the initial model to rely on spurious features, but then uses them to infer groups for robust training. The optimal point of intervention likely depends on the strength and granularity of the spurious features.
-Worst-case vs reweighted loss: GroupDRO optimizes for worst-case group performance, while SPARE reweights examples to balance group performance. Worst-case optimization provides a strong guarantee, but may be overly pessimistic. Reweighting is a softer approach, but requires careful tuning of the weights.
-Ultimately, the best approach depends on the nature of the spurious correlations, the availability of group labels, and the specific robustness and accuracy requirements of the application.
+### Robustness vs. Accuracy
+
+One fundamental tradeoff is between robustness and accuracy. Methods that aim to improve worst-group performance, such as Group DRO and GEORGE, often do so at the cost of average performance. This is because the model is encouraged to rely on more complex, semantically meaningful features rather than simplistic spurious correlations. In some cases, this tradeoff may be acceptable or even desirable, particularly in high-stakes applications like medical diagnosis where the cost of errors on minority groups is severe. However, in other scenarios, sacrificing too much average accuracy for the sake of robustness may not be practical.
+
+### Labeled vs. Unlabeled Groups
+
+Another key consideration is whether the groups exhibiting spurious correlations are explicitly labeled or not. Methods like Group DRO assume that the groups are predefined, which allows for direct optimization of the worst-case performance over these groups. However, obtaining clean group labels can be challenging and time-consuming, especially if the spurious correlations are not well-understood beforehand.
+
+In contrast, methods like GEORGE and SPARE aim to infer the groups automatically from the data. GEORGE does this by clustering the feature representations of a trained model, while SPARE identifies groups early in training based on the model's output on each example. These approaches offer more flexibility, but the inferred groups may not perfectly align with the true spurious correlations, potentially limiting their effectiveness.
+
+### Proactive vs. Reactive Mitigation
+
+The choice of when to intervene and mitigate spurious correlations is another important factor. SPARE takes a proactive approach by identifying and correcting for spurious features very early in training, before the model has a chance to overfit to them. This early intervention prevents the model from relying too heavily on spurious correlations in the first place.
+
+On the other hand, GEORGE allows the initial model to rely on spurious features, but then uses them to infer groups for a second round of robust training. This reactive approach may be more effective when the spurious correlations are very strong and dominate the initial learning process.
+
+The optimal point of intervention likely depends on the strength and granularity of the spurious features, as well as the specific architecture and training setup of the model.
+
+### Worst-Case vs. Reweighted Optimization
+
+Finally, there is a choice between optimizing for worst-case group performance, as in Group DRO, and reweighting examples to balance performance across groups, as in SPARE. Worst-case optimization provides a strong guarantee that the model will perform well on every group, but it may be overly pessimistic and lead to degraded average performance.
+
+Reweighting is a softer approach that aims to equalize performance across groups without being overly conservative. However, it requires careful tuning of the group weights and may not always succeed in closing the performance gap between the best and worst groups.
+
+### Is Mitigation Always Necessary?
+
+While mitigating spurious correlations is important for building robust and fair machine learning models, it is not always necessary or practical. In some cases, the spurious correlations may be so strong that attempting to remove them significantly degrades overall performance. Moreover, if the test distribution is expected to exhibit similar spurious correlations as the training data, then optimizing for robustness may not be worth the cost in accuracy.
+
+Ultimately, the decision to mitigate spurious correlations depends on the specific goals and constraints of the application. If the model is being deployed in a high-stakes setting where errors on minority groups can have severe consequences, then investing in robustness is likely worthwhile. However, if the main priority is overall accuracy and the spurious correlations are not expected to shift significantly between training and deployment, then standard empirical risk minimization may be sufficient.
+
+In practice, a combination of techniques may be most effective, such as using a robust training method like Group DRO or GEORGE to mitigate the most severe spurious correlations, while also incorporating domain expertise to identify and correct for any remaining biases. Regular monitoring and evaluation of the model's performance on different subgroups is also important to catch any unintended consequences of the mitigation strategies.
 
 ## Conclusion
 
-Spurious correlations are a key challenge in training models that can generalize to out-of-distribution data. While methods like GroupDRO are effective when group labels are available, GEORGE and SPARE show promising results in automatically identifying and mitigating spurious correlations.
+Spurious correlations pose a significant challenge in training deep learning models that can generalize well to out-of-distribution data. While methods like GroupDRO are effective when group labels are available, GEORGE and SPARE show promising results in automatically identifying and mitigating spurious correlations without requiring labeled groups.
 
-Looking ahead, there are several important directions for future work:
+However, there are important tradeoffs to consider when dealing with spurious correlations, such as the balance between robustness and accuracy, the availability of group labels, the optimal point of intervention during training, and the choice between worst-case and reweighted optimization. The decision to mitigate spurious correlations ultimately depends on the specific goals and constraints of the application.
 
-Developing architectures and regularizers that have a stronger inductive bias towards semantic features over spurious ones.
-Improving methods for automated discovery of spurious features, e.g., through unsupervised learning or causal reasoning.
-Characterizing the tradeoffs between robustness and accuracy in the presence of spurious correlations, and developing methods to navigate these tradeoffs.
-Extending these methods to more complex data modalities and tasks, such as video understanding and language generation.
-Continued research along these lines will be crucial for building more robust and generalizable machine learning systems.
+Future research directions include developing architectures and regularizers with stronger inductive biases towards semantic features, improving methods for automated discovery of spurious features, characterizing the tradeoffs between robustness and accuracy, and extending these methods to more complex data modalities and tasks. Continued work along these lines will be crucial for building more robust and generalizable machine learning systems.
 
-## Reference
+## References
 
 [1] Sohoni, Nimit S., et al. "No Subclass Left Behind: Fine-Grained Robustness in Coarse-Grained Classification Problems." arXiv:2011.12945v2 [cs.LG]. 2022.
 
 [2] Joshi, Siddharth, et al. "Towards Mitigating Spurious Correlations in the Wild: A Benchmark & a more Realistic Dataset." arXiv:2306.11957v2 [cs.LG]. 2023.
 
 [3] Yang, Yu, et al. "Identifying Spurious Biases Early in Training through the Lens of Simplicity Bias" arXiv:2305.18761v2 [cs.LG]. 2024.
+
+[4] Sagawa, Shiori, et al. "Distributionally Robust Neural Networks for Group Shifts: On the Importance of Regularization for Worst-Case Generalization." arXiv:1911.08731v2 [cs.LG]. 2020.
 
 ---
