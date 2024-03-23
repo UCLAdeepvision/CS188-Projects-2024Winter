@@ -33,7 +33,11 @@ Paired datasets are easier to train on, but they maybe hard to collect, especial
 
 Generative adversarial network (GAN) are deep learning frameworks that relies on a generator $$G$$ and a discriminator $$D$$. Cycle GAN introduces **cycle consistency** (similar to language translation, where a sentence in English when translated to German then translated back should be the same as English).
 
+-![cycle-gan]({{ '/assets/images/team26/cycle-GAN-simple.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 2. Illustration of Cycle GAN* [1].
+
 The goal of our Cycle GAN is to learn a mapping between two image styles $X$ and $Y$. So if we have preserve cycle consistency, the ideaaaa is that our tralated image will preserve most of its semanics besides the style change.
+
+-![cycle-consistency]({{ '/assets/images/team26/cycle-consistency.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 3. Illustration of Cycle Consistency* [1].
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a similar image to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
 
@@ -98,8 +102,6 @@ self.model = nn.Sequential(*model)
 
 ### Training CycleGAN
 
-![training-CycleGAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [4].
-
 To train Gan 1 $$(G, D_Y)$$, where $$G$$ is a mapping from $$X$$ to $$Y$$ and $$D_Y$$ is a discriminator for $$Y$$, we use the following loss function:
 
 $$
@@ -128,6 +130,8 @@ $$
 G^*, F^* = \arg \min_{G, F} \max_{D_X, D_Y} \mathcal{L}(G, F, D_X, D_Y)
 $$
 
+![training-CycleGAN]({{ '/assets/images/team26/A-to-B-diagram.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} *Fig 6. Illustration of the training process for G* [4].
+
 ## Stable Diffusion
 
 Stable Diffusion is in the class of latent diffusion models (LDMs). Similar to diffusion models, LDMs work by repeatedly removing noise from an image, but instead of starting in the pixel space, LDMs start in the latent space.
@@ -141,7 +145,7 @@ Before diving into Stable Diffusion, we start by discussing the fundamental diff
 
 ![Diffusion]({{ '/assets/images/team26/diffusion.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-*Fig 1. The diffusion and reverse illustrated as a directed graphical model* [1].
+*Fig 7. The diffusion and reverse illustrated as a directed graphical model* [1].
 
 In the forward pass, we add noise to the input image following a variance schedule $$\beta_1, ..., \beta_T$$. The approximate posterior (_diffusion process_) is defined as:
 
