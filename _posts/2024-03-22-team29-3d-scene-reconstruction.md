@@ -3,7 +3,7 @@ layout: post
 comments: true
 title: 3D Scene Representation from Sparse 2D Images
 author: Krystof Latka, Patrick Dai, Srikar Nimmagadda, Andy Lewis
-date: 2024-03-10
+date: 2024-03-22
 ---
 
 > In this report, we first introduce the topic of 3D scene representation as a whole. We briefly go over classical approaches and explain some of the common issues preventing them from rendering a high-quality scene. Then, we discuss three deep learning based approaches in more depth, taking Neural Radiance Fields (NeRFs) as our starting point. Instant NGP improves upon the original NeRF paper by suggesting a hash encoding of inputs to the MLP that speeds up training at least 200x. Zero-1-to-3 combines NeRF and diffusion to offer extraordinary zero-shot scene synthesis abilities. Lastly, we give the most attention to 3D Gaussian Splatting, which represents the entire scene as a set of 3D Gaussians, enabling efficient training time and real-time scene rendering.
@@ -11,8 +11,8 @@ date: 2024-03-10
 <!--more-->
 
 {: class="table-of-content"}
-
-- {:toc}
+* TOC
+{:toc}
 
 ## Introduction to 3D Reconstruction
 
@@ -20,21 +20,24 @@ date: 2024-03-10
 
 ### Structure from Motion (SfM)
 
-<img src="../assets/images/Team29/sfm.png" alt="Structure from Motion Diagram (SfM)" width="100%"/>
-*Figure 1. SfM: Classical approach to 3D scene reconstruction [11]*
+![SfM]({{ '/assets/images/Team29/sfm.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 1. SfM: Classical approach to 3D scene reconstruction [12]*
 
 SfM stands as one of the key pillars of classical 3D reconstruction methods within the realm of computer vision dating all the way back to the 1979 paper, "The interpretation of structure from motion". Specifically, SfM focuses on the reconstruction of 3D scenes from a series of 2D images captured from various viewpoints (which can be seen in the figure above). SfM detects and matches distinctive features across the images to establish correspondence between the images, which then faciliates the estimation of camera poses and a sparse 3D reconstruction of the scene. This method involves triangulation between the rays projected from each calculated camera pose and a bundle adjustment optimization algorithm to adjust camera pamereters and minimize reprojection errors across the images. Overall, SfM provides a solid groundwork for understanding scenes through 3D images, and it can be used as a first step in many 3D scene resonstruction pipelines to estimate camera parameters for images and produce a baseline sparse 3D reconstruction to be iterated on.
 
 ### Multi-View Stereo (MVS)
 
-<img src="../assets/images/Team29/mvs.png" alt="Multi-View Stereo (MVS)" width="100%"/>
-*Figure 2. MVS: Dense 3D scene reconstruction from SfM parameters pipeline [12]*
+![MVS]({{ '/assets/images/Team29/mvs.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 2. MVS: Dense 3D scene reconstruction from SfM parameters pipeline [13]*
 
 Multi-View Stereo (MVS) is a complementary technique to Structure from Motion (SfM), aiming to improve its sparse reconstructions with more dense 3D reconstructions. Unlike SfM, which focuses on estimating camera poses and creating a sparse 3D structure, MVS aims to generate more detailed geometry by estimating depth information for every pixel across multiple images with methods like depth from defocus or stereo matching. By utilizing information from multiple viewpoints, MVS overcomes limitations such as occlusions and ambiguities present in individual images, resulting in more accurate reconstructions. Additionally, MVS integrates with SfM pipelines, using the sparse reconstructions obtained from SfM as input to refine and densify the reconstruction. This is adjacent to more modern pipelines that utilize SfM and its generated basis of camera parameters and sparse reconstructions with a method like deep learning. MVS has also been iterated upon and even applied as a deep learning network in more modern implementations.
 
 ### Depth from Defocus
 
-<img src="../assets/images/Team29/dfd.png" alt="Depth from Defocus" width="100%"/>
+![Depth from Defocus]({{ '/assets/images/Team29/dfd.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
 *Figure 3. Depth from defocus visualizations [13]*
 
 Depth from defocus is commonly used in MVS pipelines to estimate depth map information for 3D scene reconstruction. It utilizes variations in image blur caused by defocus at different depths within an image. By analyzing the degree of defocus across multiple images of the scene, depth from defocus algorithms can estimate the depth of objects in the scene. Depth from defocus complements other depth estimation techniques like stereo matching and can be useful in datasets with complex regions, such as low-texture or occluded areas. By incorporating depth from defocus alongside other depth estimation techniques, MVS and even other more modern deep-learning based pipelines can achieve more accurate reconstructions in challenging environments and imagery.
@@ -55,10 +58,11 @@ $$ x = {PX} = {(PQ^{-1})(QX)}$$
         X - Points matrix
         Q - Transformation
 
-According to the different types of 3D representations seen below in Figure 1, we find that we can only generate projective reconstructions of an input scene. We would need additional information for affine/similar/euclidean representations.
+According to the different types of 3D representations seen below in Figure 4, we find that we can only generate projective reconstructions of an input scene. We would need additional information for affine/similar/euclidean representations.
 
-<img src="../assets/images/Team29/ambiguity.png" alt="Ambiguity" width="100%"/>
-*Figure 1: Ambiguity in SfM representation*
+![Ambiguity]({{ '/assets/images/Team29/ambiguity.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 4: Ambiguity in SfM representation*
 
 ### Occlusion and Limited Viewpoints
 
@@ -68,10 +72,11 @@ Given a sparse set of images:
 - For far-away cameras: correspondence can be missed
 
 SfM depends purely on input images to construct a geometric representation of an input scene, so given limited viewpoints
-it may struggle to capture comprehensive 3D structures. It will often miss details or occluded areas in the scene, as shown below in Figure 2.
+it may struggle to capture comprehensive 3D structures. It will often miss details or occluded areas in the scene, as shown below in Figure 5.
 
-<img src="../assets/images/Team29/occlusion.png" alt="Occlusion" width="100%"/>
-*Figure 2: Missed structures due to limited viewpoints*
+![Occlusion]({{ '/assets/images/Team29/occlusion.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 5: Missed structures due to limited viewpoints*
 
 The highlighted structures are occluded by larger structures in the central cathedral at certain camera points, leading to missed correspondence and failed point cloud reconstruction.
 This can be mitigated with better camera point planning (i.e. if camera positions were planned to include regions between the central cathedral and sides stuctures, occlusion could be limited),
@@ -83,17 +88,19 @@ Low-texture surfaces also pose a unique challenge for SfM based approaches. SfM 
 and textured objects make the challenge geometrically easier. Low-texture surfaces, on the other hand, have features that are harder to identify, which can add difficulty to
 the correspondence process. Below is an example where low-texture, repetitive surfaces lead to mismatches.
 
-<img src="../assets/images/Team29/low_texture.png" alt="Low texture" width="100%"/>
-*Figure 3: Low texture*
+![Low texture]({{ '/assets/images/Team29/low_texture.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 6: Low texture*
 
 Non-lambertian surfaces are a unique low-texture case which can cause correspondence mismatching. Reflective or transparent surfaces display different
 features depending on the observer's position, so such surfaces can lead to either missed correspondence (where a surface cannot be matched with its previous images)
 or incorrect correspondence (which is often more disastrous).
 
-<img src="../assets/images/Team29/reflection.png" alt="Reflection" width="100%"/>
-*Figure 4: Reflection*
+![Depth from Defocus]({{ '/assets/images/Team29/reflection.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 7: Reflection*
 
-Above in Figure 4 is an image depicting how a single reflective surface has an inverse surface which could be incorrectly matched depending on the camera position.
+Above in Figure 7 is an image depicting how a single reflective surface has an inverse surface which could be incorrectly matched depending on the camera position.
 
 ### Noise Defects
 
@@ -106,8 +113,9 @@ Outliers: <br>
 General noise between frames can also result in epipolar line mis-estimations. Epipolar lines are used to map camera positions relative to each other, where one camera
 will estimate the degree and location of a ray between another camera's optical center and image point. Failures to calculate epipolar lines can create warped estimations of a scene.
 
-<img src="../assets/images/Team29/noise.png" alt="low texture" width="100%"/> <br>
-_Figure 5: Epipolar line mis-estimation with noise_
+![Noise]({{ '/assets/images/Team29/noise.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 8: Epipolar line mis-estimation with noise*
 
     Green - ground truth
     Red - added gaussian noise
@@ -120,8 +128,9 @@ Many modern 3D scene rendering approaches still use Structure from Motion for pr
 
 [Mildenhall et. al](https://arxiv.org/abs/2003.08934) synthesize images by sampling points in space along camera rays, feeding those locations into a very small MLP $$F_{\Theta}: (x, y, z, \theta, \phi) \rightarrow (R, G, B, \sigma)$$. This produces color and volume density, and using volume rendering techniques, they composite these values into an image. The rendering function is differentiable, so the learned weights $$\Theta$$ can be optimized by minimizing the residual between synthesized and ground truth observed images. Figure 6 below summarizes the outlined process.
 
-<img src="../assets/images/Team29/nerf.png" alt="NeRF" width="100%"/> <br>
-_Figure 6: NeRF MLP Visualization_
+![NeRF]({{ '/assets/images/Team29/nerf.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 9: NeRF MLP Visualization*
 
 The following code snippet shows how a simple NeRF MLP can be implemented.
 
@@ -155,9 +164,10 @@ In the NeRF paper, scalar positions $$x \in \mathbb{R}$$ are encoded as a multi-
 
 $$\gamma(x)=\left(x, \sin\left(2^0 \cdot x\right), \cos\left(2^0 \cdot x\right), ...,\sin\left(2^{L-1} \cdot x\right), \cos\left(2^{L-1} \cdot x\right) \right)$$
 
-Instead, Instant NGP proposes a trainable hash-based encoding with parameters $$\theta$$, visualized in Figure 7 below.
-<img src="../assets/images/Team29/ngp.png" alt="NGP" width="100%"/> <br>
-_Figure 7: Proposed NGP workflow_
+Instead, Instant NGP proposes a trainable hash-based encoding with parameters $$\theta$$, visualized in Figure 10 below.
+![NGP]({{ '/assets/images/Team29/ngp.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 10: Proposed NGP workflow*
 
 For a given input coordinate $$\mathbf{x}$$, we find the surrounding voxels (single samples on a regularly spaced, three-dimensional grid) at $$L \in \mathbb{R}$$ resolution levels and assign indices to their corners by hashing their integer coordinates. The hash function used is
 
@@ -177,10 +187,11 @@ $$\text{PSNR} = 10 \cdot \log_{10} \left( \frac{\text{MAX}_{I}^{2}}{MSE} \right)
 
 where $$\text{MAX}_{I}$$ is the maximum possible pixel value of an image.
 
-Figure 8 below, provided within the Instant NGP paper, documents comparison of PSNR with other scene rendering approaches on a variety of commonly-used scenes. We focus on comparison with the original NeRF and mip-NeRF, which improved upon the original NeRF by efficiently rendering the scene using anti-aliased conical frustums instead of rays. For each scene, the methods with top 3 least errors are marked with gold, silver, and bronze medals.
+Figure 11 below, provided within the Instant NGP paper, documents comparison of PSNR with other scene rendering approaches on a variety of commonly-used scenes. We focus on comparison with the original NeRF and mip-NeRF, which improved upon the original NeRF by efficiently rendering the scene using anti-aliased conical frustums instead of rays. For each scene, the methods with top 3 least errors are marked with gold, silver, and bronze medals.
 
-<img src="../assets/images/Team29/ngp_performance.png" alt="NGP Performance" width="100%"/> <br>
-_Figure 8: Comparison of PSNR achieved using Instant NGP and original NeRF_
+![NGP Performance]({{ '/assets/images/Team29/ngp_performance.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 11: Comparison of PSNR achieved using Instant NGP and original NeRF*
 
 We can see that Instant NGP is competitive with NeRF after just 15 seconds of training and competitive with mip-NeRF after 1 to 5 minutes of training, while NeRF-based approaches train in the order of hours. This shows that Instant NGP provides immense upside over original NeRF by improving the training time at least 200x.
 
@@ -194,10 +205,11 @@ $$\widehat{x}_{R,T} = f(x, R, T)$$
 
 One problem this approach is facing is that pre-trained large-scale generative models do not explicitly encode the correspondences between viewpoints. [Liu et. al](https://arxiv.org/abs/2303.11328) solve this problem by using the [_Objaverse_](https://arxiv.org/abs/2212.08051) dataset for fine-tuning, which is a large-scale open-source dataset con- taining 800K+ 3D models created by 100K+ artists. For each object in the dataset, they randomly sample 12 camera extrinsics matrices pointing at the center of the object and render 12 views with a ray-tracing engine. At training time, two views can be sampled for each object to form an image pair $$(x, x_{R,T})$$. The corresponding relative viewpoint transformation $$(R, T)$$ that defines the mapping between both perspectives can be derived from the two extrinsic matrices.
 
-Then, given paired images and their camera extrinsics $$\{(x, x_{R,T}, R, T)\}$$, they fine-tune a pre-trained latent diffusion model to learn controls over the camera parameters. The architecture of the model follows the original Latent Diffusion paper, and is shown in Figure 9 below.
+Then, given paired images and their camera extrinsics $$\{(x, x_{R,T}, R, T)\}$$, they fine-tune a pre-trained latent diffusion model to learn controls over the camera parameters. The architecture of the model follows the original Latent Diffusion paper, and is shown in Figure 12 below.
 
-<img src="../assets/images/Team29/latent_diffusion.png" alt="Latent Diffusion" width="100%"/> <br>
-_Figure 9: Latent Diffusion_
+![Latent Diffusion]({{ '/assets/images/Team29/latent_diffusion.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 12: Latent Diffusion*
 
 Compared to a standard diffusion model we have implemented in Assignment 4, latent diffusion uses an encoder $$\mathcal{E}$$ to reduce the dimensionality of the original image and thus make diffusion computations more efficient. The forward diffusion process, as well as the denoising backward process using U-Net $$\epsilon_{\theta}$$ are computed in the image latent space and the result is scaled back up to the original dimensionality using a decoder $$\mathcal{D}$$.
 
@@ -205,40 +217,46 @@ At diffusion timestep $$t \sim [0, 1000]$$, taking $$c(x, R, T)$$, the embedding
 
 $$\mathcal{L} = \mathbb{E}_{z \sim \mathcal{E}(x), t, \epsilon \sim \mathcal{N} \sim (0, 1)} || \epsilon - \epsilon_{\theta}(z_t, t, c(x, R, T) ||_2^2$$
 
-Similarly to standard diffusion implemented in Assignment 4, the denoiser U-Net $$\epsilon_{\theta}$$ learns to model the noise added to image at timestep $$t$$, conditioned on the embedding of $$c(x, R, T)$$, so that the inference model $$f$$ can generate an image by performing iterative denoising from a Gaussian noise image. The approach is summarized in Figure 10 below.
+Similarly to standard diffusion implemented in Assignment 4, the denoiser U-Net $$\epsilon_{\theta}$$ learns to model the noise added to image at timestep $$t$$, conditioned on the embedding of $$c(x, R, T)$$, so that the inference model $$f$$ can generate an image by performing iterative denoising from a Gaussian noise image. The approach is summarized in Figure 13 below.
 
-<img src="../assets/images/Team29/zero1to3.png" alt="Zero 1 to 3" width="100%"/> <br>
-_Figure 10: Zero-1-to-3, Controlling the camera viewpoint_
+![Zero 1 to 3]({{ '/assets/images/Team29/zero1to3.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 13: Zero-1-to-3, Controlling the camera viewpoint*
 
-The Zero-1-to-3 approach can further be used to synthesize a 3D scene reconstruction, capturing both the appearance and geometry of an object. The authors adopt Score Jacobian Chaining to optimize a 3D representation. The specific implementation of SJC is beyond the scope of this report; however, we show the visualization of this approach in Figure 11 below.
+The Zero-1-to-3 approach can further be used to synthesize a 3D scene reconstruction, capturing both the appearance and geometry of an object. The authors adopt Score Jacobian Chaining to optimize a 3D representation. The specific implementation of SJC is beyond the scope of this report; however, we show the visualization of this approach in Figure 14 below.
 
-<img src="../assets/images/Team29/zero1to3_3d.png" alt="Zero 1 to 3, 3D" width="100%"/> <br>
-_Figure 11: Zero-1-to-3, 3D Reconstruction_
+![Depth from Defocus]({{ '/assets/images/Team29/zero1to3_3d.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 14: Zero-1-to-3, 3D Reconstruction*
 
 ### Performance
 
-The approach described above cannot be directly compared performance-wise to the original NeRF or Instant NGP, because the authors directly compare their method only to other methods operating in zero-shot setting and with single-view RGB images. Nevertheless, Figures 12 and 13 show comparison with DietNeRF, which is a NeRF-based approach proposed specifically for few-shot view synthesis.
+The approach described above cannot be directly compared performance-wise to the original NeRF or Instant NGP, because the authors directly compare their method only to other methods operating in zero-shot setting and with single-view RGB images. Nevertheless, Figures 15 and 16 show comparison with DietNeRF, which is a NeRF-based approach proposed specifically for few-shot view synthesis.
 
-<img src="../assets/images/Team29/zero_performance_google.png" alt="Zero 1 to 3, 3D" width="100%"/> <br>
-_Figure 12: Zero-1-to-3, Performance comparison, Google Scanned Objects_
+![Zero 1 to 3, 3D]({{ '/assets/images/Team29/zero_performance_google.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 15: Zero-1-to-3, Performance comparison, Google Scanned Objects*
 
-<img src="../assets/images/Team29/zero_performance_rtmv.png" alt="Zero 1 to 3, 3D" width="100%"/> <br>
-_Figure 13: Zero-1-to-3, Performance comparison, RTMV_
+![Zero 1 to 3, 3D]({{ '/assets/images/Team29/zero_performance_rtmv.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 16: Zero-1-to-3, Performance comparison, RTMV*
 
 The two datasets used for benchmarking are Google Scanned Objects, which consists of high-quality scaned household items, and RTMV, consisting of complex scenes of 20 random objects. Furthermore, scenes in RTMV are out-of-distribution from Objaverse data used for fine-tuning the model. Despite that, Zero-1-to-3 still achieves high results, outperforming DietNERF on both benchmarks.
 
 ## 3D Gaussian Splatting
 After the emergence of Neural Radiance Fields, [Gaussian Splatting](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/3d_gaussian_splatting_high.pdf) in 2023 was introduced at SIGGRAPH to also take on the daunting task of 3D scene rendering. In the following, we will be giving a high-level overview of this technique, beginning with the Gaussian Splatting pipeline.
 
-<img src="../assets/images/Team29/GaussianPipeline.png" alt="GSPipeline" width="100%"/> <br>
-_Figure 14: Gaussian Splatting Pipeline_
+![Gaussian Pipeline]({{ '/assets/images/Team29/GaussianPipeline.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 17: Gaussian Splatting Pipeline*
 
-### Sfm and Initialization of Gaussians
+### SfM and Initialization of Gaussians
 
-As spoken about before, Sfm is quite important to this process as it is the root of our initialization process of these Gaussians. Running images through Sfm, a point cloud is generated, from which a set of Gaussians can be derived. Contexually, 3D Gaussians are defined as a position (mean position), covariance matrix, and an opacity α. From our point cloud, groups of three neighbors will average their positions to form a mean position of the Gaussian. The covariance matrix of the Gaussian would simply be the covariances of the distances w.r.t. to x, y, and z between the 3 points.
+As spoken about before, Sfm is quite important to this process as it is the root of our initialization process of these Gaussians. Running images through SfM, a point cloud is generated, from which a set of Gaussians can be derived. Contexually, 3D Gaussians are defined as a position (mean position), covariance matrix, and an opacity α. From our point cloud, groups of three neighbors will average their positions to form a mean position of the Gaussian. The covariance matrix of the Gaussian would simply be the covariances of the distances w.r.t. to x, y, and z between the 3 points.
 
-<img src="../assets/images/Team29/GaussianFormula.png" alt="GSFormula" width="100%"/> <br>
-_Figure 15: 3D Gaussian Distribution_
+![GS Formula]({{ '/assets/images/Team29/GaussianFormula.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 18: 3D Gaussian Distribution*
 
 From this process, we have a achieved an initial set of Gaussians to represent our scene/object in our image set.
 
@@ -246,32 +264,37 @@ From this process, we have a achieved an initial set of Gaussians to represent o
 
 Now that we have our Gaussians, we want a method of deriving perspectives of these Gaussians that match our images', similar to the "ray-tracing" in NeRF.
 
-<img src="../assets/images/Team29/Example.png" alt="GS Example" width="100%"/> <br>
-_Figure 16: Example of 2D Projection of Gaussians that we want to achieve, as this was the angle the original image was shot from._
+![GS Example]({{ '/assets/images/Team29/GaussianFormula.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 19: Example of 2D Projection of Gaussians that we want to achieve, as this was the angle the original image was shot from*
 
 In the figure above, we have projected our 3D Gaussians to some perspective given by W (viewing transformations) and J (Jacobian of affine transformations), both of which comes from the intrinsics and extrinsics of the camera that took the original shot of the bike (not GS). We can achieve this type of project using:
 
-<img src="../assets/images/Team29/NewCovJac.png" alt="NewCovJac" width="100%"/> <br>
-_Figure 17: New Covariance for 2D Projection of 3D Gaussians._
+![New Cov Jac]({{ '/assets/images/Team29/NewCovJac.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 20: New Covariance for 2D Projection of 3D Gaussians*
 
 After some plug-and-chug, we are able to achieve this new covariance that is supposed to accomplish the job of 2D projection. However, as spoken about in the paper, a covariance matrix is only valid for physical representation if positive semi-definite. The running issue is if this matrix somehow becomes corrupt or the gradient updates to this matrix are skewed/wrong, the Gaussian that this matrix represents will be "rendered" (haha pun :D) useless.
 
-<img src="../assets/images/Team29/PosSemiDef.png" alt="PosSemiDef" width="100%"/> <br>
-_Figure 18: Definition of Positive Semi-Definite._
+![Pos Semi Def]({{ '/assets/images/Team29/PosSemiDef.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 21: Definition of Positive Semi-Definite*
 
 To fix this issue, the authors of 3DGS decided to instead represent the covariance matrix to these Gaussians as Ellipsoidal covariances, thus not only resolving the issue of positive semi-definite-ness, but also making the Gaussian much more flexible, as it is now an ellipsoid, represented by some rotation and scaling.
 
-<img src="../assets/images/Team29/EllipsoidCov.png" alt="EllipCov" width="100%"/> <br>
-_Figure 19: Representation of an Ellipsoid._
+![EllipCov]({{ '/assets/images/Team29/EllipsoidCov.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 22: Representation of an Ellipsoid*
 
-From here everything can be plugged back into Fig. 15 and that would be our group of projected Gaussians.
+From here everything can be plugged back into Fig. 18 and that would be our group of projected Gaussians.
 
 ### The Rasterizer.
 
 Now we have those sets of Gaussians, but they are projected to some viewing perspective, like that of the bike, and now we have to render our image.
 
-<img src="../assets/images/Team29/Frustum.jpg" alt="Frustum" width="100%"/> <br>
-_Figure 20: The Viewing Frustum_
+![Frustum]({{ '/assets/images/Team29/Frustum.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 23: The Viewing Frustum*
 
 With the given figure above, the image that is directly infront of the camera is the image that we want to render. On that note, as you may have realized from the previous section that we almost have this image already; we just have to do some tinkering to actually get the the colors and what not, as what we have currently are not pixel values, but rather full Gaussians that we need to extract those densities from.
 
@@ -282,8 +305,9 @@ To accomplish this task, we first "cull" those Gaussians that are not within scr
 
 We can then run a GPU Radix Sort so that as a result, we know for each tile, and thus each pixel in each tile, the Gaussians behind that pixel. From this, we create a list per tile of depth-sorted Gaussians.
 
-<img src="../assets/images/Team29/NeRFGS.png" alt="NeRFGS" width="100%"/> <br>
-_Figure 20: NeRF vs. GS Each ray is going through a pixel and there are Gaussians behind those rays._
+![NeRFGS]({{ '/assets/images/Team29/NeRFGS.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 24: NeRF vs. GS Each ray is going through a pixel and there are Gaussians behind those rays*
 
 From there, for each tile, we run a GPU Thread Block (each block tends to have a vast number of threads) to parallelize amongst the 16x16 tiles of the screen. For each pixel in the tile, we then accumulate, like we do in NeRF, colors and opacities along the ray. Of course, if the opacity has reached a certain threshold then we stop, as the colors are so dense we wouldn't see the objects behind it (optimization purposes). After these steps, an image is generated!
 
@@ -291,13 +315,15 @@ From there, for each tile, we run a GPU Thread Block (each block tends to have a
 
 The entire process of Gaussian Splatting is fully differentiable, and with that, there is this loss function.
 
-<img src="../assets/images/Team29/LossFunc.png" alt="LossFunc" width="100%"/> <br>
-_Figure 21: Loss Function_
+![LossFunc]({{ '/assets/images/Team29/LossFunc.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 25: Loss Function*
 
 L1 simply represents "L1 Loss", which is simply pixel2pixel difference. L_D-SSIM is loss due to image similarity.
 
-<img src="../assets/images/Team29/DSSIM.png" alt="DSSIM" width="100%"/> <br>
-_Figure 22: D-SSIM_
+![DSSIM]({{ '/assets/images/Team29/DSSIM.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 26: D-SSIM*
 
 As you can see, each of the un-original images have some amount of pixelated difference relative to the original sloth photo. L_D-SSIM handles this image similarity correlation. Of course, the two images in question are the original shot photo (for example, like the bike) and the rendered image (after the rasterization process). The gradient that is computed here then flows through the projection process of GS but also the GS Adaptive Density Control.
 
@@ -308,15 +334,17 @@ One of the novelties of 3DGS is its ability to shift where these Gaussians are t
 1. Over-Reconstruction
 2. Under-Reconstruction
 
-<img src="../assets/images/Team29/AdaptiveDensity.png" alt="AdaptiveDensity" width="100%"/> <br>
-_Figure 22: Example of Adaptive Density Control_
+![AdaptiveDensity]({{ '/assets/images/Team29/AdaptiveDensity.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 27: Example of Adaptive Density Control*
 
 The above figure is quite explanatory as to the purpose of density control. For under-reconstruction, this is when we have too much vacant white space that in our rendered scene there is absolutely nothing. To solve this issue, we clone an existing nearby Gaussian to help fill this space. After many timesteps, we are able to achieve a nice spread of the environment. For over-reconstruction, this is when we have an over-generalized Gaussian overshadowing a significant part of the scene so we need to partition it. As a result, we divide this specific Gaussian into tinier ones to improve accuracy in our render. Furthermore in ADC, we also get rid of those Gaussians that have no opacity at all (in essence just whitespace to reduce complexity).
 
 ### Results
 
-<img src="../assets/images/Team29/Results.png" alt="Results" width="100%"/> <br>
-_Figure 22: Some Results_
+![Results]({{ '/assets/images/Team29/Results.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Figure 28: Some Results*
 
 As you can see with GS, over several iterations (less than that of NeRF), we can do drastically better on the criterion of accuracy and clarity. In others where an aspect is blurry, GS steps up to overcome this.
 
@@ -338,15 +366,7 @@ The first is at 500 iterations and the next is at 995. The reason behind these c
 This was a broad overview of some of the bigger topics talked about in this day and age regarding 3D Reconstruction and 3D Rendering, but there's always bigger and better and more niche technology coming in this field that we all need to be on the look out for. Hopefully this was an insightful read of the history and background to viewing the world through a computer. So, with that being said, Go Computer Vision!!
 
 ## Code Repositories
-1. Few-Shot Gaussian Splatting
-@misc{zhu2023FSGS, 
-title={FSGS: Real-Time Few-Shot View Synthesis using Gaussian Splatting}, 
-author={Zehao Zhu and Zhiwen Fan and Yifan Jiang and Zhangyang Wang}, 
-year={2023},
-eprint={2312.00451},
-archivePrefix={arXiv},
-primaryClass={cs.CV} 
-}
+[Few-Shot Gaussian Splatting](https://github.com/VITA-Group/FSGS)
 
 ## References
 
@@ -368,6 +388,16 @@ primaryClass={cs.CV}
 
 [9] Jain, A., Tancik, M., & Abbeel, P. (2021). Putting NeRF on a Diet: Semantically Consistent Few-Shot View Synthesis. CoRR, abs/2104.00677. Retrieved from [https://arxiv.org/abs/2104.00677](https://arxiv.org/abs/2104.00677)
 
-[10] Zhu, Zehao, et al. “FSGS: Real-Time Few-Shot View Synthesis Using Gaussian Splatting.” ArXiv.org, 1 Dec. 2023, arxiv.org/abs/2312.00451. Accessed 23 Jan. 2024.
+[10] Zhu, Zehao, et al. “FSGS: Real-Time Few-Shot View Synthesis Using Gaussian Splatting.” ArXiv.org, 1 Dec. 2023, [arxiv.org/abs/2312.00451](arxiv.org/abs/2312.00451). Accessed 23 Jan. 2024.
+
+[11] Ullman S. (1979). The interpretation of structure from motionProc. R. Soc. Lond. B.203405–426. Retreived from [http://doi.org/10.1098/rspb.1979.0006](http://doi.org/10.1098/rspb.1979.0006)
+
+[12] van Riel, Sjoerd. (2016). Exploring the use of 3D GIS as an analytical tool in archaeological excavation practice. Retreived from [10.13140/RG.2.1.4738.2643](https://www.researchgate.net/publication/303824023_Exploring_the_use_of_3D_GIS_as_an_analytical_tool_in_archaeological_excavation_practice).
+
+[13] Yasutaka Furukawa and Carlos Hernández. (2015). Multi-View Stereo: A Tutorial. Foundations and Trends in Computer Graphics and Vision: Vol. 9: No. 1-2, pp 1-148. Retreived from [http://dx.doi.org/10.1561/0600000052](http://dx.doi.org/10.1561/0600000052)
+
+[14] Bailey, S.W., Echevarria, J.I., Bodenheimer, B. et al. (2015). Fast depth from defocus from focal stacks. Vis Comput 31, 1697–1708. Retreived from [https://doi.org/10.1007/s00371-014-1050-2](https://doi.org/10.1007/s00371-014-1050-2)
+
+---
 
 ---
