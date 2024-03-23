@@ -498,8 +498,6 @@ these results stem purely from architecture, and not choice of
 optimizer or hyperparameter.
 
 # Reference
-Please make sure to cite properly in your work, for example:
-
 [1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." *Proceedings of the IEEE conference on computer vision and pattern recognition*. 2016.
 
 [2] Shichao Li and Zengqiang Yan and Hongyang Li and Kwang-Ting Cheng,  et al. "Exploring intermediate representation for monocular vehicle pose estimation" *CVPR*. 2021.
