@@ -48,6 +48,30 @@ Nowadays, transfer learning has become a powerful tool that has helped the NLP c
 {: style="width: 700px; max-width: 100%;"}
 *Fig 3. Visualisation of the representation learned by the CNN proposed in [1], showing similar galaxies occupying similar regions of feature space. Created using Incremental PCA and umap to compress the representation to 2D, and then placing galaxy thumbnails at the 2D location of the corresponding galaxy based on a similarity search*.
 
+
+### AstroVaDEr
+To not depend on human-assigned labels, AstroVaDEr: an astronomical variational deep embedder, introduces a VAE designed to perform unsupervised clustering and synthetic image generation using astronomical imaging catalogs [5]. This model is a CNN that learns to embed images into a low-dimensional latent space while also optimizing a Gaussian Mixture Model (GMM) to cluster the training data. Using this approach, we can use the learned GMM to show how many galaxies are assigned to each cluster label based on their highest probability component. To help prevent overfitting and augment the data set, images are randomly flipped on their horizontal/vertical axes each time they are fed into the network. Additionally, they convert the image to a greyscale, which during training time ensures that the network is learning strictly based on morphology, rather than learning the color dependence of different morphological types.
+
+For AstroVaDEr, they choose to implement the VaDE algorithm [6] with the optimizations from Stable Variational Deep Clustering (s3VDC). VaDE calculates a single encoded mean and variance for each sample and learns the GMM means, variances, and weights as trainable parameters. They chose the optimum number of clusters to fit the data by initializing many instances of a BGM with different mini-batches of embedded samples and found that 12 clusters emerged as a fairly consistent mixture configuration. Compared to the other methods discussed here, using this stick-breaking method is computationally fast, consistent, intuitive, and crucially doesn’t require comparing clustering metrics and visualizations of a dozen fitted models where the best options aren’t immediately apparent
+
+The AstroVaDEr architecture is shown below (see Fig. 3), intended to be flexible and based on the CNN for GZ2. The final upsampled output is fed into a final convolutional layer with either a single filter for grey-scale input or three filters for RGB images. Throughout the network, they implement the Leaky ReLU activation function, and the network is optimized using the Adam optimizer with a learning rate that decreases every five epochs using exponential decay. 
+
+![rep]({{ '/assets/images/team24/astrovader_arch.png' | relative_url }})
+{: style="width: 800px; max-width: 100%;"}
+*Fig 3. Network architecture representation of AstroVaDEr* [5]
+
+
+We observe the following unsupervised clustering results using the AstroVaDEr model (see Fig. 4). It shows the image reconstructions of test data objects assigned to each cluster. This figure shows the objects with the highest cluster likelihood of objects from those that have the appropriate cluster label. Images are shown with a linear scale and pixel range of (0,1).
+
+![rep]({{ '/assets/images/team24/astrovader_results.png' | relative_url }})
+{: style="width: 900px; max-width: 100%;"}
+*Fig 4. Image reconstructions of test data objects assigned to each cluster* [5]
+
+This approach found their unsupervised generative model clustered galaxies according to whether they have a background/secondary partner galaxy in the top or bottom corner of the image [1]. The benefits of this approach include its scalability and adaptability, which enable it to handle larger datasets or different types of imaging data effectively. The model's generative capabilities can produce realistic synthetic galaxy images based on its classification system. Although the clustering outcomes may diverge from human expectations, they provide a logical framework for assessing galaxy morphology. Additionally, these results offer deeper insights into the mechanisms of unsupervised clustering for morphological features, guiding future enhancements in these techniques.
+
+However, there are challenges. For example, if we have six clusters predominantly consisting of objects with less than two secondary sources, AstroVaDEr doesn't distinguish based on the primary source's morphology but rather on the secondary sources' placement. This underscores the value of human judgment, especially since the model sometimes overemphasizes the presence of companion objects. Moreover, when the batch size exceeds a certain threshold, the network may fail to prepare batches quickly enough for efficient GPU processing. All in all, we conclude that AstroVaDEr unexpectedly places high importance on the presence of companion objects – demonstrating the importance of human interpretation.
+
+
 ### Variational Autoencoders
 
 
