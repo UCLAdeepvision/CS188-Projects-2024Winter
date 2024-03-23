@@ -40,8 +40,11 @@ The goal of CycleGAN is to learn a mapping between two image styles $X$ and $Y$.
 
 To preserve cycle consistency, we want to make sure when our network translates an image, we can translate it back to get a image similar to the original image. In order to do this, we train two GANs together, Gan 1 $$(G, D_Y)$$ translating from style $$X$$ to style $$Y$$. Gan 2 $$(F, D_X)$$ translating from style $$Y$$ to style $$X$$. We additionally introduce a normalization term (the cycle consistency loss) on the input image $$I$$ and the $$F(G(I))$$, the input image translated twice.
 
-![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 4. Illustration of X-Y-X Cycle Consistency* [5].
-![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 200px; max-width: 100%;"} *Fig 5. Illustration of Y-X-Y Cycle Consistency* [5].
+| X-Y-X Cycle | Y-X-Y Cycle   |
+| - | - |
+|![cycle-consistency-normalizations1]({{ '/assets/images/team26/X-Y-cycle.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![cycle-consistency-normalizations2]({{ '/assets/images/team26/Y-X-cycle.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
+
+*Fig 4. Illustration of Cycle Consistency Loss* [5].
 
 Now, in the actual style transfer process, we can use $$G$$ to translate from style $$X$$ to style $$Y$$, and $$F$$ to translate from style $$Y$$ to style $$X$$, and disregard the discriminators.
 
@@ -561,10 +564,12 @@ In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only t
 {: style="width: 400px; max-width: 100%;"}
 *Fig 8. Two real images we used for style transfer*
 
-![sample_CycleGAN1]({{ '/assets/images/team26/sample1-cyclegan.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-![sample_CycleGAN2]({{ '/assets/images/team26/sample2-cyclegan.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
+| Syntax      | Description |
+| ----------- | ----------- |
+| ![sample_CycleGAN1]({{ '/assets/images/team26/sample1-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"}      | ![sample_CycleGAN2]({{ '/assets/images/team26/sample2-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"}       |
+| Paragraph   | Text        |
+
+
 *Fig 9. output from CycleGAN*
 
 ![sample_Diffusion_pre_1]({{ '/assets/images/team26/sample1-sd-pretrained.jpg' | relative_url }})
