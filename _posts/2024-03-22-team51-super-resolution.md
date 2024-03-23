@@ -31,9 +31,9 @@ View code [[Here](https://colab.research.google.com/drive/1Xp7M8tjUyzbdMU6URFfvG
 
 # Introduction
 
-Super resolution is the process of enhancing the resolution of an image or video. The task of Super-Resolution can be defined as a mapping from $x_{lr} \in \R^{w \times h \times c}$ to $\hat{x}_{hr} \in \R^{\bar{w} \times \bar{h} \times c}$, where $\bar{w} > w$ and $\bar{h} > h$ ($x_{hr}$ is the high-resolution image; $x_{lr}$ is the low-resolution image; $\hat{x}_{hr}$ is the reconstructed high-resolution image). Traditionally, increasing resolution involved simple interpolation techniques leading to blurry outcomes. However, advanced machine learning and AI, especially convolutional neural networks (CNNs), have significantly improved this field. Super resolution aims not just to upscale images, but to reconstruct high-resolution details that closely approximate true high-resolution counterparts.
+Super resolution is the process of enhancing the resolution of an image or video. The task of Super-Resolution can be defined as a mapping from $$x_{lr} \in \R^{w \times h \times c}$$ to $$\hat{x}_{hr} \in \R^{\bar{w} \times \bar{h} \times c}$$, where $$\bar{w} > w$$ and $$\bar{h} > h$$ ($$x_{hr}$$ is the high-resolution image; $$x_{lr}$$ is the low-resolution image; $$\hat{x}_{hr}$$ is the reconstructed high-resolution image). Traditionally, increasing resolution involved simple interpolation techniques leading to blurry outcomes. However, advanced machine learning and AI, especially convolutional neural networks (CNNs), have significantly improved this field. Super resolution aims not just to upscale images, but to reconstruct high-resolution details that closely approximate true high-resolution counterparts.
 
-|              ![unet](../assets/images/51/sr3_example1.png)               |
+|   ![unet](/CS188-Projects-2024Winter/assets/images/51/sr3_example1.png)    |
 | :------------------------------------------------------------------------: |
 | _Example comparing different super resolution methods (image source: [6])_ |
 
@@ -43,7 +43,7 @@ $$
 \hat{x}_{hr} = SuperRes(x_{lr};\theta)
 $$
 
-describes the super resolution process, where the training objective is to minimize $L(x_{hr}, \hat{x}_{hr})$. From a signal processing perspective, this problem is inherently challenging as low-resolution images lack high-frequency information expressiveness. Reconstructing a high-resolution image from a low-resolution one requires approximating these frequencies, necessitating a deep semantic understanding of the image. By leveraging patterns learned from large datasets, SR techniques can generate clear, detailed images from low-resolution inputs, finding applications in areas like satellite imagery, medical imaging, and enhancing old video footage.
+describes the super resolution process, where the training objective is to minimize $$L(x_{hr}, \hat{x}_{hr})$$. From a signal processing perspective, this problem is inherently challenging as low-resolution images lack high-frequency information expressiveness. Reconstructing a high-resolution image from a low-resolution one requires approximating these frequencies, necessitating a deep semantic understanding of the image. By leveraging patterns learned from large datasets, SR techniques can generate clear, detailed images from low-resolution inputs, finding applications in areas like satellite imagery, medical imaging, and enhancing old video footage.
 
 Recently, with the advancement of Diffusion models in image generation task, natrually, researchers explores the intersection between super resolution with diffusion models and have shown exciting results,offering high-quality reconstructions. A notable implementation is the SR3 architecture, which this post will explore.
 
@@ -52,21 +52,21 @@ Recently, with the advancement of Diffusion models in image generation task, nat
 ## Classical Techniques
 
 Traditional image SR methods encompass various approaches like statistical, edge-based, patch-based, prediction-based, and sparse representation techniques. These methods generate high-resolution (HR) images by utilizing the inherent information in existing pixels and image statistics. However, they often introduce noise, blur, and visual artifacts, which are significant drawbacks.
-|![unet](../assets/images/51/interpolation.png)|
+|![unet](/CS188-Projects-2024Winter/assets/images/51/interpolation.png)|
 |:--:|
 |_Different interpolation methods (image source: https://en.wikipedia.org/wiki/Bicubic_interpolation)_|
 
 ## Deep Learning Methods
 
 Image SR has undergone substantial improvements with the advent of Deep Learning (DL) and enhanced computational power. DL-based methods, typically employing Convolutional Neural Networks (CNNs) for direct LR to HR mapping, outperform traditional techniques. Early models like SRCNN, FSRCNN, and ESPCNN used basic CNN structures, while later developments integrated broader computer vision concepts. This includes adaptations like SRResNet from ResNet and SRDenseNet from DenseNet, incorporating residual and dense blocks, respectively. Recursive CNNs and attention mechanisms have also been integrated. DL-based SR models fall into three categories: Pixel-based, GAN-based, and Flow-based, each with distinct training objectives.
-|![unet](../assets/images/51/SRCNN.png)|
+|![unet](/CS188-Projects-2024Winter/assets/images/51/SRCNN.png)|
 |:--:|
 |_SRCNN architecture_ (image source: [2])|
 
 ## GAN Methods
 
 GANs operate with two CNNs - a generator and a discriminator, trained in tandem. The generator creates HR images to deceive the discriminator, which differentiates between generated and real images. Models like SRGAN and ESRGAN use a mix of adversarial and content loss to create sharper, more detailed images. Despite their ability to produce high-quality, diverse images, they face challenges like mode collapse, high computational demands, convergence issues, and require stabilization techniques.
-|![unet](../assets/images/51/SRGAN.png)|
+|![unet](/CS188-Projects-2024Winter/assets/images/51/SRGAN.png)|
 |:--:|
 |_SRGAN architecture (image source: [4])_|
 
@@ -77,7 +77,7 @@ These methods use optical flow algorithms to create SR images. They aim to solve
 ## Diffusion Methods
 
 Diffusion-based methods in SR gradually transform a random distribution of pixels into a structured high-resolution (HR) image. They function by reversing a diffusion process, starting from noise and progressively refining it into a detailed image through a series of learned steps. Different from the original diffusion model introduced in DDPM, these diffusion based super resolution methods generates a high resolution image under the guidance of a lower resolution image. This approach excels in capturing fine details and textures, producing high-quality HR images that are often more realistic and less prone to artifacts compared to other methods. The focus of this post, SR3 (Image Super-Resolution via Iterative Refinement), belongs to this exciting category.
-|![unet](../assets/images/51/ddpm.png)|
+|![unet](/CS188-Projects-2024Winter/assets/images/51/ddpm.png)|
 |:--:|
 |_Diffusion process (image source: [3])_|
 
@@ -85,12 +85,12 @@ Diffusion-based methods in SR gradually transform a random distribution of pixel
 
 Image Super-Resolution via Iterative Refinement (SR3) is a deffusion-based method that takes in a interpolated low resolution input along with random noise to generate a high resolution counter part using the diffusion model denoising process.
 
-| ![unet](../assets/images/51/sr3_example2.png) |
-| :---------------------------------------------: |
-|   _example output of sr3 (image source: [6])_   |
+| ![unet](/CS188-Projects-2024Winter/assets/images/51/sr3_example2.png) |
+| :-------------------------------------------------------------------: |
+|              _example output of sr3 (image source: [6])_              |
 
 SR3 uses a similar U-net architecture to the DDMP with some improvements and adoption to suit the super resolution objective. The SR3 U-net model uses the residual block from BigGAN, which is a two-layer CNN with skip connection along with normalizations. The model uses 1.interpolated low resolution image (the paper used bicubic interpolation) to map a low resolution image to higher resolution and 2.high resolution random noise as input (concatenated on the channel dimension). And uses the U-net archietecture illistrated in Figure 3 to iteratively denoise the noisy input. Finally, the loss is calculated using l1-loss between super-resolution output and the ground-truth high resolution image
-$|\hat{x}_{hr} - x_{hr}|_1$.
+$$|\hat{x}_{hr} - x_{hr}|_1$$.
 
 # Pytorch Implementation
 
@@ -98,9 +98,9 @@ $|\hat{x}_{hr} - x_{hr}|_1$.
 
 The BigGAN downsample block that consists of 1. a residual path that is reduced in in the channel dimension using 1x1 conv and downsampled using average pool 2. a main path that first passes through an activation; a 3x3 conv; an activation; a 3x3 conv and an average pool for downsample. Finally the residual is added with the main path to form the final output of the downsample resblock.
 
-|   ![unet](../assets/images/51/biggan_downsample_block.png)   |
-| :------------------------------------------------------------: |
-| _BigGAN downsample resblock (used in SR3) (image source: [1])_ |
+| ![unet](/CS188-Projects-2024Winter/assets/images/51/biggan_downsample_block.png) |
+| :------------------------------------------------------------------------------: |
+|          _BigGAN downsample resblock (used in SR3) (image source: [1])_          |
 
 ```python
 class DownsampleResBlock(nn.Module):
@@ -144,9 +144,9 @@ class DownsampleResBlock(nn.Module):
 
 The SR3 U-net model adopts the residual block used in BigGAN as a basic building block. The BigGAN resblock consists 1. a residual path that is upsampled and amplified in in the channel dimension using 1x1 conv 2. a main path, which takes-in the U-net downsample residule and concatenated on the channel dimension, that is first normalized and passed through an activation; upsampled using transposed convolution; a 3x3 conv; a normalization; an activation; finally a 3x3 conv. The two paths are added together to form the output of the upsample resblock.
 
-|   ![unet](../assets/images/51/biggan_upsample_block.png)   |
-| :----------------------------------------------------------: |
-| _BigGAN upsample resblock (used in SR3) (image source: [1])_ |
+| ![unet](/CS188-Projects-2024Winter/assets/images/51/biggan_upsample_block.png) |
+| :----------------------------------------------------------------------------: |
+|          _BigGAN upsample resblock (used in SR3) (image source: [1])_          |
 
 ```python
 class UpsampleResBlock(nn.Module):
@@ -206,9 +206,9 @@ class UpsampleResBlock(nn.Module):
 
 Finally, putting everything together, we have the full u-net archietecture that is consist of the upsampling and downsampling blocks implemented above.
 
-|       ![unet](../assets/images/51/unet.png)        |
-| :--------------------------------------------------: |
-| _U-net architecture used by SR3 (image source: [6])_ |
+| ![unet](/CS188-Projects-2024Winter/assets/images/51/unet.png) |
+| :-----------------------------------------------------------: |
+|     _U-net architecture used by SR3 (image source: [6])_      |
 
 ```python
 class Unet(nn.Module):
@@ -274,19 +274,19 @@ For the two datasets, the images are first downsampled using bilinear interpolat
 
 Before training the SR3 U-net model, I trained a simple U-net model using the implementation from Assigment 4. Below is some brief results that showed very good performance after 5 epochs of training.
 
-![MNIST](../assets/images/51/MNIST_simple_unet.png)
-| ![MiniPlaces](../assets/images/51/MiniPlaces_simple_unet.png) |
+![MNIST](/CS188-Projects-2024Winter/assets/images/51/MNIST_simple_unet.png)
+| ![MiniPlaces](/CS188-Projects-2024Winter/assets/images/51/MiniPlaces_simple_unet.png) |
 :---------------------------------------: |
 | Super-Resolution output on the MNIST dataset. (hr_image -> reference, lr_image -> downsampled image, sr_image -> bicubic interpolation, step = 0 -> model output) |
 
 Compared to the interpolated high resolution image, the model output indeed has more details and have more defined edges.
 
 As noted previously, the SR3 paper doesn't explicitly specify the location of which the time embedding is inserted into the BigGAN residual block and the original implementation has no notion of time. Yet, as a essential part of diffusion model, time embedding is a necesity for good model performance. Thus I experimented with the time embedding injection locations (1. before first conv layer 2. between first and second conv layer 3. after the conv layers) within the residual block and observed that time embedding inserted before the first convolution layer seems to work the best (details can be found in jupyter notebook). Thus in my final model implementation I choose to do the element-wise sum of the time embedding before the first convolution layer for both upsampling and downsampling blocks.
-| ![unet](../assets/images/51/MNIST_res.png) |
+| ![unet](/CS188-Projects-2024Winter/2024/03/assets/images/51/assets/images/51/MNIST_res.png) |
 | :---------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | Super-Resolution output on the MNIST dataset. (hr_image -> reference, lr_image -> downsampled image, sr_image -> bicubic interpolation, step = 0 -> model output) |
 
-|                                                           ![unet](../assets/images/51/MiniPlaces_res.png)                                                            |
+|                                                ![unet](/CS188-Projects-2024Winter/assets/images/51/MiniPlaces_res.png)                                                 |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | Super-Resolution output on the MiniPlaces dataset. (hr_image -> reference, lr_image -> downsampled image, sr_image -> bicubic interpolation, step = 0 -> model output) |
 
