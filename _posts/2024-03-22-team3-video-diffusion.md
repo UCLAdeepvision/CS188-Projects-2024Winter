@@ -240,6 +240,7 @@ You can find more Markdown syntax at [this page](https://www.markdownguide.org/b
 
 Please make sure to cite properly in your work, for example:
 
-[1] Redmon, Joseph, et al. "You only look once: Unified, real-time object detection." _Proceedings of the IEEE conference on computer vision and pattern recognition_. 2016.
 
+[1] Ho, Jonathan, et al. "Video diffusion models." arXiv:2204.03458 2022.
+[2] Ho, Jonathan, et al. "Imagen Video: High Definition Video Generation with Diffusion Models" arXiv:2210.02303 2022.
 ---
