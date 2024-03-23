@@ -15,6 +15,12 @@ date: 2024-03-22
 * TOC
 {:toc}
 
+### Web Demo 
+
+<iframe width="700" height="400" src="https://www.youtube.com/embed/OUeUAhbBJCM?si=VpQpW1mK7DVvqNCM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+Before you move onto our report... Watch the video above to see our live web demo of the Partial Convolution paper, which we will discuss shortly! See our [source code](https://github.com/rizvi-ha/pconv-demo){:target="_blank"}{:rel="noopener noreferrer"} for more technical details on how we did this. 
+
 ## Introduction
 
 Image inpainting is the task of reconstructing missing regions in an image, which is important in many computer vision applications. Some of these applications include restoration of damaged artwork, object removal, and image compression. 
