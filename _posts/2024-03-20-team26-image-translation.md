@@ -558,9 +558,9 @@ CycleGAN's inference speed if faster than Stable Diffusion model since the image
 
 In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only trained to transfer between specific domains, which mean we need to retrain the model for each new style. Stable Diffusion, however, offers greater flexibility due to its ability to interpret and apply styles based on textual description.
 
-![real_1]({{ '/assets/images/team26/sample1-real.png' | relative_url }})
+![real_1]({{ '/assets/images/team26/sample1-real.jpg' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-![real_2]({{ '/assets/images/team26/sample2-real.png' | relative_url }})
+![real_2]({{ '/assets/images/team26/sample2-real.jpg' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 8. Two real images we used for style transfer*
 
