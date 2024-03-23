@@ -183,9 +183,7 @@ $$
 To solve for $\mu$ they utilize the underlying distribution’s structure as $\mu$ is an extreme point in the distribution, thus the first derivative at $\mu$ is trivially: 
 
 $$
-\left. \mathcal{D}'(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = 
-\left. \frac{\partial\mathcal{P}^T}{\partial \mathbf{x}} \right|_{\mathbf{x}=\mathbf{\mu}} =
-\left. -\Sigma^{-1}(\mathbf{x}-\mathbf{\mu}) \right|_{\mathbf{x}=\mathbf{\mu}} = 0 \tag{12}
+\left. \mathcal{D}'(\mathbf{x}) \right|_{\mathbf{x}=\mathbf{\mu}} = \left. \frac{\partial\mathcal{P}^T}{\partial \mathbf{x}} \right|_{\mathbf{x}=\mathbf{\mu}} = \left. -\Sigma^{-1}(\mathbf{x}-\mathbf{\mu}) \right|_{\mathbf{x}=\mathbf{\mu}} = 0 \tag{12}
 $$
 
 Using the first derivative as well as the second derivative defined below (13) they compute $\mu$ using the following equation (14): 
