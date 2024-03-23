@@ -48,6 +48,7 @@ This social pooling layer is based on human intuition. Individuals usually make 
 
 ![Social GANs]({{ '/assets/images/team10/socialGAN.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Pedestrians moving towards one another with socially-acceptable predictions. [2]</em>
 
 #### Introduction
 Human motion is inherently ‘multi-modal’: given any position, we have many ‘socially plausible’ methods of maneuvering throughout space to get to our destination. This suggests modeling a recurrent sequence to make predictions on future behavior and pooling information across various agents that impact possible suggested movements. Previous methods, RNN-based architectures and traditionally used methods based on specialized features (i.e. physics-based approaches) suffered from certain primary limitations: using only a neighborhood of agents to compute due to being unable to model interactions between all agents in a computationally efficient manner (1) and only being able to learn ‘average behavior’ instead of generally acceptable and more likely behaviors based on a history of movements at a given time step (2). 
@@ -57,6 +58,7 @@ This following proposed architecture addresses these limitations by employing Ge
 
 ![Social GANs]({{ '/assets/images/team10/sgarch.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Encoder-decoder structure connecting LSTM cells of the Social-GAN architecture with both generator and discriminator. [2]</em>
 
 The model: an RNN Encoder-Decoder generator and RNN-based encoder discriminator with variety loss to encourage the generator to explore various plausible paths while being consistent with provided inputs, combined with global pooling to encode information with respect to all agents in a given scene. In the provided figure, there are several key components, the initial generator ($$G$$), pooling module, and discriminator ($$D$$). $$G$$ takes in previous trajectories $$X_i$$ and encodes the history of individual $$i$$ as $$H_i^t$$ where $$t$$ indicates the current time. The pooling module takes input the hidden state of the currently observed hidden state for each individual and outputs a pooled vector $$P_i$$ for each person. The decoder then produces the future trajectory conditioned on the latest observed hidden state $$H_i^{t_{obs}}$$ and $$P_i$$. $$D$$ takes in as input whether or not the trajectory is real or fake and classifies them as socially acceptable or not. This allows for the generator to converge on a predicted series of probabilities for given agents within a scene. Given all agents in a scene $$X = X_1, X_2, …, X_n$$, the goal is to predict all future trajectories simultaneously such that the input trajectory of person i is defined as $$X_i = (x_i^t, y_i^t)$$ for a $$t=1,...t_{obs}$$  and the future trajectory is defined similarly with $$Y_i = (x_i^t, y_i^t)$$ from time steps $$t=t_{obs} + 1,...,t_{pred}$$.
 
@@ -65,6 +67,7 @@ The generative adversarial network functions with two neural networks trained in
 
 ![Social GANs]({{ '/assets/images/team10/ganloss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>GAN optimization formula. [2]</em>
 
 where we maximize the capability of the discriminator and minimize $$G$$ to become close to generative distribution of the data such that the discriminator cannot tell the difference.
 
@@ -75,6 +78,7 @@ With the generator, using $$\phi(\cdot)$$ as a single layer MLP with ReLU non-li
 
 ![Social GANs]({{ '/assets/images/team10/socialganeq2.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Encoder initialization. [2]</em>
 
 However, one LSTM per person fails to capture the understanding of inter-agent interactions, so this is modeled via the Pooling Module such that each hidden state for all agents interact, giving a pooled hidden state $$P_i$$ for each person i.
 
@@ -82,6 +86,7 @@ To produce future scenarios with respect to the past, the generation of new outp
 
 ![Social GANs]({{ '/assets/images/team10/socialganeq3.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Decoder initialization. [2]</em>
 
 where $$\gamma(\cdot)$$ is a fully-connected layer with ReLU activation and $$W_c$$ as the weight embedding.
 
@@ -89,16 +94,19 @@ After the given encoder and decoder initialization, we obtain the predictions as
 
 ![Social GANs]({{ '/assets/images/team10/socialganeq4.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Final predictions of the model. [2]</em>
 
 The discriminator ultimately consists of a separate encoder which takes as input some real or generated data and classifies them accordingly. Based on the encoder’s last hidden state, the model uses an additional fully-connected layer to generate a classification score. This ideally teaches subtle social interaction rules and classifies trajectories that aren’t acceptable as ‘fake’, using L2 loss on top of adversarial loss to indicate how ‘far’ generated samples are from the ideal data distribution. To further encourage diverse samples on trajectory prediction (in the case of being able to move in multiple directions to mimic humans’ multi-modal movement capability), the authors employed a variety loss function which selected the best of $$k$$ generated output predictions by randomly sampling the latent space!
 
 ![Social GANs]({{ '/assets/images/team10/variety_loss.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>L-variety loss optimization for best trajectory. [2]</em>
 
 This loss considers only the best trajectory, pushing the network to cover the space that best conforms to the past trajectory and provides high probabilistic predictions in realistic directions.
 
 ![Social GANs]({{ '/assets/images/team10/pm_vs_social_pool.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>Social Pooling (red-grid) vs. Social GAN Pooling Mechanism (distance metric comparison). [2]</em>
 
 ### Discussion 
 Using the LSTMs, the authors were able to determine the hidden states with respect to each individual agent, but this additionally requires a mechanism to share information across LSTMs (i.e. between individuals). This is directly enabled with the pooling module in computing a resultant hidden state using the hidden states of all LSTMs for each agent; the module handles primary issues when scaling to variable numbers of people across a large crowd and handling human-to-human interactions that may be significantly more scarce environment (where agents further away may still impact one another, albeit to a lesser degree). With other social pooling mechanisms, they fundamentally work by employing a grid-based pooling scheme which fails to capture global extent as it only considers within the grid whereas the Pooling Module computes relative positions between each agent and all other agents which are concatenated with the person’s hidden state and processed independently via MLP. This allows the final pooled vector $$P_i$$ to summarize all the information a person needs to make a decision to ‘move’. 
@@ -107,6 +115,7 @@ When removing the pooling, we observe that agents fail to consider the paths of 
 
 ![Social GANs]({{ '/assets/images/team10/sgan_vs_sganp.png' | relative_url }})
 {: style="width: 100%; max-width: 100%; text-align: center;"}
+<em>SGAN vs. SGAN-P (without pooling and with pooling mechanism integrated into architecture prediction performance comparison) [2]</em>
 
 This directly mimics human behavior in representing those tending towards the same direction, depicting human tendency to vary pace in order to avoid collision (scenario 3) and even yield right-of-way (scenario 4). And, this represents the tendency to react to incoming movement as well (particularly in group behavior). Using information with respect to the pace of the person and the particular direction of movement (gathered from the initial time-steps), the paper observed different ‘reactions’ of predictions to the movement of crowds.
 
@@ -208,17 +217,23 @@ Based on the results, we can observe that in these scenarios, the Social LSTM ha
 
 #### Introduction 
 ![Overall]({{ '/assets/images/team10/Overall.jpg' | relative_url }})
+<em>TrajNet++ benchmark [5]</em>
+
 There are more real world applications for human trajectory forecasting including evacuation analysis, more efficient public transportation, to how crowds behave during chaotic events. Early approaches to this used handcrafted representations based on domain knowledge to predict where people (agents) in a crowd would go. However, social interactions in the crows are diverse and subtle, making these predictions difficult to capture manually. 
 Due to the recent advantages of deep learning - large models are able to accurately predict and outperform handcrafted approaches. VectorNet by Waymo, a self-driving car company backed by Alphabet, is a state-of-the-art deep learning model for trajectory prediction. Its main novel advantages include using vector representations to model spatial agent interactions and employing deep sets architecture to reason about interacting agents. To test the performance of Vector Net, this group uses TrajNet++, a large-scale benchmark tailored for evaluating interaction forecasting. 
 
 #### Architecture
 ![Architecture]({{ '/assets/images/team10/Architecture.jpg' | relative_url }})
+<em>Overall architecture of VectorNet [4]</em>
+
 The architecture of VectorNet has two primary novel strengths. The first being its use of vectors to encode data, whether it be agents, lanes, crosswalks, etc. Vector representation naturally captures the spatial relationships and geometry between agents, which is crucial information about interactions in trajectory prediction tasks. The vector representation also allows for the second main advantage of vector net, GNNs. Conventional neural networks employ a layer-wise architecture, where each layer performs linear transformations followed by non-linear activations to learn relevant patterns from the input data. However, graph neural networks (GNNs) adopt a distinct approach by utilizing neighborhood-based aggregations to generate representations that evolve over iterations.
 The primary advantage of GNNs lies in their ability to handle tasks that are beyond the scope of traditional Convolutional Neural Networks (CNNs). While CNNs excel at tasks such as object detection, image classification, and pattern recognition, they achieve this through the use of convolutional layers and pooling operations tailored for grid-structured data.
 
 There are two fundamental limitations that hinder the application of CNNs to graph-structured data: 1. Computational Complexity: Applying CNNs to graph data is computationally challenging due to the arbitrary and intricate topology of graphs, which lack the spatial locality inherent in grid-like structures. Additionally, the absence of a fixed node ordering further complicates the utilization of CNNs. 2. Loss of Relational Information: When graph data is projected onto a grid or image representation, valuable information regarding the depth and distance relationships between key entities is lost. This projection process effectively discards the rich relational structure inherent in graph data.
 
 ![Training]({{ '/assets/images/team10/Training.jpg' | relative_url }})
+<em>Training VectorNet and retrieving the node/edge embeddings to update weightings for next layer. [4]</em>
+
 Convolutional Neural Networks have demonstrated remarkable success in tackling problems where the underlying data representation exhibits a grid-like structure, such as image classification. These architectures leverage their learnable filters efficiently by applying them to all input positions, thereby reusing local patterns. However, many compelling tasks involve data that cannot be represented in a grid-like format and instead resides in an irregular domain. Examples of such data include 3D meshes, social networks, telecommunication networks, biological networks, and brain connectomes, all of which can be naturally represented as graphs.
 In GNNs, nodes embed information with regards to an object or entity. This could include positional data or attributes of the object. Edges could represent the relationship between a node and how embeddings update.
 
@@ -287,5 +302,7 @@ Please make sure to cite properly in your work, for example:
 [3] Kothari, P., Kreiss, S., & Alahi, A. (2020). Human Trajectory Forecasting in Crowds: A Deep Learning Perspective (Version 3). arXiv. https://doi.org/10.48550/ARXIV.2007.03639
 
 [4] J. Gao et al., "VectorNet: Encoding HD Maps and Agent Dynamics From Vectorized Representation," 2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), Seattle, WA, USA, 2020, pp. 11522-11530, doi: 10.1109/CVPR42600.2020.01154.
+
+[5] P. Kothari, S. Kreiss and A. Alahi, "Human Trajectory Forecasting in Crowds: A Deep Learning Perspective," in IEEE Transactions on Intelligent Transportation Systems, vol. 23, no. 7, pp. 7386-7400, July 2022, doi: 10.1109/TITS.2021.3069362.
 
 ---
