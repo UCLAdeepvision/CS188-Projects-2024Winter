@@ -1,13 +1,13 @@
 ---
 layout: post
 comments: true
-title: 3D Bounding Box Estimation Using Deep Learning and Geometry
+title: 3d Bounding Box Estimation Using Deep Learning and Geometry
 author: UCLAdeepvision
 date: 2024-03-18
 ---
 
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+> This blog delves into techniques for estimating 3d bounding boxes from monocular images, examining common datasets and evaluating three prominent methods. Additionally, it investigates enhancing the Deep3dBox model's performance by incorporating temporal and stereo information, assessing the scalability of its geometric insights.
 
 
 <!--more-->
@@ -16,13 +16,13 @@ date: 2024-03-18
 {:toc}
 
 # Introduction
-3D object detection is a challenging task in computer vision where the goal is to identify and locate objects in 3D environments based on their shape, location and orientation. While there exists many multi-modal models that take advantage of different data from multiple sensors, the task of regressing 3D bounding box and orientation from monocular, 2D RGB images is a particularly challenging one. 
+3d object detection is a challenging task in computer vision where the goal is to identify and locate objects in 3d environments based on their shape, location and orientation. While there exists many multi-modal models that take advantage of different data from multiple sensors, the task of regressing 3d bounding box and orientation from monocular, 2D RGB images is a particularly challenging one. 
 
-In this final report, we explore different methods for 3d bounding box estimation from monocular images. We first briefly discuss about the common data set used to benchmark this task. Next, we analyze 3 different popular methods used and their pros and cons. Finally, we experiment with the Deep3DBox model by augmenting the amount of information available to the model by adding temporal information and stereo information and checking if the geometric insight of the original paper scaled.
+In this final report, we explore different methods for 3d bounding box estimation from monocular images. We first briefly discuss about the common data set used to benchmark this task. Next, we analyze 3 different popular methods used and their pros and cons. Finally, we experiment with the Deep3dBox model by augmenting the amount of information available to the model by adding temporal information and stereo information and checking if the geometric insight of the original paper scaled.
 
 # Data Set
 
-Most datasets consists of 2D images/videos that contain additional information such as Distance, Elevation, and Azimuth of the camera which is relevant for evaluating 3D Bounding box generated from 2D images/videos. 
+Most datasets consists of 2D images/videos that contain additional information such as Distance, Elevation, and Azimuth of the camera which is relevant for evaluating 3d Bounding box generated from 2D images/videos. 
 
 The additional information is often recorded in the form of point-clouds measured using LIDAR technology.
 
@@ -33,12 +33,12 @@ Alternatively, there are tools which can be used to map CAD models of objects on
 
 ## KITTI
 
-One of the most popular benchmark dataset in 3D Object Detection is the KITTI dataset from 2012. 
+One of the most popular benchmark dataset in 3d Object Detection is the KITTI dataset from 2012. 
 
-Kitti stands for Karlsruhe Institute of Technology and Toyota Technological Institute. 
-The dataset includes: Various sensor modalities, High resolution RGB, 3D LIDAR data, GPS Localization data (tying objects to GPS coordinates). 
+KITTI stands for Karlsruhe Institute of Technology and Toyota Technological Institute. 
+The dataset includes: Various sensor modalities, High resolution RGB, 3d LIDAR data, GPS Localization data (tying objects to GPS coordinates). 
 
-For 3D Object detection, frames are selected to maximize the amount of cluttering objects
+For 3d Object detection, frames are selected to maximize the amount of cluttering objects
 There have been various work done by other researchers to label the data further. 
 
 The label processing is quite difficult, as labelling needs to be added on a pixel-wise and point-wise basis.
@@ -53,33 +53,29 @@ KITTI uses “Average Orientation Similarity”, which is calculated using the c
 ![DATA3]({{ '/assets/images/32/data3.png' | relative_url }})
 {: style="width: 600px; max-width: 100%;"}
 
-In Deep3DBox, the loss function also uses the following criterion:
+In Deep3dBox, the loss function also uses the following criterion:
 
 ![DATA3]({{ '/assets/images/32/data5.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
-
-
-
-
 
 
 # Models
 
 ## Viewpoints and Keypoints
 
-The paper "3D Bounding Box Estimation Using Deep Learning and Geomtry" underscores the significances of pose estimation as it provides some critial information about the object's orientation and position, by understanding the object's pose, we can preceisely determine its locaition, orientation relative to the observer. Another related work on pose estimation in particualr is mainly introduced by the paper "Viewpoins and Keypoints", it mainly characterizes the problem of pose estimation for rigid objects by separating it into two tasks - determining the viewpoint to capture the coarse overall pose, and predicting keypoints to capture the finer local details of the object's configuration. It presents convolutional neural network (CNN) based architectures to address both these tasks in two different settings. The first is a constrained setting where the bounding boxes around objects are provided, while the second is a more challenging detection setting where the goal is to simultaneously detect objects and estimate their pose correctly.
+The paper "3d Bounding Box Estimation Using Deep Learning and Geometry" underscores the significances of pose estimation as it provides some critical information about the object's orientation and position, by understanding the object's pose, we can precisely determine its location, orientation relative to the observer. Another related work on pose estimation in particular is mainly introduced by the paper "Viewpoints and Keypoints", it mainly characterizes the problem of pose estimation for rigid objects by separating it into two tasks - determining the viewpoint to capture the coarse overall pose, and predicting keypoints to capture the finer local details of the object's configuration. It presents convolution neural network (CNN) based architectures to address both these tasks in two different settings. The first is a constrained setting where the bounding boxes around objects are provided, while the second is a more challenging detection setting where the goal is to simultaneously detect objects and estimate their pose correctly.
 
 ![kv1]({{ '/assets/images/32/kv1.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
 
 ### Method
 #### 1. Viewpoint Prediction
-The authors formulate viewpoint prediction as a classification problem where the goal is to predict the three Euler angles (azimuth, elevation, and cyclorotation) corresponding to the object instance's orientation. This is treated as a multi-class classification problem, where the potential angles is divided into bins, and a CNN is trained to classify each instance into one of these bins for each of the three angle types. The CNN architecture used is based on popular ImageNet models like AlexNet and VGGNet back in 2015, where they then applied transfer learning with the final layers reformulated for this multi-class angle classification task. 
+The authors formulate viewpoint prediction as a classification problem where the goal is to predict the three Euler angles (azimuth, elevation, and cyclo-rotation) corresponding to the object instance's orientation. This is treated as a multi-class classification problem, where the potential angles is divided into bins, and a CNN is trained to classify each instance into one of these bins for each of the three angle types. The CNN architecture used is based on popular ImageNet models like AlexNet and VGGNet back in 2015, where they then applied transfer learning with the final layers reformulated for this multi-class angle classification task. 
 
-The key idea is that the hierarchical convolutional layers can implicitly capture and aggregate local visual evidence across the image to predict these global orientation angles in an end-to-end fashion, without having to explicitly model part appearances or spatial relationships.
+The key idea is that the hierarchical convolution layers can implicitly capture and aggregate local visual evidence across the image to predict these global orientation angles in an end-to-end fashion, without having to explicitly model part appearances or spatial relationships.
 
 #### 2. Keypoint Prediction 
-##### 2.1 Multiscale Convolutional Response Maps
+##### 2.1 Multi-scale Convolutional Response Maps
 For predicting keypoints like the positions of wheels, headlights etc., the authors propose modeling the local appearance of these parts using a fully convolutional CNN architecture. The network is trained such that the output feature maps correspond to spatial log-likelihood maps for the different keypoint locations. Specifically, the CNN contains convolutional layers borrowed from standard ImageNet architectures (follow similar approach as viewpoint prediction), followed by a final convolutional layer whose channels correspond one-to-one to the different keypoints being predicted across all object categories. During training, the target outputs are constructed as Gaussian response maps centered at the annotated keypoint locations.  
 
 To benefit from reasoning at multiple scales, the authors train two parallel CNNs - one at a higher 384x384 resolution capturing finer details, and another at a lower 192x192 resolution capturing some more context around each part. 
@@ -87,9 +83,9 @@ To benefit from reasoning at multiple scales, the authors train two parallel CNN
 <!-- The coarse and fine scale predictions are upsampled/downsampled as required and combined in a linear manner to produce the final multi-scale keypoint log-likelihood maps. -->
 
 ##### 2.2 Viewpoint Conditioned Keypoint Likelihood  
-In addtion, while modeling local appearance is important for accurate keypoint localization, the global viewpoint context is also crucial to resolve ambiguities and predict likely keypoint configurations. For example, for a left-facing car, we expect the left wheel to be visible but not the right wheel based on the overall pose.
+In addition, while modeling local appearance is important for accurate keypoint localization, the global viewpoint context is also crucial to resolve ambiguities and predict likely keypoint configurations. For example, for a left-facing car, we expect the left wheel to be visible but not the right wheel based on the overall pose.
 
-To incorporate this global viewpoint reasoning, they propose a non-parametric mixture model that represents the conditional probability distribution of each keypoint's location given the predicted viewpoint. Specifically, for a test instance with predicted viewpoint R, they first retrieve all training instances whose viewpoint is within π/6 radians of R. Then the conditional keypoint likelihood is modeled as a mixture of Gaussians centered at the keypoint annotations from these retrieved instances.
+To incorporate this global viewpoint reasoning, they propose a non-parametric mixture model that represents the conditional probability distribution of each keypoint's location given the predicted viewpoint. Specifically, for a test instance with predicted viewpoint R, they first retrieve all training instances whose viewpoint is within π/6 radians of R. Then the conditional keypoint likelihood is modeled as a mixture of Gaussian centered at the keypoint annotations from these retrieved instances.
 
 ![kv3]({{ '/assets/images/32/kv3.png' | relative_url }})
 {: style="width: 800px; max-width: 100%;"}
@@ -171,7 +167,7 @@ Only around 3% of instances have errors unexplained by these two modes. -->
 #### Pros
 The key strengths of the proposed method are:
 
-<!-- 1. It achieves significant performance improvements over prior state-of-the-art methods across all the pose estimation tasks of viewpoint prediction, keypoint localization, and keypoint detection on the challenging PASCAL 3D dataset. -->
+<!-- 1. It achieves significant performance improvements over prior state-of-the-art methods across all the pose estimation tasks of viewpoint prediction, keypoint localization, and keypoint detection on the challenging PASCAL 3d dataset. -->
 
 1. By using an end-to-end trained convolutional architecture, it avoids the need for explicit modeling of part appearances or deformations, letting the CNN implicitly learn the relevant representations.
 
@@ -180,24 +176,24 @@ The key strengths of the proposed method are:
 #### Cons
 Some potential limitations of the work are:
 
-1. While avoiding explicit part modeling is a strength, the proposed method still relies on the discriminative power of the CNN architecture. It lacks explicit 3D geometric reasoning which could be beneficial.
+1. While avoiding explicit part modeling is a strength, the proposed method still relies on the discriminative power of the CNN architecture. It lacks explicit 3d geometric reasoning which could be beneficial.
 
 2. The experiments and analysis are restricted to rigid object categories like vehicles, furniture etc. The applicability to non-rigid or highly articulated objects like animals is not evaluated.  
 
-<!-- 3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases. -->
-
 3. While incorporating viewpoint improves over pure appearance models, precise localization of keypoints with high accuracy remains a challenge based on the PCK/APK numbers reported.
+
+<!-- 3. While achieving promising results overall, the performance still degrades significantly for occluded or small object instances. Better context modeling may be required to handle these cases. -->
 
 
 
 ## Intermediate Geometric Representation Based Method: Ego-Net
 
-Another popular method of regressing 3d pose from 2d images is through the extraction of intermediate geometric representation. The best performing model of this class is the Ego-Net from 2021 [2]. This class of model is also similar to Deep3DBox, as they both try to regress 3d pose from 2d images.
+Another popular method of regressing 3d pose from 2d images is through the extraction of intermediate geometric representation. The best performing model of this class is the Ego-Net from 2021 [2]. This class of model is also similar to Deep3dBox, as they both try to regress 3d pose from 2d images.
 
 
 ### IGR
 
-Inspired by the representational framework of vision introduced by Marr [3], Ego-Net explicitly defines and coerces the model to first learn some intermediate geometric representations. 
+Inspired by the representational framework of vision introduced by Marr, Ego-Net explicitly defines and coerces the model to first learn some intermediate geometric representations. 
 
 ![EGO6]({{ '/assets/images/32/ego5.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
@@ -211,7 +207,7 @@ The model attempts to regress the orientation relative to the center of a cuboid
 
 ### Custom Loss Function
 
-The lost function used for this model consists of heatmap loss, 2d and 3d. 
+The lost function used for this model consists of heatmap, 2d and 3d loss.  
 
 ![EGO7]({{ '/assets/images/32/ego7.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
@@ -250,23 +246,24 @@ Thus, by using IGR, Ego-net is able to achieve better results by reducing the di
 
 
 
-## 3D Bounding Box Estimation based Method: Deep3dbox
+## 3d Bounding Box Estimation based Method: Deep3dbox
 
-"3D Bounding Box Estimation Using Deep Learning and Geometry, Mousavian et al. 2017" starts with a 2D bounding box, and estimates 3D dimensions/orientation using that.
+"3d Bounding Box Estimation Using Deep Learning and Geometry, Mousavian et al. 2017"[4]. starts with a 2D bounding box, and estimates 3d dimensions/orientation using that.
 
 The model utilizes a Hybrid discrete-continuous loss function
 Geometric constraints from 2D bounding box
 for training. 
 
+The model's primary goal is to attempt to regress 3d Object Dimensions from 2d bounding boxes. As a part of the loss function, 
+
 ![EGO10]({{ '/assets/images/32/3d1.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
 
-The model's primary goal is to attempt to regress 3D Object Dimensions from 2d bounding boxes. As a part of the loss function, 
 
-### 3D Dimension Regression
+### 3d Dimension Regression
 
-One of the first goals of the model is to regress 3d object dimensions from the 2d bounding boxs. 
+One of the first goals of the model is to regress 3d object dimensions from the 2d bounding boxes. 
 
 The model makes the assumption that the 2d bounding boxes provided by the model is as tight as possible, and each side of the 2d box touches the projection of 1 or more of the 2d box's corners. 
 
@@ -285,19 +282,29 @@ Some simplifying assumptions made about the model is that it is upright, and tha
 
 ### Multibin CNN Module
 
-3D Orientation must be understood in the context of local orientation $\theta_l$ and camera angle $\theta_c$. 
+3d Orientation must be understood in the context of local orientation 
+$$
+\theta_l
+$$ 
+and camera angle 
+$$
+\theta_c
+$$. 
 
-In the images below, the global orientation doesn't change, even though the camera view changed. We thus try to regress $\theta_l$. ??
+In the images below, the global orientation doesn't change, even though the camera view changed. We thus try to regress 
+$$
+\theta_l
+$$.
 
 ![EGO10]({{ '/assets/images/32/3d4.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 
 
-To take advantage of existing models, the Multibin CNN module is added onto a pre-trained VGG network. Orientation angle is discretized into several possible bins. Estimate confidence that true angle belongs in each bin (column 3),
-necessary correction to θray (column 2), and dimensions based on the ITTI object category (column 1). Bin with max. confidence is selected during inference
+To take advantage of existing models, the Multibin CNN module is added onto a pre-trained VGG network [5]. Orientation angle is discretized into several possible bins. Estimate confidence that true angle belongs in each bin (column 3),
+necessary correction to θ ray (column 2), and dimensions based on the ITTI object category (column 1). Bin with max. confidence is selected during inference
 
 ![EGO10]({{ '/assets/images/32/3d5.png' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
+{: style="width: 800px; max-width: 100%;"}
 
 
 ### Multi bin Loss Function
@@ -328,13 +335,15 @@ Total Loss:
 
 ### Analysis
 
+Some novel aspects of this method are its advanced cropping feature which allows the FC layers to focus on determining orientation rather than trying to identify cars and its novel loss function which is utilize cosine difference. 
+
 The model was able to beat stereo/semantic segmentation models thanks to its clever geometric insights. It was able to achieve:
 
 - 1st place for Average Orientation Estimation, Average Precision on KITTI Easy/Moderate datasets
 
 - 1st place on KITTI Hard in Orientation Score (excludes 2D bounding box estimation)
 
-- Beats SubCNN in other metrics (e.g. 3D box IoU)
+- Beats SubCNN in other metrics (e.g. 3d box IoU)
 3-8 deg of orientation error across KITTI Easy/Moderate/Hard
 
 ![EGO10]({{ '/assets/images/32/3d11.png' | relative_url }})
@@ -352,13 +361,13 @@ The model was also able to demonstrate the "Attention" where it focuses on featu
 [Source Code Link](https://github.com/AlexWalburg/cs188poseestimation)
 
 
-Deep3dbox was highly successful in mono 3D pose estimation by use of
+Deep3dbox was highly successful in mono 3d pose estimation by use of
 clever geometric insights. We were interested to see if these
 geometric insights scaled, and experimented with augmenting it with
 both temporal information(the last 3 frames) and stereo
 information(right camera). To study this, we created an extensible
 framework which increased the information given to the model without
-compromizing the models fundamental architecture.
+compromising the models fundamental architecture.
 
 ## Preprocessing
 
@@ -379,7 +388,7 @@ was cropped to the points given in the baseline "mono" image. This was
 done for several reasons:
 
 1. Keeping the points the same can increase temporal information. As
-an example, picture a car driving perpindicular to the
+an example, picture a car driving perpendicular to the
 camera. Changing the crop location would make the previous frames
 almost identical to the current frame, giving no extra
 information. Cropping from the same location allows the car to move in
@@ -387,7 +396,7 @@ the cropped image, communicating movement to the neural net.
 
 ![Moving Vs Static Window]({{ '/assets/images/32/moving_window.svg' | relative_url}})
 
-2. Deep3dbox is heavily based on estimating the local orientation
+2. Deep3dBox is heavily based on estimating the local orientation
 angle, so there were concerns about introducing multiple global angles
 to the problem.
 
@@ -429,7 +438,7 @@ level of variance was not expected. Rough numbers are available below.
 
 | Model                 | Training Time | Num Epochs | Reason                                                       |
 |-----------------------|---------------|------------|--------------------------------------------------------------|
-| Mono                  | 10 Hours      | 10         | Reccomended value in other projects                          |
+| Mono                  | 10 Hours      | 10         | Recommended value in other projects                          |
 | Stereo                | 16 Hours      | 20         | More parameters                                              |
 | Mono, last 3 frames   | 1 Day         | 30         | More parameters                                              |
 | Stereo, Last 3 Frames | 2 Days        | 20         | Compute time constraints only allowed training for 20 epochs |
@@ -438,7 +447,7 @@ level of variance was not expected. Rough numbers are available below.
 While some of this is due to the inefficiency in concatenation and
 preparing the forward pass, it suggests that VGGNet and the increased
 size linear layers increase the time of the forward and backward
-pass. This is a concern for self driving vehicles, where 3D bounding
+pass. This is a concern for self driving vehicles, where 3d bounding
 box information needs to be available in real time.
 
 Validation and training were split by whether the last digit of the id
@@ -479,14 +488,14 @@ greatly assists with pose estimation. This makes sense, as stereo
 vision gives the model access to parallax, which increases its ability
 to judge depth and determine angle.
 
-IGR based methods would likely also benefit from stero vision without temporal data, since
+IGR based methods would likely also benefit from stereo vision without temporal data, since
 it would make minimizing the cross ratio loss easier. 
 
 
 Finally, it's worth noting that our baseline model has roughly the
 same angle deviation as seen in the paper, which is a good indication
 these results stem purely from architecture, and not choice of
-optimizer or hyperparameters.
+optimizer or hyperparameter.
 
 # Reference
 Please make sure to cite properly in your work, for example:
@@ -497,4 +506,10 @@ Please make sure to cite properly in your work, for example:
 
 [3] S. Tulsiani and J. Malik. Viewpoints and keypoints. In CVPR, 2015.
 
+[4] A. Mousavian, D. Anguelov, J. Flynn and J. Košecká, "3D Bounding Box Estimation Using Deep Learning and Geometry," 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Honolulu, HI, USA, 2017, pp. 5632-5640, doi: 10.1109/CVPR.2017.597. keywords: {Three-dimensional displays;Two dimensional displays;Solid modeling;Pose estimation;Object detection;Shape},
+
+[5] K. Simonyan and A. Zisserman, in 3rd International Con-
+ference on Learning Representations, ICLR 2015, San
+Diego, CA, USA, May 7-9, 2015, Conference Track Pro-
+ceedings, edited by Y. Bengio and Y. LeCun (2015).
 ---
