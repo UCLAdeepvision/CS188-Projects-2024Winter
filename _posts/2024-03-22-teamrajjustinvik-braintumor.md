@@ -6,14 +6,13 @@ author: Vikram Nagapudi, Justin Downing, Raj Jain
 date: 2024-3-20
 ---
 
-> This block is a brief introduction of your project. You can put your abstract here or any headers you want the readers to know.
+> In our exploration of brain tumor classification and segmentation, we explore both 2D and 3D Convolutional Neural Networks. The brain tumor detection issue is paramount - millions of people die each year due to brain cancer, and early detection from MRI scans is integral in the prevention and aid in cancer treatment. The brain tumor classification is a machine problem, and researchers have attacked this issue in many ways, as we will elaborate on below.
 
 <!--more-->
 
 {: class="table-of-content"}
-
-- TOC
-  {:toc}
+* TOC
+{:toc}
 
 ## Introduction
 
