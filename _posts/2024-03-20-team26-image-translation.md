@@ -585,6 +585,8 @@ CycleGAN's inference speed if faster than Stable Diffusion model since the image
 
 In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only trained to transfer between specific domains, which mean we need to retrain the model for each new style. Stable Diffusion, however, offers greater flexibility due to its ability to interpret and apply styles based on textual description.
 
+Although in terms of FID score CycleGAN performed better than Stable Diffusion, many generated images by CycleGAN actually look worse than those by Stable Diffusion. CycleGAN only changes the coloring and edges of the images while keeps most of the geometric information. However, human eyes sometimes are more sensitive to colors. This suggests that Stable Diffusion in terms of this actually performs better than CycleGAN. In the future, we can improve the Stable Diffusion by introducing methods to perserve more spatial information. 
+
 ## Reference
 
 [1] Ho, J., Jain, A. N., & Abbeel, P. "Denoising diffusion probabilistic models." _arXiv (Cornell University)_. 2020.
