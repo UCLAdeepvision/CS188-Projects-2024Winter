@@ -558,37 +558,15 @@ CycleGAN's inference speed if faster than Stable Diffusion model since the image
 
 In terms of flexibility, CycleGAN is limited, because a CycleGAN model is only trained to transfer between specific domains, which mean we need to retrain the model for each new style. Stable Diffusion, however, offers greater flexibility due to its ability to interpret and apply styles based on textual description.
 
-![real_1]({{ '/assets/images/team26/sample1-real.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-![real_2]({{ '/assets/images/team26/sample2-real.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 8. Two real images we used for style transfer*
+|Description | Image 1      | Image 2 |
+| ----------- | ----------- | ----------- |
+| Input Image (Realistic) | ![real_1]({{ '/assets/images/team26/sample1-real.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![real_2]({{ '/assets/images/team26/sample2-real.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
+| CycleGAN | ![sample_CycleGAN1]({{ '/assets/images/team26/sample1-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![sample_CycleGAN2]({{ '/assets/images/team26/sample2-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
+| Stable Diffusion (pretrained)    | ![sample_Diffusion_pre_1]({{ '/assets/images/team26/sample1-sd-pretrained.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![sample_Diffusion_pre_2]({{ '/assets/images/team26/sample2-sd-pretrained.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
+| Finetuned SD (1000 epochs) | ![sample_Diffusion_1000_1]({{ '/assets/images/team26/sample1-sd-1000.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![sample_Diffusion_1000_2]({{ '/assets/images/team26/sample2-sd-1000.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
+| Finetuned SD (3000 epochs) | ![sample_Diffusion_3000_1]({{ '/assets/images/team26/sample1-sd-3000.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} | ![sample_Diffusion_3000_2]({{ '/assets/images/team26/sample2-sd-3000.jpg' | relative_url }}){: style="width: 400px; max-width: 100%;"} |
 
-| Syntax      | Description |
-| ----------- | ----------- |
-| ![sample_CycleGAN1]({{ '/assets/images/team26/sample1-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"}      | ![sample_CycleGAN2]({{ '/assets/images/team26/sample2-cyclegan.png' | relative_url }}){: style="width: 400px; max-width: 100%;"}       |
-| Paragraph   | Text        |
-
-
-*Fig 9. output from CycleGAN*
-
-![sample_Diffusion_pre_1]({{ '/assets/images/team26/sample1-sd-pretrained.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-![sample_Diffusion_pre_2]({{ '/assets/images/team26/sample2-sd-pretrained.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 10. output from pretrained Stable Diffusion Model*
-
-![sample_Diffusion_1000_1]({{ '/assets/images/team26/sample1-sd-1000.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-![sample_Diffusion_1000_2]({{ '/assets/images/team26/sample2-sd-1000.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 11. output from finetuned Stable Diffusion Model (1000 epoches)*
-
-![sample_Diffusion_3000_1]({{ '/assets/images/team26/sample1-sd-3000.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-![sample_Diffusion_3000_2]({{ '/assets/images/team26/sample2-sd-3000.jpg' | relative_url }})
-{: style="width: 400px; max-width: 100%;"}
-*Fig 12. output from finetuned Stable Diffusion Model (3000 epoches)*
+*Fig 8. Comparison of outputs from CycleGAN and Stable Diffusion*
 
 ## Reference
 
