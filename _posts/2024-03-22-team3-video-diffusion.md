@@ -12,14 +12,13 @@ date: 2024-03-21
 - [Diffusion](#diffusion)
 - [Video Diffusion Models](#video-diffusion-models)
   - [3D U-Net](#3d-u-net)
-  - [Factorized Space-Time Attention](#factorized-space-time-attention)
   - [Video-Image Joint Training Video Diffusion](#video-image-joint-training-video-diffusion)
 - [Imagen Video](#imagen-video)
   - [Cascaded Architecture](#cascaded-architecture)
   - [SR3: Mechanism of Super-Resolution Block](#sr3-mechanism-of-super-resolution-block)
   - [V-Prediction](#v-prediction)
   - [Video-Image Joint Training Imagen Video](#video-image-joint-training-imagen-video)
-- [Conclusion](#conclusion)
+- [Comparison](#comparison)
 
 ## Introduction
 
@@ -47,7 +46,7 @@ $$
 
 ### Backward Diffusion Process
 
-The backward process can be understood as running the forward diffusion process in the other direction. Starting with a very noisy image, the idea to sample noise from a Gaussian distribution and progressively remove this noise from the image until the original image has been reconstructed. The reverse process aims to learn the conditional distribution $$ p_\theta (\mathbf{x}_{t-1} | \mathbf{x}_t) $$ which represents the noise we need to subtract from the order at time t in order to obtain the image at time t-1.
+The backward process can be understood as running the forward diffusion process in the other direction. Starting with a very noisy image, the idea to sample noise from a Gaussian distribution and progressively remove this noise from the image until the original image has been reconstructed. The reverse process aims to learn the conditional distribution $$ p*\theta (\mathbf{x}*{t-1} | \mathbf{x}\_t) $$ which represents the noise we need to subtract from the order at time t in order to obtain the image at time t-1.
 
 ## Video Diffusion Models
 
@@ -263,6 +262,8 @@ The prompt is 'A futuristic cityscape at dusk, with flying cars weaving between 
 </div>
 
 We see from these results that a higher number of inference steps leads to an image that more accurately reflects the prompt. With 5 steps, the video hardly reflects the prompt. With 25 steps, a resemblance is shown but the image is largely warped and different from the desired result. With 50 steps, the image accurately shows the prompt.
+
+## Comparison
 
 ## Reference
 
