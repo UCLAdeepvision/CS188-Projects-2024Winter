@@ -4,7 +4,11 @@
 
 Colon cancer is the third most commonly diagnosed cancer in the world, with nearly one million deaths in the year 2020 alone. It occurs when abnormal tissues called polyps in the color become malignant tumors. A colonoscopy is a procedure that visually inspects the colon lining for polyps. Doctors use colonoscopies as the gold standard to screen for colon cancer, which has led to a 30% decline in incidences as studies have shown. However, in the colonoscopy process, it can be hard to distinguish these abnormalities. The colon polyp miss rate could range from 20 to 47%. To cover this shortcoming, medical professionals have started to utilize medical image segmentation. In the case of colon cancer, detecting polyps using medical image segmentation requires algorithms that can detect polyps that are of variable shapes, sizes, and low-intensity contrast. Medical image segmentation involves dividing digital medical images into distinct regions to isolate specific structures or areas of interest within the image. Deep learning algorithms, particularly convolutional neural networks, help automate and improve the segmentation process.
 
-To segment colons, CT scans are used to image the colon area during colonoscopy. CT scans consist of multiple slices of of different views of an image, stacked together to form a 3D image. Previous techniques used to segment the colons include morphological operations, region growing and classical machine-learning. Morphological operators modify the shapes and boundaries of colon structures, while region growing algorithms expand regions of interest based on intensity levels, aiding in the precise delineation of colonic tissues and abnormalities. However these techniques struggled with segmenting various region-sizes and backgrounds. Classical machine-learning segmentation models required hand-crafted features, which lacked performance sufficient for clinical practice. Most segmentation models use newer technologies, and follow a UNet-like architecture, with Convolutional Neural Networks (CNNs) commonly used in the encoder. Some transformer models specifically used are TransUnet, SwinUnet, SegTran, and TransFuse. However, CNNs, while effective in segmentation tasks, have limitations. They excel at capturing local information but struggle to grasp global context. Additionally, many encoder-decoder segmentation models hinder multi-scale feature fusion by utilizing a bottom-up aggregation path in the decoder. Other downfalls of these models are that they only focused on generating higher accuracy for polyp segmentation and ignored the inference speed of the polyp detection, which is the fundamental requirement of automatic polyp segmentation. 
+To segment colons, CT scans are used to image the colon area during colonoscopy. CT scans consist of multiple slices of of different views of an image, stacked together to form a 3D image. Previous techniques used to segment the colons include morphological operations, region growing and classical machine-learning. Morphological operators modify the shapes and boundaries of colon structures, while region growing algorithms expand regions of interest based on intensity levels, aiding in the precise delineation of colonic tissues and abnormalities. However these techniques struggled with segmenting various region-sizes and backgrounds. Classical machine-learning segmentation models required hand-crafted features, which lacked performance sufficient for clinical practice. Most segmentation models use newer technologies, and follow a UNet-like architecture, with Convolutional Neural Networks (CNNs) commonly used in the encoder. Some transformer models specifically used are TransUnet, SwinUnet, SegTran, and TransFuse. However, CNNs, while effective in segmentation tasks, have limitations. They excel at capturing local information but struggle to grasp global context. Additionally, many encoder-decoder segmentation models hinder multi-scale feature fusion by utilizing a bottom-up aggregation path in the decoder. Overall, the intricacies in applying deep learning for polyp detection make it a challenging yet crucial area of research, given its significant practical applications in medical imaging and diagnosis.
+
+![*Figure 1: Different Possible Polyps In Need of Segmentation [1].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled.png)
+
+*Figure 1: Different Possible Polyps In Need of Segmentation [1].*
 
 # Approach 1: Meta
 
@@ -20,7 +24,9 @@ The META module operates on multiple scales of feature maps simultaneously. It c
 
 The segmentation head takes the processed feature maps from the META modules and performs upsampling to generate pixel-wise segmentation masks. It consists of convolutional layers followed by bilinear upsampling to increase the spatial resolution of the feature maps. The final output of the model is a segmentation mask, where each pixel represents the predicted class of the corresponding input pixel.
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled.png)
+![*Figure 2. Meta Architecture [1].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%201.png)
+
+*Figure 2. Meta Architecture [1].*
 
 ### Code Discussion
 
@@ -30,7 +36,9 @@ The code implements the META-Unet architecture for polyp segmentation, featuring
 
 The experimental results demonstrate the effectiveness of the Meta approach in polyp segmentation across various datasets. With a Dice coefficient exceeding 0.9 on the HarDNet-MSEG dataset, the Meta approach achieves exceptional segmentation accuracy. Moreover, it consistently outperforms other methods, achieving an IOU of 0.86 on the Kvasir-SEG dataset. On the ETIS-Larib dataset with higher resolution images, the Meta approach outperforms other Transformer-based methods, demonstrating its effectiveness in handling small polyps and various segmentation challenges. Overall, the Meta approach offers a significant improvement in segmentation accuracy and generalization ability, showcasing its potential impact on enhancing the diagnosis and treatment of colorectal cancer.
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%201.png)
+![*Table 1. Meta Results [1].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%202.png)
+
+*Table 1. Meta Results [1].*
 
 ### Conclusion/Summary
 
@@ -48,7 +56,9 @@ The motivation for the raBiT network stems from the limitations of existing segm
 
 RaBiT, a Transformer-based network tailored for polyp segmentation, integrates a hierarchically structured lightweight Transformer encoder and a bidirectional feature pyramid network decoder. RaBiT addresses limitations in capturing multi-scale and multi-level features by proposing a lightweight binary Reverse Attention (RA) module with bottleneck layers, iteratively refining polyp boundaries. Additionally, a multi-class RA module is introduced that meets the needs for multi-class segmentation.
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%202.png)
+![*Figure 3. RaBit Architecture [2].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%203.png)
+
+*Figure 3. RaBit Architecture [2].*
 
 **Encoder**
 
@@ -72,11 +82,17 @@ For binary segmentation, a compound loss, combining weighted focal loss and weig
 
 The model was trained and applied to multiple datasets, including the CVC-ClinicDB and Kvsair for polyp segmentation. It was also applied to multi-class segmentation problems, including NeoPolyp-Large and -Small. These results display the RaBit approaches outcome using the Dice, IoU, Recall, and Precision metrics, compated to other previous models used for polyp segmentation. RaBit successfully improves on the scores for each of these previous models. 
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%203.png)
+![*Table 2. RaBit Binary Class Results [2].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%204.png)
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%204.png)
+*Table 2. RaBit Binary Class Results [2].*
 
-![Untitled](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%205.png)
+![*Table 3. RaBit Multi-Class Results [2].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%205.png)
+
+*Table 3. RaBit Multi-Class Results [2].*
+
+![*Figure 4. RaBit Segmentation Results Images [2].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Untitled%206.png)
+
+*Figure 4. RaBit Segmentation Results Images [2].*
 
 ### Conclusion/Summary
 
@@ -104,7 +120,9 @@ This helps the network understand both the fine details and the overall context 
 
 ### Specific Architecture
 
-![Screenshot 2024-03-08 at 11.26.55 PM.png](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Screenshot_2024-03-08_at_11.26.55_PM.png)
+![*Figure 5. MSDenseNet Architecture [3].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Screenshot_2024-03-08_at_11.26.55_PM.png)
+
+*Figure 5. MSDenseNet Architecture [3].*
 
 The proposed CNN architecture is based on a 3D Multiscale Densely Connected Convolutional Neural Network (3D MSDenseNet). 
 
@@ -120,7 +138,9 @@ The 3D level-set method establishes a relationship between the computation of ge
 
 ## Results
 
-![Screenshot 2024-03-09 at 12.58.44 AM.png](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Screenshot_2024-03-09_at_12.58.44_AM.png)
+![*Table 5. MSDenseNet Results [3].*](Polyp%20Segmentation%20for%20Colorectal%20Cancer%202e28f2c1fbcf41e685655503855cf9fa/Screenshot_2024-03-09_at_12.58.44_AM.png)
+
+*Table 5. MSDenseNet Results [3].*
 
 The method was evaluated using T2-weighted 3D MRI data from 43 patients diagnosed with locally advanced colorectal tumors (cT3/T4).
 
@@ -176,24 +196,16 @@ In contrast, RaBit introduces a lightweight transformer model with bidirectional
 
 Meanwhile, 3D MSDenseNet captures both local and global contextual information with its 3D convolutional architecture. It used two parallel paths of 3D layers used to define features related to the depth and scale of the images. 3D convolutional layers improve colon segmentation in CT scans by considering spatial context across three dimensions, extracting features from the entire volume for comprehensive understanding, and integrating contextual information along the depth to reduce information loss and enhance segmentation accuracy. The integration of a 3D level-set post-processing algorithm further refines segmentation accuracy, making it a valuable tool for automated tumor segmentation. Nonetheless, the requirement for volumetric MRI data may constrain its applicability in certain clinical contexts compared to 2D approaches. 
 
-In evaluating performance, each approach demonstrates significant advancements over conventional methods. The choice of the optimal approach hinges upon various factors, including segmentation accuracy, computational efficiency, and real-time feasibility. Meta excels in striking a balance between accuracy and efficiency, while RaBit showcases novel attention mechanisms, and 3D MSDenseNet underscores robustness in handling volumetric MRI data. Looking at the, the results from each of the models, Meta and RaBit can be compared as they were both ran on the Kvasir-SEG and ClinicDB dataset for binary polyp identification. RaBit performed with a DICE coefficient of 0.951 and an IOU of 0.911 on the ClinicDB dataset, and a DICE of 0.921 and IOU of 0.873 on the Kvasir-SEG dataset. On the other hand, Meta achieves a DICE of 0.939 and IOU of 0.890 on the ClinicDB dataset, and a DICE of 0.919 and IOU of 0.864 on the Kvasir-SEG dataset. 3D MSDenseNet achieves a DICE score of 0.841 although on a separate dataset. Overall these scores indicate that all three models perform well in accurately separating polyps within colons, with the transformer models of Meta and RaBit being slightly better than the 3D convolutional network of 3D MSDenseNet. 
+In evaluating performance, each approach demonstrates significant advancements over conventional methods. The choice of the optimal approach hinges upon various factors, including segmentation accuracy, computational efficiency, and real-time feasibility. Meta excels in striking a balance between accuracy and efficiency, while RaBit showcases novel attention mechanisms, and 3D MSDenseNet underscores robustness in handling volumetric MRI data. Looking at the results from each of the models, Meta and RaBit can be compared as they were both ran on the Kvasir-SEG and ClinicDB dataset for binary polyp identification from the backgroun colon. RaBit performed with a DICE coefficient of 0.951 and an IOU of 0.911 on the ClinicDB dataset, and a DICE of 0.921 and IOU of 0.873 on the Kvasir-SEG dataset. On the other hand, Meta achieves a DICE of 0.939 and IOU of 0.890 on the ClinicDB dataset, and a DICE of 0.919 and IOU of 0.864 on the Kvasir-SEG dataset. 3D MSDenseNet achieves a DICE score of 0.841 although on a separate dataset. Overall these scores indicate that all three models perform well in accurately separating polyps within colons, with the transformer models of Meta and RaBit being slightly better than the 3D convolutional network of 3D MSDenseNet. The transformer-based models may produce better results due to their ability to capture long-range dependencies and contextual information across locally and globally, leading to more nuanced and accurate polyp identification and background colon differentiation compared to the 3D convolutional network.
 
 Collectively, these methodologies hold great promise in the realm of colorectal cancer diagnosis. By automating and enhancing the accuracy of polyp segmentation, they contribute to earlier detection and treatment, thereby improving patient outcomes and reducing mortality rates. Furthermore, their development advances medical imaging technology, augmenting clinicians' capabilities in diagnosing and managing colorectal cancer effectively.
 
 # References
 
-# Papers
+[1] H. Wu, Z. Zhao and Z. Wang, "META-Unet: Multi-Scale Efficient Transformer Attention Unet for Fast and High-Accuracy Polyp Segmentation," in *IEEE Transactions on Automation Science and Engineering*, doi: 10.1109/TASE.2023.3292373. keywords: {Transformers;Image segmentation;Shape;Context modeling;Feature extraction;Task analysis;Colonoscopy;Polyp segmentation;META-Unet;efficient transformer;multi-scale transformer attention},
 
-[https://arxiv.org/pdf/2307.06420v1.pdf](https://arxiv.org/pdf/2307.06420v1.pdf)
+[2] Thuan, Nguyen Hoang, et al. “RaBiT: An Efficient Transformer Using Bidirectional Feature Pyramid Network with Reverse Attention for Colon Polyp Segmentation.” *ArXiv (Cornell University)*, 12 July 2023, https://doi.org/10.48550/arxiv.2307.06420. Accessed 23 Mar. 2024.
 
-rabit
+[3] Mumtaz Hussain Soomro, Matteo Coppotelli, Silvia Conforto, Maurizio Schmid, Gaetano Giunta, Lorenzo Del Secco, Emanuele Neri, Damiano Caruso, Marco Rengo, Andrea Laghi, "Automated Segmentation of Colorectal Tumor in 3D MRI Using 3D Multiscale Densely Connected Convolutional Neural Network", *Journal of Healthcare Engineering*, vol. 2019, Article ID 1075434, 11 pages, 2019. https://doi.org/10.1155/2019/1075434
 
-[https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6374810/pdf/JHE2019-1075434.pdf](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6374810/pdf/JHE2019-1075434.pdf)
-
-- 2D/3D CNN
-
-[https://ieeexplore.ieee.org/abstract/document/10179485](https://ieeexplore.ieee.org/abstract/document/10179485)
-
-- META - Multi-Scale Efficient Transformer Attention
-- Unet
-- Code: [https://github.com/szuzzb/META-Unet/tree/main](https://github.com/szuzzb/META-Unet/tree/main)
+[4] Akilandeswari A, Sungeetha D, Joseph C, Thaiyalnayaki K, Baskaran K, Jothi Ramalingam R, Al-Lohedan H, Al-Dhayan DM, Karnan M, Meansbo Hadish K. Automatic Detection and Segmentation of Colorectal Cancer with Deep Residual Convolutional Neural Network. Evid Based Complement Alternat Med. 2022 Mar 17;2022:3415603. doi: 10.1155/2022/3415603. PMID: 35341149; PMCID: PMC8947925.
