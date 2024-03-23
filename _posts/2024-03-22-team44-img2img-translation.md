@@ -155,7 +155,7 @@ $$
 \mathcal{L}\_{GAN} \left( G,D_Y,X,Y \right) = \mathbb{E}\_{y\sim p_{data} (y)} \left[\log D_Y(y) \right] + \mathbb{E}\_{x\sim p_{data}(x)}\left[\log(1-D_Y(G(x)))\right]
 $$
 
-where the generator $G$ samples from the input domain $\mathbb{X}$ instead of the latent distribution. The inverse transformation, $G: Y \rightarrow X$, is formulated similarly.
+where the generator $G$ samples from the input domain $\mathbb{X}$ instead of the latent distribution. The inverse transformation, $F: Y \rightarrow X$, is formulated similarly.
 
 
 To exploit the properties of cycle consistency, the model also introduced two reconstruction L1 losses to derive ***cycle consistency loss***:
