@@ -85,7 +85,7 @@ OpenPifPaf's architecture is designed to emphasize speed while maintaining compa
 ### Loss Design
 After the final prediction(s) are output by the decoder, loss is calculated on the prediction(s). Similar to MMPose, OpenPifPaf includes multiple parts in its loss calculation to account for different features of the predictions. Classification loss is binary cross entropy loss with a focal loss modification term, w. Focal loss modification increases the magnitude of loss on predictions that the model is least confident about, focusing learning on the harder parts of the dataset. For loss on the location and scale of each joint, Laplace loss is used:
 
-![OpenPifPaf Loss]({{ '/assets/images/team46/openpifpaf-architecture.png' | relative_url }})
+![OpenPifPaf Loss]({{ '/assets/images/team46/openpifpaf-loss.png' | relative_url }})
 {: style="width: 400px; max-width: 100%;"}
 *Fig 5. OpenPifPaf loss equations* [4].
 
