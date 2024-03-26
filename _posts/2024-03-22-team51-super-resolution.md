@@ -7,8 +7,13 @@ date: 2024-03-22 01:09:00
 ---
 
 > Super resolution enhances image resolution from low to high, with modern techniques like convolutional neural networks and diffusion models like SR3 significantly improving image detail and quality. This Post explore a simplified implementation of SR3.
-
 View code [[Here](https://colab.research.google.com/drive/1Xp7M8tjUyzbdMU6URFfvGQDUFGSiOUjM?usp=sharing)]
+
+
+<!--more-->
+{: class="table-of-content"}
+* TOC
+{:toc}
 
 # Table of Contents
 

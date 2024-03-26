@@ -8,6 +8,12 @@ date: 2024-03-21
 
 > Facial recognition is the technology of identifying human beings by analyzing their faces from pictures, video footage or in real time. Facial recognition has been an issue for computer vision until recently. The introduction of deep learning techniques which are able to grasp big data faces and analyze rich and complex images of faces has made this easier, enabling new technology to be efficient and later become even better than human vision in facial recognition.
 
+
+<!--more-->
+{: class="table-of-content"}
+* TOC
+{:toc}
+
 # Table of contents
 
 1. [Introduction](#introduction)

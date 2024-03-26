@@ -1,3 +1,18 @@
+---
+layout: post
+comments: true
+title: Polyp Segmentation for Colorectal Cancer
+author: Satvik Eltepu, Connor Steigerwald, Abhi Nadella, and Parsa Hajipour
+date: 2024-03-22
+---
+
+> Polyp Segmentation for Colorectal Cancer
+
+<!--more-->
+{: class="table-of-content"}
+* TOC
+{:toc}
+
 # Polyp Segmentation for Colorectal Cancer
 
 # Introduction

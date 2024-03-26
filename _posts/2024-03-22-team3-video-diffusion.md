@@ -8,6 +8,11 @@ date: 2024-03-22
 
 > In this paper, we will discuss diffusion-based video generation models. We will first do a preliminary exploration of diffusion, then extend it to video generation by examining Video Diffusion Models by Jonathon Ho, et al. We will then follow this with a refinement of video diffusion models by conducting a deep dive into Imagen Video, a high definition video generation model developed by researchers at Google. Through this paper, we aim to provide an overview of diffusion-based video generation, as well as rigorously cover a high definition refinement of the basic video diffusion model.
 
+<!--more-->
+{: class="table-of-content"}
+* TOC
+{:toc}
+
 - [Introduction](#introduction)
 - [Diffusion](#diffusion)
 - [Video Diffusion Models](#video-diffusion-models)

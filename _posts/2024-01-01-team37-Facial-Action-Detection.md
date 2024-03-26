@@ -2,12 +2,17 @@
 layout: post
 comments: true
 title: Facial-Action-Detection
-author: UCLAdeepvision
+author: May Wang, Sue Tang, Cixuan Zhang, and Xuanzhe Han
 date: 2024-01-01
 ---
+
+
+<!--more-->
 {: class="table-of-content"}
 * TOC
 {:toc}
+
+
 ## Introduction
 ### Background Introduction
 #### Application value of facial action detection in natural human-computer interaction, emotional analysis, and other fields.

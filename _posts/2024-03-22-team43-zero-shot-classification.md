@@ -7,13 +7,13 @@ date: 2024-03-22
 ---
 >In this blog article, we'll delve into CLIP(Contrastive Language-Image Pre-training), focusing primarily on its application in zero-shot classification. Unlike examining a pre-trained version, we will embark on training CLIP ourselves, crafting the core components of the model and employing a distinct, smaller dataset for training purposes. We'll also introduce custom loss functions and dissect specific elements of CLIP, such as its contrastive loss mechanism. This article aims to dissect the architecture and its implications, making minor adjustments to better grasp what drives its effectiveness.
 
----
-Table of Contents
+
 <!--more-->
 {: class="table-of-content"}
 * TOC
 {:toc}
----
+
+# Table of Contents
 
 ## Introduction to Zero-Shot Learning, Previous Methods, and Their Shortfalls
 What exactly is zero-shot classification? Zero-shot classification models have the ability to classify data that hasn't been seen during training. Consider a model trained to differentiate all mammals from Africa; if it can classify mammals from other parts of the world without being trained on those specific animals, then it possesses zero-shot capabilities for this newly extended class set. Furthermore, a model is said to have n-shot classification capabilities if it maintains a certain accuracy on unseen classes, after being trained with n instances per class.
